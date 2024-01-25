@@ -15,6 +15,29 @@ int main() {
 	try {
 		game.init();
 
+		// Client or server selection
+		int playerSelection = 0;
+		bool server;
+		int const CREATE_ROOM = 1;
+		int const JOIN_ROOM = 2;
+		std::cout << "1. Create Room" << std::endl;
+		std::cout << "2. Join Room" << std::endl;
+		std::cin >> playerSelection;
+		
+		switch (playerSelection)
+		{
+		case CREATE_ROOM:
+			server = true;
+			game.createGameRoom();
+			break;
+		case JOIN_ROOM:
+			server = false;
+			game.joinGameRoom();
+			break;
+		default:
+			break;
+		}
+
 		while (game.isRunning()) {
 			game.handleEvents();
 

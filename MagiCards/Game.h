@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL.h>
+#include "Connection.h"
 
 class Game
 {
@@ -19,6 +20,10 @@ public:
 
 	bool isRunning();
 
+	void createGameRoom();
+
+	void joinGameRoom();
+
 private:
 	void createWindowAndRenderer();
 
@@ -29,5 +34,7 @@ private:
 
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
+
+	Connection _connection;
 };
 

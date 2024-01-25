@@ -1,6 +1,10 @@
 #include "Game.h"
 #include <SDL.h>
 #include "SDLException.h"
+#include "Connection.h"
+#include <iostream>
+
+
 
 Game::Game() {
 	_isRunning = true;
@@ -8,10 +12,11 @@ Game::Game() {
 
 void Game::init()
 {
-	initSDL();
+/*	initSDL();
 	createWindowAndRenderer();
 	SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
-	_isRunning = true;
+	*/_isRunning = true;
+	std::cout << "Game init" << std::endl;
 }
 
 void Game::initSDL()
@@ -33,31 +38,87 @@ void Game::createWindowAndRenderer()
 
 void Game::handleEvents()
 {
-	SDL_Event event;
-	if (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT) {
-			_isRunning = false;
-		}
-	}
+	//SDL_Event event;
+	//if (SDL_PollEvent(&event)) {
+	//	if (event.type == SDL_QUIT) {
+	//		_isRunning = false;
+	//	}
+	//}
+
+
+	//std::cout << "Cartas en mano:" << std::endl;
+	//std::cout << "1. Goblin Fumaporros-Creature" << std::endl;
+	//std::cout << "2. Dragon Fumaporros-Creature" << std::endl;
+	//std::cout << "3. Rey Fumaporros-Creature" << std::endl;
+	//std::cout << "4. Esclavo Fumaporros-Creature" << std::endl;
+	//std::cout << "5. Hechizo Fumaporros-Sorcery" << std::endl;
+	//std::cout << "6. Forest-Basic Land" << std::endl;
+	//std::cout << "7. Forest-Basic Land" << std::endl;
+
 }
 
 void Game::update()
 {
+
+
+	//switch (playerSelection)
+	//{
+	//case 1:
+	//	std::cout << "Has invocado: Goblin Fumaporros-Creature" << std::endl;
+	//	break;
+	//case 2:
+	//	std::cout << "Has invocado: Dragon Fumaporros-Creature" << std::endl;
+	//	break;
+	//case 3:
+	//	std::cout << "Has invocado: Rey Fumaporros-Creature" << std::endl;
+	//	break;
+	//case 4:
+	//	std::cout << "Has invocado: Esclavo Fumaporros-Creature" << std::endl;
+	//	break;
+	//case 5:
+	//	std::cout << "Has lanzado: Fumaporros-Sorcery" << std::endl;
+	//	break;
+	//case 6:
+	//	std::cout << "Has jugado: Forest-Basic Land" << std::endl;
+	//	break;
+	//case 7:
+	//	std::cout << "Has jugado: Forest-Basic Land" << std::endl;
+	//	break;
+	//default:
+	//	std::cout << "No se que has pulsado, debes estar emporrao..." << std::endl;
+	//	break;
+	//}
 }
 
 void Game::render()
-{
-	SDL_RenderClear(_renderer);
+{	
+	//std::cout << "Renderizando carta " << std::endl;
+	//SDL_RenderClear(_renderer);
 
 	//renderizar imagenes
 
-	SDL_RenderPresent(_renderer); //muestra o "pinta" el render
+	//SDL_RenderPresent(_renderer); //muestra o "pinta" el render
 
 }
 
 void Game::release()
 {
+	_connection.clear();
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();
+}
+
+void Game::createGameRoom() {
+	std::cout << "creating a server socket" << std::endl;
+	Connection connection;
+	if (connection.startServerSocket() != 0)
+		std::cout << "Throw ConnectionException" << std::endl;
+
+	std::cout << "your IP address and port to share are:" << std::endl;
+}
+
+void Game::joinGameRoom() {
+	std::cout << "creating a client socket" << std::endl;
+	std::cout << "select the IP and Port " << std::endl;
 }
