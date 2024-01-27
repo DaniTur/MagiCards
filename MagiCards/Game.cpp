@@ -5,7 +5,6 @@
 #include <iostream>
 
 
-
 Game::Game() {
 	_isRunning = true;
 }
@@ -112,13 +111,24 @@ void Game::release()
 void Game::createGameRoom() {
 	std::cout << "creating a server socket" << std::endl;
 	Connection connection;
-	if (connection.startServerSocket() != 0)
-		std::cout << "Throw ConnectionException" << std::endl;
-
-	std::cout << "your IP address and port to share are:" << std::endl;
+	if (connection.startServerConnection() != 0)
+		std::cout << "Throw ConnectionException at server" << std::endl;
+	
 }
 
 void Game::joinGameRoom() {
+	std::string ip;
+	int port;
+
+	std::cout << "Introduce the IP adress: " << std::endl;
+	std::cin >> ip;
+
+	std::cout << "Introduce the Port: " << std::endl;
+	std::cin >> port;
+	//TODO: check the input format
+
 	std::cout << "creating a client socket" << std::endl;
-	std::cout << "select the IP and Port " << std::endl;
+	Connection connection;
+	if (connection.startClientConnection(ip.c_str(), port) != 0)
+		std::cout << "Throw ConnectionException at client" << std::endl;
 }
