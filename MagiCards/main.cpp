@@ -44,6 +44,7 @@ int main() {
 		//	break;
 		//}
 
+		SDL_ShowCursor(SDL_DISABLE);
 
 		while (game.isRunning()) {
 			frameStart = SDL_GetTicks();

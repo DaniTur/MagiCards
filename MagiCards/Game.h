@@ -3,11 +3,13 @@
 #include <SDL.h>
 #include "Connection.h"
 #include "MainMenu.h"
+#include "Mouse.h"
 
 class Game
 {
 public:
 	Game();
+	~Game();
 
 	void init();
 
@@ -39,5 +41,7 @@ private:
 	Connection _connection;
 
 	MainMenu* _mainMenu;
+
+	Mouse* _mouse;
 };
 

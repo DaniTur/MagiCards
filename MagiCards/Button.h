@@ -14,7 +14,9 @@ public:
 
 	void setWindowXY(int x, int y);
 
-	void update(const Mouse& mouse);
+	void update(Mouse* mouse);
+
+	bool isSelected();
 
 	void render();
 

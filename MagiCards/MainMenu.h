@@ -15,13 +15,19 @@ public:
 
 	void handleEvents();
 
-	void update();
+	void update(Mouse* mouse);
 
 	void render();
 
 	void setActive();
 
+	void setInactive();
+
+	int getButtonPressed(); //return index of the pressed button of the list
+
 	bool isActive();
+
+	enum ButtonNames { CREATE_ROOM, JOIN_ROOM, DECKS, QUIT_GAME };
 
 private:
 
@@ -31,9 +37,10 @@ private:
 
 	bool _active;
 
-	enum ButtonNames {CREATE_ROOM, JOIN_ROOM, DECKS, QUIT_GAME};
+	
 	Button* _buttons[4];
 
+	int _buttonPressed = -1;
 
 	//std::vector<Button> _buttons;
 };

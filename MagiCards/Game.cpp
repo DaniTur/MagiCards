@@ -12,6 +12,10 @@ Game::Game() {
 	_isRunning = true;
 }
 
+Game::~Game()
+{
+}
+
 void Game::init()
 {
 	initSDL();
@@ -22,6 +26,10 @@ void Game::init()
 	//Main Menu
 	_mainMenu = new MainMenu(_renderer);
 	_mainMenu->setActive();
+
+	static Mouse* m = new Mouse(_renderer);
+	_mouse = m;
+
 	std::cout << "Game init" << std::endl;
 }
 
@@ -44,63 +52,65 @@ void Game::createWindowAndRenderer()
 
 void Game::handleEvents()
 {
+	SDL_GetMouseState(&(_mouse->getCursor()->x), &(_mouse->getCursor()->y));
+	_mouse->setTipXY(_mouse->getCursor()->x, _mouse->getCursor()->y);
+
 	SDL_Event event;
 	if (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT) {
+		switch (event.type)
+		{
+		case SDL_QUIT:
 			_isRunning = false;
+		case SDL_MOUSEBUTTONUP:
+			if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				if (_mainMenu->isActive())
+				{
+					_mainMenu->handleEvents();
+					
+					switch (_mainMenu->getButtonPressed())
+					{
+					case _mainMenu->CREATE_ROOM:
+						std::cout << "Pulsando Create Room" << std::endl;
+						_mainMenu->setInactive();
+						break;
+					case _mainMenu->JOIN_ROOM:
+						std::cout << "Pulsando Join Room" << std::endl;
+						_mainMenu->setInactive();
+						break;
+					case _mainMenu->DECKS:
+						std::cout << "Pulsando Decks" << std::endl;
+						_mainMenu->setInactive();
+						break;
+					case _mainMenu->QUIT_GAME:
+						std::cout << "Pulsando Quit Game" << std::endl;
+						_isRunning = false;
+						break;
+					default:
+						break;
+					}
+				}
+				
+			}
+			
+		default:
+			break;
 		}
+
 	}
-
-
-	//std::cout << "Cartas en mano:" << std::endl;
-	//std::cout << "1. Goblin Fumaporros-Creature" << std::endl;
-	//std::cout << "2. Dragon Fumaporros-Creature" << std::endl;
-	//std::cout << "3. Rey Fumaporros-Creature" << std::endl;
-	//std::cout << "4. Esclavo Fumaporros-Creature" << std::endl;
-	//std::cout << "5. Hechizo Fumaporros-Sorcery" << std::endl;
-	//std::cout << "6. Forest-Basic Land" << std::endl;
-	//std::cout << "7. Forest-Basic Land" << std::endl;
-
 }
 
 void Game::update()
 {
 	if (_mainMenu->isActive())
 	{
-		_mainMenu->update();
+		_mainMenu->update(_mouse);
 	}
 	else
 	{
 		// update logic
 	}
 
-	//switch (playerSelection)
-	//{
-	//case 1:
-	//	std::cout << "Has invocado: Goblin Fumaporros-Creature" << std::endl;
-	//	break;
-	//case 2:
-	//	std::cout << "Has invocado: Dragon Fumaporros-Creature" << std::endl;
-	//	break;
-	//case 3:
-	//	std::cout << "Has invocado: Rey Fumaporros-Creature" << std::endl;
-	//	break;
-	//case 4:
-	//	std::cout << "Has invocado: Esclavo Fumaporros-Creature" << std::endl;
-	//	break;
-	//case 5:
-	//	std::cout << "Has lanzado: Fumaporros-Sorcery" << std::endl;
-	//	break;
-	//case 6:
-	//	std::cout << "Has jugado: Forest-Basic Land" << std::endl;
-	//	break;
-	//case 7:
-	//	std::cout << "Has jugado: Forest-Basic Land" << std::endl;
-	//	break;
-	//default:
-	//	std::cout << "No se que has pulsado, debes estar emporrao..." << std::endl;
-	//	break;
-	//}
 }
 
 void Game::render()
@@ -112,9 +122,14 @@ void Game::render()
 	else
 	{
 		// render game
-		std::cout << "render game" << std::endl;
+		SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
 	}
 
+	_mouse->render();
+
+	SDL_RenderPresent(_renderer);
+	//SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
+	SDL_RenderClear(_renderer);
 	
 	//SDL_RenderClear(_renderer);
 	//renderizar imagenes

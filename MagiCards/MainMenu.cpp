@@ -33,18 +33,26 @@ MainMenu::MainMenu(SDL_Renderer* renderer) : _active(false), _renderer(renderer)
 MainMenu::~MainMenu()
 {
 	SDL_DestroyTexture(_background);
+	for (Button* btn : _buttons)
+	{
+		delete btn;
+	}
 }
 
 void MainMenu::handleEvents()
 {
+	for (size_t i = 0; i < 4; i++)
+	{
+		if (_buttons[i]->isSelected()) _buttonPressed = i;
+	}
 }
 
-void MainMenu::update()
+void MainMenu::update(Mouse* mouse)
 {
-	Mouse m;
+
 	for (Button* btn : _buttons)
 	{
-		btn->update(m);
+		btn->update(mouse);
 	}
 
 }
@@ -59,16 +67,22 @@ void MainMenu::render()
 	{
 		btn->render();
 	}
-
-	SDL_RenderPresent(_renderer);
-	SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
-	SDL_RenderClear(_renderer);
 }
 
 void MainMenu::setActive()
 {
 	_active = true;
 	std::cout << "MainMenu active" << std::endl;
+}
+
+void MainMenu::setInactive()
+{
+	_active = false;
+}
+
+int MainMenu::getButtonPressed()
+{
+	return _buttonPressed;
 }
 
 bool MainMenu::isActive()

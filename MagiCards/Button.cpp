@@ -38,22 +38,33 @@ void Button::setWindowXY(int x, int y)
 	_dRect.y = y;
 }
 
-void Button::update(const Mouse& mouse)
+void Button::update(Mouse* mouse)
 {
-	//if (SDL_HasIntersection(&_dRect, &mouse.point()))
-	//{
-	//	_mouseHover = true;
-	//	_sRect.x = 1000;
+	if (SDL_HasIntersection(mouse->getTip(), &_dRect))
+	{
+		_mouseHover = true;
+		//play mouse hover sound
+	}
+	else
+	{
+		_mouseHover = false;
+	}
+}
 
-	//}
-	//else
-	//{
-	//	_mouseHover = false;
-	//	_sRect.x = 0;
-	//}
+bool Button::isSelected()
+{
+	return _mouseHover;
 }
 
 void Button::render()
 {
+	if (_mouseHover)
+	{
+		_sRect.x = 500;
+	}
+	else
+	{
+		_sRect.x = 0;
+	}
 	SDL_RenderCopy(_renderer, _texture, &_sRect, &_dRect);
 }
