@@ -1,7 +1,6 @@
 #include "Connection.h"
 #include "Ws2tcpip.h"
 
-
 Connection::Connection() : _socket(INVALID_SOCKET){
 }
 
@@ -70,6 +69,9 @@ int Connection::startServerConnection() {
 
 	std::cout << "Accepted new client!" << std::endl;
 
+	//TODO: Start client server send-receive data
+	// Receive data from client
+
 	return 0;
 }
 
@@ -112,6 +114,18 @@ int Connection::startClientConnection(char const* ip, int port) {
 	}
 
 	std::cout << "Connected to the server" << std::endl;
+
+	char* buffer;
+	std::memcpy(&buffer, "mefumoseris", sizeof(buffer));
+
+	int sendErr = send(_socket, buffer, sizeof(buffer), NULL);
+	if (sendErr == SOCKET_ERROR) {
+		std::cout << "Error sending data " << WSAGetLastError() << std::endl;
+		clear();
+		return 1;
+	}
+
+	std::cout << "Data sended" << std::endl;
 
 	return 0;
 }
