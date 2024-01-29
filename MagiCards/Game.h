@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include "Connection.h"
+#include "MainMenu.h"
 
 class Game
 {
@@ -36,5 +37,7 @@ private:
 	SDL_Renderer* _renderer;
 
 	Connection _connection;
+
+	MainMenu* _mainMenu;
 };
 

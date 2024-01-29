@@ -6,15 +6,22 @@
 
 
 Game::Game() {
+	_window = NULL;
+	_renderer = NULL;
+	_mainMenu = NULL;
 	_isRunning = true;
 }
 
 void Game::init()
 {
-/*	initSDL();
+	initSDL();
 	createWindowAndRenderer();
 	SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
-	*/_isRunning = true;
+	_isRunning = true;
+
+	//Main Menu
+	_mainMenu = new MainMenu(_renderer);
+	_mainMenu->setActive();
 	std::cout << "Game init" << std::endl;
 }
 
@@ -37,12 +44,12 @@ void Game::createWindowAndRenderer()
 
 void Game::handleEvents()
 {
-	//SDL_Event event;
-	//if (SDL_PollEvent(&event)) {
-	//	if (event.type == SDL_QUIT) {
-	//		_isRunning = false;
-	//	}
-	//}
+	SDL_Event event;
+	if (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT) {
+			_isRunning = false;
+		}
+	}
 
 
 	//std::cout << "Cartas en mano:" << std::endl;
@@ -58,7 +65,14 @@ void Game::handleEvents()
 
 void Game::update()
 {
-
+	if (_mainMenu->isActive())
+	{
+		_mainMenu->update();
+	}
+	else
+	{
+		// update logic
+	}
 
 	//switch (playerSelection)
 	//{
@@ -91,11 +105,19 @@ void Game::update()
 
 void Game::render()
 {	
-	//std::cout << "Renderizando carta " << std::endl;
+	if (_mainMenu->isActive())
+	{
+		_mainMenu->render();
+	}
+	else
+	{
+		// render game
+		std::cout << "render game" << std::endl;
+	}
+
+	
 	//SDL_RenderClear(_renderer);
-
 	//renderizar imagenes
-
 	//SDL_RenderPresent(_renderer); //muestra o "pinta" el render
 
 }

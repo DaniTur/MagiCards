@@ -73,11 +73,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\include;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\include;$(IncludePath)</IncludePath>
     <LibraryPath>D:\MagiCardsProject\MagiCards\vclib\SDL2-devel-2.28.5-VC\SDL2-2.28.5\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_ttf-devel-2.22.0-VC\SDL2_ttf-2.22.0\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_mixer-devel-2.8.0-VC\SDL2_mixer-2.8.0\lib\x64;D:\MagiCardsProject\MagiCards\vclib\SDL2_image-devel-2.8.2-VC\SDL2_image-2.8.2\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -114,12 +114,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;SDL2.lib;SDL2main.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_ttf.lib;SDL2_image.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\MagiCardsProject\MagiCards\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -131,25 +130,30 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;SDL2.lib;SDL2main.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_mixer.lib;SDL2_ttf.lib;SDL2_image.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\MagiCardsProject\MagiCards\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="Mouse.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="Mouse.h" />
     <ClInclude Include="SDLException.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
