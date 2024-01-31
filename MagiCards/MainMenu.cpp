@@ -1,13 +1,14 @@
 #include "MainMenu.h"
 #include <SDL_image.h>
+#include <iostream>
 
-MainMenu::MainMenu() : _active(false)
+MainMenu::MainMenu()
 {
 }
 
-MainMenu::MainMenu(SDL_Renderer* renderer) : _active(false), _renderer(renderer)
+MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 {
-	_background = IMG_LoadTexture(renderer, "MainMenu.png");
+	_background = IMG_LoadTexture(_renderer, "MainMenu.png");
 	_sRect.x = 0;
 	_sRect.y = 0;
 	_sRect.w = 1000;
@@ -28,6 +29,8 @@ MainMenu::MainMenu(SDL_Renderer* renderer) : _active(false), _renderer(renderer)
 	_buttons[DECKS]->setWindowXY((windowX / 2) - (250), 220 + 50);
 	_buttons[QUIT_GAME] = new Button("Quit Game", renderer, 0, 300);
 	_buttons[QUIT_GAME]->setWindowXY((windowX / 2) - (250), 330 + 50);
+
+	//_createRoomMenu = new CreateRoomMenu(_renderer);
 }
 
 MainMenu::~MainMenu()
@@ -41,20 +44,25 @@ MainMenu::~MainMenu()
 
 void MainMenu::handleEvents()
 {
-	for (size_t i = 0; i < 4; i++)
-	{
-		if (_buttons[i]->isSelected()) _buttonPressed = i;
+	bool anyButtonSelected = false;
+	int i = 0;
+	//@pre: only one button could be selected at time
+	while (i < MAX_BUTTONS && !anyButtonSelected) {
+		if (_buttons[i]->isSelected()) anyButtonSelected = true;
+		else i++;
 	}
+
+	_buttonSelected = anyButtonSelected ? i : -1;
+	std::cout << "MainMenu button selected: " << _buttonSelected << std::endl;
 }
 
 void MainMenu::update(Mouse* mouse)
 {
-
+	//update all menu components
 	for (Button* btn : _buttons)
 	{
 		btn->update(mouse);
 	}
-
 }
 
 void MainMenu::render()
@@ -69,23 +77,18 @@ void MainMenu::render()
 	}
 }
 
-void MainMenu::setActive()
-{
-	_active = true;
-	std::cout << "MainMenu active" << std::endl;
-}
-
-void MainMenu::setInactive()
-{
-	_active = false;
-}
-
 int MainMenu::getButtonPressed()
 {
-	return _buttonPressed;
+	return _buttonSelected;
 }
 
-bool MainMenu::isActive()
+int MainMenu::menuType()
 {
-	return _active;
+	return _MENU_TYPE;
 }
+
+void MainMenu::clearPressedButton()
+{
+	_buttonSelected = -1;
+}
+

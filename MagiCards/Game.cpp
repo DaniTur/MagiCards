@@ -1,14 +1,12 @@
 #include "Game.h"
-#include <SDL.h>
 #include "SDLException.h"
 #include "Connection.h"
-#include <iostream>
-
+#include "MainMenu.h" //also includes Menu
+#include "CreateRoomMenu.h" //TODO: refactor menu creations to MenuFactoryMethod
 
 Game::Game() {
 	_window = NULL;
 	_renderer = NULL;
-	_mainMenu = NULL;
 	_isRunning = true;
 }
 
@@ -24,13 +22,12 @@ void Game::init()
 	_isRunning = true;
 
 	//Main Menu
-	_mainMenu = new MainMenu(_renderer);
-	_mainMenu->setActive();
+	Menu* mainMenu = new MainMenu(_renderer);
+	_menuStack.push(mainMenu);
+	_activeMenu = true;
 
 	static Mouse* m = new Mouse(_renderer);
 	_mouse = m;
-
-	std::cout << "Game init" << std::endl;
 }
 
 void Game::initSDL()
@@ -64,31 +61,10 @@ void Game::handleEvents()
 		case SDL_MOUSEBUTTONUP:
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				if (_mainMenu->isActive())
+				if (_activeMenu)
 				{
-					_mainMenu->handleEvents();
-					
-					switch (_mainMenu->getButtonPressed())
-					{
-					case _mainMenu->CREATE_ROOM:
-						std::cout << "Pulsando Create Room" << std::endl;
-						_mainMenu->setInactive();
-						break;
-					case _mainMenu->JOIN_ROOM:
-						std::cout << "Pulsando Join Room" << std::endl;
-						_mainMenu->setInactive();
-						break;
-					case _mainMenu->DECKS:
-						std::cout << "Pulsando Decks" << std::endl;
-						_mainMenu->setInactive();
-						break;
-					case _mainMenu->QUIT_GAME:
-						std::cout << "Pulsando Quit Game" << std::endl;
-						_isRunning = false;
-						break;
-					default:
-						break;
-					}
+					(_menuStack.top())->handleEvents();
+
 				}
 				
 			}
@@ -102,22 +78,56 @@ void Game::handleEvents()
 
 void Game::update()
 {
-	if (_mainMenu->isActive())
+	if (_activeMenu)
 	{
-		_mainMenu->update(_mouse);
-	}
-	else
-	{
-		// update logic
-	}
+		Menu* tmpMenu = NULL;
+		Menu* activeMenu = _menuStack.top();
+		activeMenu->update(_mouse);
 
+		switch (activeMenu->menuType())
+		{
+		case 0://Main menu
+			switch (activeMenu->getButtonPressed())
+			{
+			case CREATE_ROOM:
+				tmpMenu = new CreateRoomMenu(_renderer);
+				_menuStack.push(tmpMenu);
+				std::cout << "Game update: Main Menu -> Create Room" << std::endl;
+				break;
+			case JOIN_ROOM:
+				std::cout << "Game update: Main Menu -> Join Room" << std::endl;
+				break;
+			case DECKS:
+				std::cout << "Game update: Main Menu -> Decks" << std::endl;
+				break;
+			case QUIT_GAME:
+				_isRunning = false;
+				std::cout << "Game update: Main Menu -> Quit game" << std::endl;
+				break;
+			}
+			break;
+		case 1: //Create Room menu
+			switch (activeMenu->getButtonPressed())
+			{
+			case 0: // Back button
+				std::cout << "Game update: Create Room Menu -> Back" << std::endl;
+				_menuStack.pop();
+				break;
+			}
+			break;
+		}
+
+		activeMenu->clearPressedButton();
+	}
 }
 
 void Game::render()
 {	
-	if (_mainMenu->isActive())
+	// if: there is a menu active, render it
+	// else: render the game
+	if (_activeMenu)
 	{
-		_mainMenu->render();
+		(_menuStack.top())->render();
 	}
 	else
 	{

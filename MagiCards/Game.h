@@ -1,8 +1,9 @@
 #pragma once
-
-#include <SDL.h>
 #include "Connection.h"
-#include "MainMenu.h"
+#include <SDL.h>
+#include <iostream>
+#include <stack>
+#include "Menu.h"
 #include "Mouse.h"
 
 class Game
@@ -40,7 +41,8 @@ private:
 
 	Connection _connection;
 
-	MainMenu* _mainMenu;
+	std::stack<Menu*> _menuStack;
+	bool _activeMenu = false;
 
 	Mouse* _mouse;
 };

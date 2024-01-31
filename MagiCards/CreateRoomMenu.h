@@ -1,19 +1,16 @@
 #pragma once
-#include "Button.h"
 #include "Menu.h"
 #include "Mouse.h"
+#include "Button.h"
 
-const int MAX_BUTTONS = 4;
-enum ButtonNames { CREATE_ROOM, JOIN_ROOM, DECKS, QUIT_GAME };
-
-class MainMenu : public Menu
+class CreateRoomMenu : public Menu
 {
 public:
-	MainMenu();
+	CreateRoomMenu();
 
-	MainMenu(SDL_Renderer* renderer);
-	
-	~MainMenu();
+	CreateRoomMenu(SDL_Renderer* renderer);
+
+	~CreateRoomMenu();
 
 	void handleEvents() override;
 
@@ -21,20 +18,23 @@ public:
 
 	void render() override;
 
-	int getButtonPressed() override; //return index of the pressed button of the list
-
 	int menuType() override;
+
+	int getButtonPressed() override;
 
 	void clearPressedButton() override;
 
 private:
-	const int _MENU_TYPE = 0;
+	const int _MENU_TYPE = 1;
 
 	SDL_Texture* _background;
 	SDL_Rect _sRect, _dRect;
 	SDL_Renderer* _renderer;
-	
-	Button* _buttons[MAX_BUTTONS];
+
+	Button* _backButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
+
+	const int _MAX_PLAYERS = 2;
+	int _playerNumer;
 };
 
