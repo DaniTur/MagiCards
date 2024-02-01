@@ -143,7 +143,9 @@
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="CreateRoomMenu.cpp" />
+    <ClCompile Include="DecksMenu.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="JoinRoomMenu.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="MainMenu.cpp" />
@@ -153,8 +155,10 @@
   <ItemGroup>
     <ClInclude Include="Button.h" />
     <ClInclude Include="CreateRoomMenu.h" />
+    <ClInclude Include="DecksMenu.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="JoinRoomMenu.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Mouse.h" />

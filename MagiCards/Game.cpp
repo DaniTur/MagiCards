@@ -3,6 +3,8 @@
 #include "Connection.h"
 #include "MainMenu.h" //also includes Menu
 #include "CreateRoomMenu.h" //TODO: refactor menu creations to MenuFactoryMethod
+#include "JoinRoomMenu.h"
+#include "DecksMenu.h"
 
 Game::Game() {
 	_window = NULL;
@@ -64,9 +66,7 @@ void Game::handleEvents()
 				if (_activeMenu)
 				{
 					(_menuStack.top())->handleEvents();
-
 				}
-				
 			}
 			
 		default:
@@ -80,45 +80,73 @@ void Game::update()
 {
 	if (_activeMenu)
 	{
-		Menu* tmpMenu = NULL;
-		Menu* activeMenu = _menuStack.top();
-		activeMenu->update(_mouse);
+		updateMenu();
+	}
+	else
+	{
+		//update game
+	}
+}
 
-		switch (activeMenu->menuType())
+void Game::updateMenu()
+{
+	Menu* tmpMenu = NULL;
+	Menu* activeMenu = _menuStack.top();
+	activeMenu->update(_mouse);
+
+	switch (activeMenu->menuType())
+	{
+	case 0://Main menu
+		switch (activeMenu->getButtonPressed())
 		{
-		case 0://Main menu
-			switch (activeMenu->getButtonPressed())
-			{
-			case CREATE_ROOM:
-				tmpMenu = new CreateRoomMenu(_renderer);
-				_menuStack.push(tmpMenu);
-				std::cout << "Game update: Main Menu -> Create Room" << std::endl;
-				break;
-			case JOIN_ROOM:
-				std::cout << "Game update: Main Menu -> Join Room" << std::endl;
-				break;
-			case DECKS:
-				std::cout << "Game update: Main Menu -> Decks" << std::endl;
-				break;
-			case QUIT_GAME:
-				_isRunning = false;
-				std::cout << "Game update: Main Menu -> Quit game" << std::endl;
-				break;
-			}
+		case CREATE_ROOM:
+			tmpMenu = new CreateRoomMenu(_renderer);
+			_menuStack.push(tmpMenu);
+			std::cout << "Game update: Main Menu -> Create Room" << std::endl;
 			break;
-		case 1: //Create Room menu
-			switch (activeMenu->getButtonPressed())
-			{
-			case 0: // Back button
-				std::cout << "Game update: Create Room Menu -> Back" << std::endl;
-				_menuStack.pop();
-				break;
-			}
+		case JOIN_ROOM:
+			tmpMenu = new JoinRoomMenu(_renderer);
+			_menuStack.push(tmpMenu);
+			std::cout << "Game update: Main Menu -> Join Room" << std::endl;
+			break;
+		case DECKS:
+			tmpMenu = new DecksMenu(_renderer);
+			_menuStack.push(tmpMenu);
+			std::cout << "Game update: Main Menu -> Decks" << std::endl;
+			break;
+		case QUIT_GAME:
+			_isRunning = false;
+			std::cout << "Game update: Main Menu -> Quit game" << std::endl;
 			break;
 		}
-
-		activeMenu->clearPressedButton();
+		break;
+	case 1: //Create Room menu
+		switch (activeMenu->getButtonPressed())
+		{
+		case 0: // Back button
+			_menuStack.pop();
+			break;
+		}
+		break;
+	case 2: //Join Room menu
+		switch (activeMenu->getButtonPressed())
+		{
+		case 0: // Back button
+			_menuStack.pop();
+			break;
+		}
+		break;
+	case 3: //Decks Menu
+		switch (activeMenu->getButtonPressed())
+		{
+		case 0: // Back button
+			_menuStack.pop();
+			break;
+		}
+		break;
 	}
+
+	activeMenu->clearPressedButton();
 }
 
 void Game::render()

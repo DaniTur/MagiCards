@@ -33,6 +33,8 @@ private:
 
 	void initSDL();
 
+	void updateMenu();
+
 private:
 	bool _isRunning;
 
