@@ -5,6 +5,7 @@
 #include "CreateRoomMenu.h" //TODO: refactor menu creations to MenuFactoryMethod
 #include "JoinRoomMenu.h"
 #include "DecksMenu.h"
+#include "RoomMenu.h"
 
 Game::Game() {
 	_window = NULL;
@@ -21,6 +22,9 @@ void Game::init()
 	initSDL();
 	createWindowAndRenderer();
 	SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
+
+	if (TTF_Init() == -1) std::cerr << "failed to initialize ttf" << std::endl;
+
 	_isRunning = true;
 
 	//Main Menu
@@ -44,7 +48,7 @@ bool Game::isRunning() {
 
 void Game::createWindowAndRenderer()
 {
-	SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_SHOWN, &_window, &_renderer);
+	SDL_CreateWindowAndRenderer(1280, 720, SDL_WINDOW_SHOWN, &_window, &_renderer);
 	SDL_SetWindowTitle(_window, "MagiCards");
 	if (_window == NULL || _renderer == NULL) throw SDLException(SDL_GetError());
 }
@@ -60,6 +64,7 @@ void Game::handleEvents()
 		{
 		case SDL_QUIT:
 			_isRunning = false;
+			break;
 		case SDL_MOUSEBUTTONUP:
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
@@ -68,7 +73,14 @@ void Game::handleEvents()
 					(_menuStack.top())->handleEvents();
 				}
 			}
-			
+			break;
+		case SDL_TEXTINPUT:
+			if (_activeMenu) //text input in menuType 1 (create room)
+			{
+				(_menuStack.top())->handleTextInputEvent(event.text);
+			}
+			std::cout << "text input: " << event.text.text << std::endl;
+			break;
 		default:
 			break;
 		}
@@ -102,28 +114,29 @@ void Game::updateMenu()
 		case CREATE_ROOM:
 			tmpMenu = new CreateRoomMenu(_renderer);
 			_menuStack.push(tmpMenu);
-			std::cout << "Game update: Main Menu -> Create Room" << std::endl;
 			break;
 		case JOIN_ROOM:
 			tmpMenu = new JoinRoomMenu(_renderer);
 			_menuStack.push(tmpMenu);
-			std::cout << "Game update: Main Menu -> Join Room" << std::endl;
 			break;
 		case DECKS:
 			tmpMenu = new DecksMenu(_renderer);
 			_menuStack.push(tmpMenu);
-			std::cout << "Game update: Main Menu -> Decks" << std::endl;
 			break;
 		case QUIT_GAME:
 			_isRunning = false;
-			std::cout << "Game update: Main Menu -> Quit game" << std::endl;
 			break;
 		}
 		break;
 	case 1: //Create Room menu
 		switch (activeMenu->getButtonPressed())
 		{
-		case 0: // Back button
+		case 0: // Create button
+			std::cout << "create menu button pressed" << std::endl;
+			tmpMenu = new RoomMenu(_renderer);
+			_menuStack.push(tmpMenu);
+			break;
+		case 1: // Back button
 			_menuStack.pop();
 			break;
 		}
@@ -140,6 +153,16 @@ void Game::updateMenu()
 		switch (activeMenu->getButtonPressed())
 		{
 		case 0: // Back button
+			_menuStack.pop();
+			break;
+		}
+		break;
+	case 4: // Room Menu
+		switch (activeMenu->getButtonPressed())
+		{
+		case 0: // start game button
+			break;
+		case 1: // Back button
 			_menuStack.pop();
 			break;
 		}

@@ -1,18 +1,17 @@
 #pragma once
 #include "Menu.h"
-#include "Mouse.h"
 #include "Button.h"
-#include "TextInput.h"
 
-class CreateRoomMenu : public Menu
+class RoomMenu :  public Menu
 {
 public:
-	CreateRoomMenu();
+	RoomMenu();
 
-	CreateRoomMenu(SDL_Renderer* renderer);
+	RoomMenu(SDL_Renderer* renderer);
 
-	~CreateRoomMenu();
+	~RoomMenu();
 
+	// Inherited via Menu
 	void handleEvents() override;
 
 	void handleTextInputEvent(SDL_TextInputEvent event) override;
@@ -28,16 +27,13 @@ public:
 	void clearPressedButton() override;
 
 private:
-	const int _MENU_TYPE = 1;
+	const int _MENU_TYPE = 4;
 
 	SDL_Texture* _background;
 	SDL_Rect _sRect, _dRect;
 	SDL_Renderer* _renderer;
 
-	Button *_backButton, *_createButton;
+	Button *_backButton, *_startButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
-
-	TextInput* _playerNameInput;
-	TextInput* _deckSelector; //should be replaced by a proper selector
 };
 

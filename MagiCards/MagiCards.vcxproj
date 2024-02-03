@@ -149,8 +149,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="MainMenu.cpp" />
-    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="RoomMenu.cpp" />
+    <ClCompile Include="TextInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
@@ -162,7 +163,9 @@
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="RoomMenu.h" />
     <ClInclude Include="SDLException.h" />
+    <ClInclude Include="TextInput.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

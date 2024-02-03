@@ -58,3 +58,7 @@ void DecksMenu::clearPressedButton()
 {
     _buttonSelected = -1;
 }
+
+void DecksMenu::handleTextInputEvent(SDL_TextInputEvent event)
+{
+}

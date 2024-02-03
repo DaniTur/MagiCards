@@ -35,6 +35,9 @@ private:
 	SDL_Renderer* _renderer;
 	
 	Button* _buttons[MAX_BUTTONS];
-	int _buttonSelected = -1; // default: -1 no buttonSelected
+	int _buttonSelected = -1;
+	// Inherited via Menu
+	void handleTextInputEvent(SDL_TextInputEvent event) override;
+	// default: -1 no buttonSelected
 };
 
