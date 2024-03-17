@@ -120,5 +120,15 @@ void CreateRoomMenu::clearPressedButton()
 	_buttonSelected = -1;
 }
 
+std::string CreateRoomMenu::getPlayerName()
+{
+	return _playerNameInput->getText();
+}
+
+int CreateRoomMenu::getSelectedDeck()
+{
+	return std::stoi(_deckSelector->getText());
+}
+
 
 

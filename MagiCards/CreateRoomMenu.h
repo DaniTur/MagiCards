@@ -27,6 +27,10 @@ public:
 
 	void clearPressedButton() override;
 
+	std::string getPlayerName();
+
+	int getSelectedDeck();
+
 private:
 	const int _MENU_TYPE = 1;
 

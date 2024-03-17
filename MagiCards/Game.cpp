@@ -106,6 +106,7 @@ void Game::updateMenu()
 	Menu* tmpMenu = NULL;
 	Menu* activeMenu = _menuStack.top();
 	activeMenu->update(_mouse);
+	Player* player1;
 
 	switch (activeMenu->menuType())
 	{
@@ -135,7 +136,7 @@ void Game::updateMenu()
 		case 0: // Create button
 			std::cout << "create menu button pressed" << std::endl;
 			// get text inputs from menu
-			Player* player1 = new Player();
+			player1 = new Player();
 			tmpMenu = new RoomMenu(_renderer);
 			_menuStack.push(tmpMenu);
 			break;
