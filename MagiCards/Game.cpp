@@ -6,6 +6,7 @@
 #include "JoinRoomMenu.h"
 #include "DecksMenu.h"
 #include "RoomMenu.h"
+#include "Player.h"
 
 Game::Game() {
 	_window = NULL;
@@ -55,13 +56,14 @@ void Game::createWindowAndRenderer()
 
 void Game::handleEvents()
 {
-	SDL_GetMouseState(&(_mouse->getCursor()->x), &(_mouse->getCursor()->y));
-	_mouse->setTipXY(_mouse->getCursor()->x, _mouse->getCursor()->y);
-
 	SDL_Event event;
 	if (SDL_PollEvent(&event)) {
 		switch (event.type)
 		{
+		case SDL_MOUSEMOTION:
+			SDL_GetMouseState(&(_mouse->getCursor()->x), &(_mouse->getCursor()->y));
+			_mouse->setTipXY(_mouse->getCursor()->x, _mouse->getCursor()->y);
+			break;
 		case SDL_QUIT:
 			_isRunning = false;
 			break;
@@ -79,7 +81,6 @@ void Game::handleEvents()
 			{
 				(_menuStack.top())->handleTextInputEvent(event.text);
 			}
-			std::cout << "text input: " << event.text.text << std::endl;
 			break;
 		default:
 			break;
@@ -133,6 +134,8 @@ void Game::updateMenu()
 		{
 		case 0: // Create button
 			std::cout << "create menu button pressed" << std::endl;
+			// get text inputs from menu
+			Player* player1 = new Player();
 			tmpMenu = new RoomMenu(_renderer);
 			_menuStack.push(tmpMenu);
 			break;
