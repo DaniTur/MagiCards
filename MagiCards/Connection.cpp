@@ -143,7 +143,7 @@ int Connection::startClientConnection(char const* ip, int port) {
 	//}
 
 	//std::cout << "Socket created" << std::endl;
-
+		
 	//// Server socket info
 	//sockaddr_in serverSocketInfo;
 	//serverSocketInfo.sin_family = AF_INET;
@@ -172,7 +172,7 @@ int Connection::startClientConnection(char const* ip, int port) {
 
 	//std::cout << "Data sended" << std::endl;
 
-	//return 0;
+	return 0;
 }
 
 std::pair<std::string, int> Connection::getConnectionInfo() {
