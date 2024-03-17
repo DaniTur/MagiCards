@@ -1,5 +1,8 @@
 #include "Connection.h"
 #include "Ws2tcpip.h"
+#include <asio.hpp>
+
+;
 
 Connection::Connection() : _socket(INVALID_SOCKET){
 }
@@ -9,65 +12,76 @@ Connection::~Connection() {
 }
 
 int Connection::startServerConnection() {
-	WORD wVersionRequested;
-    WSADATA wsaData;
-    int wsaErr;
 
-	wVersionRequested = MAKEWORD(2, 2);
+	asio::io_context context; //connects with the system net interface
+	asio::error_code errCode;
 
-	wsaErr = WSAStartup(wVersionRequested, &wsaData);
-	if (wsaErr != 0) {
-		std::cout << "Error starting WSA with code" << wsaErr;
-		std::cout << "Windsock DLL not found" << std::endl;
-		return 1;
-	}
+	unsigned short portNum = 30000;
 
-	_socket = socket(AF_INET, SOCK_STREAM ,IPPROTO_TCP);
+	asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), portNum);
 
-	if (_socket == INVALID_SOCKET) {
-		std::cout << "Error at socket " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//passive socket to listen for new connections
+	asio::ip::tcp::acceptor acceptor(context, endpoint);
 
-	//Binding socketAddress info to the Socket
-	sockaddr_in sockInfo;
-	sockInfo.sin_family = AF_INET;
-	sockInfo.sin_port = htons(30000);
-	InetPton(AF_INET, L"127.0.0.1", &sockInfo.sin_addr.s_addr);
+	//WORD wVersionRequested;
+ //   WSADATA wsaData;
+ //   int wsaErr;
 
-	int bindErr = bind(_socket, (SOCKADDR*)&sockInfo, sizeof(SOCKADDR_IN));
-	if (bindErr == SOCKET_ERROR) {
-		std::cout << "Error at binding socket " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//wVersionRequested = MAKEWORD(2, 2);
 
-	//Listen to the socket
-	const int MAX_NCONNECTIONS = 1;
-	int listenErr = listen(_socket, MAX_NCONNECTIONS);
-	if (listenErr == SOCKET_ERROR) {
-		std::cout << "Error at listening socket " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//wsaErr = WSAStartup(wVersionRequested, &wsaData);
+	//if (wsaErr != 0) {
+	//	std::cout << "Error starting WSA with code" << wsaErr;
+	//	std::cout << "Windsock DLL not found" << std::endl;
+	//	return 1;
+	//}
 
-	std::pair<std::string, int> socketInfo = getConnectionInfo();
-	std::cout << "Your IP address is: " << socketInfo.first << std::endl;
-	std::cout << "Your port is: " << socketInfo.second << std::endl;
-	std::cout << "Share this with your friends" << std::endl;
-	std::cout << "Waiting for a client connection..." << std::endl;
+	//_socket = socket(AF_INET, SOCK_STREAM ,IPPROTO_TCP);
 
-	//Accept connection, TODO: accepter class to handle incoming connections
-	SOCKET acceptSocket = accept(_socket, NULL, NULL);
-	if (acceptSocket == INVALID_SOCKET)
-	{
-		std::cout << "Error with accept socket: " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//if (_socket == INVALID_SOCKET) {
+	//	std::cout << "Error at socket " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
 
-	std::cout << "Accepted new client!" << std::endl;
+	////Binding socketAddress info to the Socket
+	//sockaddr_in sockInfo;
+	//sockInfo.sin_family = AF_INET;
+	//sockInfo.sin_port = htons(30000);
+	//InetPton(AF_INET, L"127.0.0.1", &sockInfo.sin_addr.s_addr);
+
+	//int bindErr = bind(_socket, (SOCKADDR*)&sockInfo, sizeof(SOCKADDR_IN));
+	//if (bindErr == SOCKET_ERROR) {
+	//	std::cout << "Error at binding socket " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
+
+	////Listen to the socket
+	//const int MAX_NCONNECTIONS = 1;
+	//int listenErr = listen(_socket, MAX_NCONNECTIONS);
+	//if (listenErr == SOCKET_ERROR) {
+	//	std::cout << "Error at listening socket " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
+
+	//std::pair<std::string, int> socketInfo = getConnectionInfo();
+	//std::cout << "Your IP address is: " << socketInfo.first << std::endl;
+	//std::cout << "Your port is: " << socketInfo.second << std::endl;
+	//std::cout << "Share this with your friends" << std::endl;
+	//std::cout << "Waiting for a client connection..." << std::endl;
+
+	////Accept connection, TODO: accepter class to handle incoming connections
+	//SOCKET acceptSocket = accept(_socket, NULL, NULL);
+	//if (acceptSocket == INVALID_SOCKET)
+	//{
+	//	std::cout << "Error with accept socket: " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
+
+	//std::cout << "Accepted new client!" << std::endl;
 
 	//TODO: Start client server send-receive data
 	// Receive data from client
@@ -76,58 +90,89 @@ int Connection::startServerConnection() {
 }
 
 int Connection::startClientConnection(char const* ip, int port) {
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int wsaErr;
 
-	wVersionRequested = MAKEWORD(2, 2);
+	asio::io_context context; 
 
-	wsaErr = WSAStartup(wVersionRequested, &wsaData);
-	if (wsaErr != 0) {
-		std::cout << "Error starting WSA with code" << wsaErr;
-		std::cout << "Windsock DLL not found" << std::endl;
-		return 1;
+	asio::error_code errCode;
+
+	//unsigned short portNum = 30000;
+	//asio::ip::address ipAddress = asio::ip::make_address(ip, errCode);
+	unsigned short portNum = 80;
+	asio::ip::address ipAddress = asio::ip::make_address("51.38.81.49", errCode);
+	if (errCode) 
+	{
+		std::cout << "Error making address from a std::string:\n" << errCode.message() << std::endl;
 	}
 
-	_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//endpoint(ip, port) we want to connect to
+	asio::ip::tcp::endpoint endpoint(ipAddress, portNum);
 
-	if (_socket == INVALID_SOCKET) {
-		std::cout << "Error at socket " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
+
+	// Create a socket, the context deliver the implementation
+	asio::ip::tcp::socket socket(context);
+
+	socket.connect(endpoint, errCode);
+
+	if (!errCode) {
+		std::cout << "Connected!" << std::endl;
+	}
+	else
+	{
+		std::cout << "Failed to connect to address:\n" << errCode.message() << std::endl;
 	}
 
-	std::cout << "Socket created" << std::endl;
+	//WORD wVersionRequested;
+	//WSADATA wsaData;
+	//int wsaErr;
 
-	// Server socket info
-	sockaddr_in serverSocketInfo;
-	serverSocketInfo.sin_family = AF_INET;
-	serverSocketInfo.sin_port = htons(30000);
-	//InetPton(AF_INET, (PCWSTR)ip, &serverSocketInfo.sin_addr.s_addr);
-	InetPton(AF_INET, L"127.0.0.1", &serverSocketInfo.sin_addr.s_addr);
+	//wVersionRequested = MAKEWORD(2, 2);
 
-	int connectErr = connect(_socket, (sockaddr*)&serverSocketInfo, sizeof(serverSocketInfo));
-	if (connectErr == SOCKET_ERROR) {
-		std::cout << "Error connecting to a server socket " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//wsaErr = WSAStartup(wVersionRequested, &wsaData);
+	//if (wsaErr != 0) {
+	//	std::cout << "Error starting WSA with code" << wsaErr;
+	//	std::cout << "Windsock DLL not found" << std::endl;
+	//	return 1;
+	//}
 
-	std::cout << "Connected to the server" << std::endl;
+	//_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	char* buffer;
-	std::memcpy(&buffer, "mefumoseris", sizeof(buffer));
+	//if (_socket == INVALID_SOCKET) {
+	//	std::cout << "Error at socket " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
 
-	int sendErr = send(_socket, buffer, sizeof(buffer), NULL);
-	if (sendErr == SOCKET_ERROR) {
-		std::cout << "Error sending data " << WSAGetLastError() << std::endl;
-		clear();
-		return 1;
-	}
+	//std::cout << "Socket created" << std::endl;
 
-	std::cout << "Data sended" << std::endl;
+	//// Server socket info
+	//sockaddr_in serverSocketInfo;
+	//serverSocketInfo.sin_family = AF_INET;
+	//serverSocketInfo.sin_port = htons(30000);
+	////InetPton(AF_INET, (PCWSTR)ip, &serverSocketInfo.sin_addr.s_addr);
+	//InetPton(AF_INET, L"127.0.0.1", &serverSocketInfo.sin_addr.s_addr);
 
-	return 0;
+	//int connectErr = connect(_socket, (sockaddr*)&serverSocketInfo, sizeof(serverSocketInfo));
+	//if (connectErr == SOCKET_ERROR) {
+	//	std::cout << "Error connecting to a server socket " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
+
+	//std::cout << "Connected to the server" << std::endl;
+
+	//char* buffer;
+	//std::memcpy(&buffer, "mefumoseris", sizeof(buffer));
+
+	//int sendErr = send(_socket, buffer, sizeof(buffer), NULL);
+	//if (sendErr == SOCKET_ERROR) {
+	//	std::cout << "Error sending data " << WSAGetLastError() << std::endl;
+	//	clear();
+	//	return 1;
+	//}
+
+	//std::cout << "Data sended" << std::endl;
+
+	//return 0;
 }
 
 std::pair<std::string, int> Connection::getConnectionInfo() {
