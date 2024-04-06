@@ -1,13 +1,14 @@
 #pragma once
 #include "Menu.h"
 #include "Button.h"
+#include "Player.h"
 
 class RoomMenu :  public Menu
 {
 public:
 	RoomMenu();
 
-	RoomMenu(SDL_Renderer* renderer);
+	RoomMenu(SDL_Renderer* renderer, Player* playerHost, bool serverSide);
 
 	~RoomMenu();
 
@@ -26,6 +27,8 @@ public:
 
 	void clearPressedButton() override;
 
+	bool serverSide();
+
 private:
 	const int _MENU_TYPE = 4;
 
@@ -35,5 +38,8 @@ private:
 
 	Button *_backButton, *_startButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
+
+	Player *_playerHost, *_playerClient;
+	bool _serverSide = false;
 };
 

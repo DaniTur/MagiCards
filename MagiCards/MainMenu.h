@@ -4,7 +4,7 @@
 #include "Mouse.h"
 
 const int MAX_BUTTONS = 4;
-enum ButtonNames { CREATE_ROOM, JOIN_ROOM, DECKS, QUIT_GAME };
+enum ButtonNames { CREATE_ROOM_BTN, JOIN_ROOM_BTN, DECKS_BTN, QUIT_GAME_BTN};
 
 class MainMenu : public Menu
 {

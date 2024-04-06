@@ -4,8 +4,12 @@ class Player
 {
 public:
 	Player();
-	Player(std::string name);
+	Player(std::string name, int deck);
 	~Player();
+
+	std::string getName();
+
+	int getDeck();
 
 private:
 	std::string _name;

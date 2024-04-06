@@ -23,6 +23,8 @@ public:
 
 	void clearPressedButton() override;
 
+	void handleTextInputEvent(SDL_TextInputEvent event) override;
+
 private:
 	const int _MENU_TYPE = 2;
 
@@ -31,9 +33,6 @@ private:
 	SDL_Renderer* _renderer;
 
 	Button* _backButton;
-	int _buttonSelected = -1;
-	// Inherited via Menu
-	void handleTextInputEvent(SDL_TextInputEvent event) override;
-	// default: -1 no buttonSelected
+	int _buttonSelected = -1; // default: -1 no buttonSelected
 };
 

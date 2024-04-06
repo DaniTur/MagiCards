@@ -22,14 +22,14 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	_dRect.w = windowW;
 	_dRect.h = windowH;
 
-	_buttons[CREATE_ROOM] = new Button("Create Room", renderer, 0, 0);
-	_buttons[CREATE_ROOM]->setWindowXY((windowW/2) - (250), 0 + 50);
-	_buttons[JOIN_ROOM] = new Button("Join Room", renderer, 0, 100);
-	_buttons[JOIN_ROOM]->setWindowXY((windowW / 2) - (250), 110 + 50);
-	_buttons[DECKS] = new Button("Decks", renderer, 0, 200);
-	_buttons[DECKS]->setWindowXY((windowW / 2) - (250), 220 + 50);
-	_buttons[QUIT_GAME] = new Button("Quit Game", renderer, 0, 300);
-	_buttons[QUIT_GAME]->setWindowXY((windowW / 2) - (250), 330 + 50);
+	_buttons[CREATE_ROOM_BTN] = new Button("Create Room", _renderer, 0, 0);
+	_buttons[CREATE_ROOM_BTN]->setWindowXY((windowW/2) - (250), 0 + 50);
+	_buttons[JOIN_ROOM_BTN] = new Button("Join Room", _renderer, 0, 100);
+	_buttons[JOIN_ROOM_BTN]->setWindowXY((windowW / 2) - (250), 110 + 50);
+	_buttons[DECKS_BTN] = new Button("Decks", _renderer, 0, 200);
+	_buttons[DECKS_BTN]->setWindowXY((windowW / 2) - (250), 220 + 50);
+	_buttons[QUIT_GAME_BTN] = new Button("Quit Game", _renderer, 0, 300);
+	_buttons[QUIT_GAME_BTN]->setWindowXY((windowW / 2) - (250), 330 + 50);
 
 	//_createRoomMenu = new CreateRoomMenu(_renderer);
 }

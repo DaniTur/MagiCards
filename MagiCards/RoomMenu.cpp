@@ -1,7 +1,8 @@
 #include "RoomMenu.h"
 #include <SDL_image.h>
 
-RoomMenu::RoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
+RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* playerHost, bool serverSide) 
+	: _renderer(renderer), _playerHost(playerHost), _serverSide(serverSide)
 {
 	const int windowW = 1280;
 	const int windowH = 720;
@@ -70,4 +71,9 @@ int RoomMenu::getButtonPressed()
 void RoomMenu::clearPressedButton()
 {
 	_buttonSelected = -1;
+}
+
+bool RoomMenu::serverSide()
+{
+	return _serverSide;
 }
