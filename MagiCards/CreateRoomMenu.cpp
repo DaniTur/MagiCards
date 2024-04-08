@@ -74,18 +74,13 @@ void CreateRoomMenu::handleTextInputEvent(SDL_TextInputEvent textEvent)
 
 void CreateRoomMenu::update(Mouse* mouse)
 {
-	if (_playerNameInput->isFocused())
+	if (_playerNameInput->isFocused() || _deckSelector->isFocused())
 	{
-		_playerNameInput->startTextInput();
-	}
-	else if (_deckSelector->isFocused())
-	{
-		_deckSelector->startTextInput();
+		SDL_StartTextInput();
 	}
 	else
 	{
-		_playerNameInput->stopTextInput();
-		_deckSelector->stopTextInput();
+		SDL_StopTextInput();
 	}
 
 	_playerNameInput->update(mouse);

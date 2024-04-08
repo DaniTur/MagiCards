@@ -100,6 +100,7 @@ void Game::handleEvents()
 			break;
 
 		case SDL_TEXTINPUT:
+			std::cout << "gamestate text input sdl" << _gameState << std::endl;
 			switch (_gameState)
 			{
 				case CREATE_ROOM:
@@ -177,11 +178,11 @@ void Game::updateMenu()
 			_joinRoomMenu->update(_mouse);
 			switch (_joinRoomMenu->getButtonPressed())
 			{
-				//case 0: //Join button
+				case 0: //Join button
 					// create player with name and selected deck got by user input
 					// make connection with the server game room
 					break;
-				case 0: //Back button
+				case 1: //Back button
 					_gameState = MAIN_MENU;
 					break;
 			}

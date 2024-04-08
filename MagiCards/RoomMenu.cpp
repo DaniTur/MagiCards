@@ -45,7 +45,10 @@ void RoomMenu::handleTextInputEvent(SDL_TextInputEvent event)
 
 void RoomMenu::update(Mouse* mouse)
 {
-	_startButton->update(mouse);
+	if (_serverSide)
+	{
+		_startButton->update(mouse);
+	}
 	_backButton->update(mouse);
 }
 
@@ -54,7 +57,10 @@ void RoomMenu::render()
 	//render background
 	SDL_RenderCopy(_renderer, _background, &_sRect, &_dRect);
 
-	_startButton->render();
+	if (_serverSide)
+	{
+		_startButton->render();
+	}
 	_backButton->render();
 }
 
