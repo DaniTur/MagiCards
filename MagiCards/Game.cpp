@@ -111,6 +111,16 @@ void Game::handleEvents()
 					break;
 			}
 			break;
+		case SDL_KEYDOWN:
+			switch (_gameState)
+			{
+			case CREATE_ROOM:
+				_createRoomMenu->handleKeyDownEvent(event.key.keysym);
+				break;
+			case JOIN_ROOM:
+				_joinRoomMenu->handleKeyDownEvent(event.key.keysym);
+				break;
+			}
 		}
 	}
 }
@@ -165,7 +175,6 @@ void Game::updateMenu()
 					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
 					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
 					_gameState = GAME_ROOM;
-					std::cout << "Starting connection...\nPlayer: " << _playerHost->getName() << " joined with deck: " << _playerHost->getDeck() << std::endl;
 					break;
 				case 1: //Back button
 					_gameState = MAIN_MENU;

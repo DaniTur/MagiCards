@@ -62,13 +62,39 @@ void CreateRoomMenu::handleEvents()
 
 void CreateRoomMenu::handleTextInputEvent(SDL_TextInputEvent textEvent)
 {
-	if (_playerNameInput->isFocused())
+	if (isValidText(textEvent.text[0]))
 	{
-		_playerNameInput->addText(textEvent.text);
+		if (_playerNameInput->isFocused())
+		{
+			_playerNameInput->addText(textEvent.text);
+		}
+		else if (_deckSelector->isFocused())
+		{
+			_deckSelector->addText(textEvent.text);
+		}
+
 	}
-	else if (_deckSelector->isFocused())
+}
+
+bool CreateRoomMenu::isValidText(const char text) {
+	//check if character is not ASCII (non english characters)
+	if (static_cast<unsigned char>(text) > 127) return false;
+
+	if (isdigit(text) || isalpha(text)) return true;
+	else return false;
+
+	return true;
+}
+
+void CreateRoomMenu::handleKeyDownEvent(SDL_Keysym keysym)
+{
+	if (_playerNameInput->isFocused() && keysym.sym == SDLK_BACKSPACE) //delete button
 	{
-		_deckSelector->addText(textEvent.text);
+		_playerNameInput->deleteChar();
+	}
+	else if (_deckSelector->isFocused() && keysym.sym == SDLK_BACKSPACE)
+	{
+		_deckSelector->deleteChar();
 	}
 }
 

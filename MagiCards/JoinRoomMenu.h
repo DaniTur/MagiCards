@@ -28,6 +28,8 @@ public:
 
 	void handleTextInputEvent(SDL_TextInputEvent event) override;
 
+	void handleKeyDownEvent(SDL_Keysym keysym);
+
 private:
 	const int _MENU_TYPE = 2;
 
@@ -43,5 +45,7 @@ private:
 	TextInput* _deckSelector;
 	TextInput* _serverIpInput;
 	TextInput* _serverPortInput;
+
+	bool isValidText(const char text);
 };
 

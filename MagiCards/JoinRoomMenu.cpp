@@ -58,79 +58,41 @@ void JoinRoomMenu::handleEvents()
 	if (_joinButton->isSelected()) _buttonSelected = 0;
 	else if (_backButton->isSelected()) _buttonSelected = 1;
 	else _buttonSelected = -1;
-
-
-	//if (_playerNameInput->isSelected()) {
-	//	_playerNameInput->focus();
-
-	//	_deckSelector->unfocus();
-	//	_serverIpInput->unfocus();
-	//	_serverPortInput->unfocus();
-	//}
-	//else if (_deckSelector->isSelected())
-	//{
-	//	_deckSelector->focus();
-
-	//	_playerNameInput->unfocus();
-	//	_serverIpInput->unfocus();
-	//	_serverPortInput->unfocus();
-	//}
-	//else if (_serverIpInput->isSelected())
-	//{
-	//	_serverIpInput->focus();
-
-	//	_playerNameInput->unfocus();
-	//	_deckSelector->unfocus();
-	//	_serverPortInput->unfocus();
-	//}
-	//else if (_serverPortInput->isSelected())
-	//{
-	//	_serverPortInput->focus();
-
-	//	_playerNameInput->unfocus();
-	//	_deckSelector->unfocus();
-	//	_serverIpInput->unfocus();
-	//}
-	//else {
-	//	_playerNameInput->unfocus();
-	//	_deckSelector->unfocus();
-	//	_serverIpInput->unfocus();
-	//	_serverPortInput->unfocus();
-
-	//	if (_joinButton->isSelected()) _buttonSelected = 0;
-	//	else if (_backButton->isSelected()) _buttonSelected = 1;
-	//	else _buttonSelected = -1;
-	//}
 }
 
 void JoinRoomMenu::handleTextInputEvent(SDL_TextInputEvent textEvent)
 {
-	std::cout << "handletextinputevent" << std::endl;
-	for (TextInput* input : _textInputs)
+	if (isValidText(textEvent.text[0]))
 	{
-		if (input->isFocused())
+		for (TextInput* input : _textInputs)
 		{
-			input->addText(textEvent.text);
-			std::cout << "adding text to focused input" << std::endl;
+			if (input->isFocused())
+			{
+				input->addText(textEvent.text);
+			}
 		}
 	}
+}
 
-	//if (_playerNameInput->isFocused())
-	//{
-	//	_playerNameInput->addText(textEvent.text);
-	//}
-	//else if (_deckSelector->isFocused())
-	//{
-	//	_deckSelector->addText(textEvent.text);
-	//}
-	//else if (_serverIpInput->isFocused())
-	//{
-	//	_serverIpInput->addText(textEvent.text);
-	//}
-	//else if (_serverPortInput->isFocused()) 
-	//{
-	//	_serverPortInput->addText(textEvent.text);
-	//}
+bool JoinRoomMenu::isValidText(const char text) {
+	//check if character is not ASCII (non english characters)
+	if (static_cast<unsigned char>(text) > 127) return false;
+
+	if (isdigit(text) || isalpha(text)) return true;
+	else return false;
+
+	return true;
+}
+
+void JoinRoomMenu::handleKeyDownEvent(SDL_Keysym keysym) 
+{
+	for (TextInput* input : _textInputs)
+	{
+		if (input->isFocused() && keysym.sym == SDLK_BACKSPACE) //delete button
+		{
+			input->deleteChar();
+		}
+	}
 }
 
 void JoinRoomMenu::update(Mouse* mouse)
@@ -153,35 +115,6 @@ void JoinRoomMenu::update(Mouse* mouse)
 	}
 	_joinButton->update(mouse);
 	_backButton->update(mouse);
- 
-	//if (_playerNameInput->isFocused())
-	//{
-	//	_playerNameInput->startTextInput();
-	//}
-	//else if (_deckSelector->isFocused())
-	//{
-	//	_deckSelector->startTextInput();
-	//}
-	//else if (_serverIpInput->isFocused())
-	//{
-	//	_serverIpInput->startTextInput();
-	//}
-	//else if (_serverPortInput->isFocused())
-	//{
-	//	_serverPortInput->startTextInput();
-	//}
-	//else
-	//{
-	//	_playerNameInput->stopTextInput();
-	//	_deckSelector->stopTextInput();
-	//	_serverIpInput->stopTextInput();
-	//	_serverPortInput->stopTextInput();
-	//}
-
-	//_playerNameInput->update(mouse);
-	//_deckSelector->update(mouse);
-	//_serverIpInput->update(mouse);
-	//_serverPortInput->update(mouse);
 }
 
 void JoinRoomMenu::render()

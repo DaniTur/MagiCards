@@ -127,3 +127,8 @@ void TextInput::addText(const char* text)
 		_text += std::string(text);
 	}
 }
+
+void TextInput::deleteChar()
+{
+	_text = _text.substr(0, _text.size() - 1);
+}

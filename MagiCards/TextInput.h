@@ -35,6 +35,8 @@ public:
 
 	void addText(const char* text);
 
+	void deleteChar();
+
 private:
 	std::string _text = "";
 	std::string _defaultText = "";

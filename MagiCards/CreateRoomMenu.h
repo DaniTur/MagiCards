@@ -17,6 +17,8 @@ public:
 
 	void handleTextInputEvent(SDL_TextInputEvent event) override;
 
+	void handleKeyDownEvent(SDL_Keysym keysym);
+
 	void update(Mouse* mouse) override;
 
 	void render() override;
@@ -43,5 +45,7 @@ private:
 
 	TextInput* _playerNameInput;
 	TextInput* _deckSelector; //should be replaced by a proper selector
+
+	bool isValidText(const char text);
 };
 
