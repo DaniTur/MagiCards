@@ -2,6 +2,12 @@
 #include <SDL_image.h>
 #include <iostream>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 MainMenu::MainMenu()
 {
 }
@@ -11,7 +17,7 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer, "MainMenu.png");
+	_background = IMG_LoadTexture(_renderer,  + "D:\\MagiCardsProject\\MagiCards\\MagiCards\\MainMenu.png");
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -95,4 +101,3 @@ void MainMenu::clearPressedButton()
 void MainMenu::handleTextInputEvent(SDL_TextInputEvent event)
 {
 }
-

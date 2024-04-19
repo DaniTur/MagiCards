@@ -10,7 +10,7 @@ TextInput::TextInput()
 TextInput::TextInput(SDL_Renderer* renderer, int dRectX, int dRectY, std::string defaultText)
 	: _renderer(renderer), _defaultText(defaultText)
 {
-	_texture = IMG_LoadTexture(_renderer, "TextInput.png");
+	_texture = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\TextInput.png");
 
 	_sRect.x = 0;
 	_sRect.y = 0;
