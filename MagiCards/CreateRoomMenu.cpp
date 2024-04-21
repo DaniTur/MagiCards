@@ -11,7 +11,7 @@ CreateRoomMenu::CreateRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer, "CreateRoomMenu.png");
+	_background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\CreateRoomMenu.png");
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -120,8 +120,8 @@ void CreateRoomMenu::render()
 	//render background
 	SDL_RenderCopy(_renderer, _background, &_sRect, &_dRect);
 
-	_deckSelector->render();
 	_playerNameInput->render();
+	_deckSelector->render();
 	_createButton->render();
 	_backButton->render();
 }

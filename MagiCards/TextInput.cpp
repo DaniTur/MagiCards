@@ -22,7 +22,14 @@ TextInput::TextInput(SDL_Renderer* renderer, int dRectX, int dRectY, std::string
 	_dRect.w = 350;
 	_dRect.h = 30;
 
-	_textFont = TTF_OpenFont("OpenSans-Regular.ttf", _fontSize);
+	_dTextRect.w = 0;
+	_dTextRect.h = 0;
+	_dTextRect.x = 0;
+	_dTextRect.y = 0;
+
+	_surfaceText = NULL;
+
+	_textFont = TTF_OpenFont("D:\\MagiCardsProject\\MagiCards\\MagiCards\\OpenSans-Regular.ttf", _fontSize);
 }
 
 TextInput::~TextInput()
@@ -54,9 +61,9 @@ void TextInput::render()
 	if (_text.size() <= 0) {
 		//placeholder
 		_surfaceText = TTF_RenderText_Solid(_textFont, _defaultText.c_str(), {0, 0, 0, 102});
+
 		textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
-		
-		//adjust the text width/heigth by the surface width/heigth
+
 		_dTextRect.w = _surfaceText->w;
 		_dTextRect.h = _surfaceText->h;
 		_dTextRect.x = _dRect.x * 1.2;

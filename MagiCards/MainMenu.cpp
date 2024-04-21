@@ -17,7 +17,7 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer,  + "D:\\MagiCardsProject\\MagiCards\\MagiCards\\MainMenu.png");
+	_background = IMG_LoadTexture(_renderer,  "D:\\MagiCardsProject\\MagiCards\\MagiCards\\MainMenu.png");
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -27,6 +27,7 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	_dRect.y = 0;
 	_dRect.w = windowW;
 	_dRect.h = windowH;
+
 
 	_buttons[CREATE_ROOM_BTN] = new Button("Create Room", _renderer, 0, 0);
 	_buttons[CREATE_ROOM_BTN]->setWindowXY((windowW/2) - (250), 0 + 50);

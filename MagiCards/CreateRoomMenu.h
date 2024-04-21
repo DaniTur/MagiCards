@@ -36,15 +36,15 @@ public:
 private:
 	const int _MENU_TYPE = 1;
 
-	SDL_Texture* _background;
+	SDL_Texture* _background = NULL;
 	SDL_Rect _sRect, _dRect;
-	SDL_Renderer* _renderer;
+	SDL_Renderer* _renderer = NULL;
 
-	Button *_backButton, *_createButton;
+	Button *_backButton = NULL, *_createButton = NULL;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
 
-	TextInput* _playerNameInput;
-	TextInput* _deckSelector; //should be replaced by a proper selector
+	TextInput* _playerNameInput = NULL;
+	TextInput* _deckSelector = NULL; //should be replaced by a proper selector
 
 	bool isValidText(const char text);
 };
