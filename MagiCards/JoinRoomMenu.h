@@ -30,6 +30,14 @@ public:
 
 	void handleKeyDownEvent(SDL_Keysym keysym);
 
+	std::string getPlayerName();
+
+	int getSelectedDeck();
+
+	std::string getServerAddress();
+
+	int getServerPort();
+
 private:
 	const int _MENU_TYPE = 2;
 
@@ -41,11 +49,7 @@ private:
 	int _buttonSelected = -1; // default: -1 no buttonSelected
 
 	std::vector<TextInput*> _textInputs;
-	TextInput* _playerNameInput;
-	TextInput* _deckSelector;
-	TextInput* _serverIpInput;
-	TextInput* _serverPortInput;
-
+	enum {PLAYER_NAME, DECK_SELECTOR, SERVER_IP, SERVER_PORT};
 	bool isValidText(const char text);
 };
 

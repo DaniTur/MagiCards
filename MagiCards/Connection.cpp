@@ -1,14 +1,16 @@
 #include "Connection.h"
-#include "Ws2tcpip.h"
-#include <asio.hpp>
+#include <thread>
 
-;
+//testing 
+#include <mutex>
 
-Connection::Connection() : _socket(INVALID_SOCKET){
+std::mutex mtxServer, mtxClient;
+
+Connection::Connection() {
 }
 
 Connection::~Connection() {
-	clear();
+	//clear();
 }
 
 int Connection::startServerConnection() {
@@ -16,90 +18,87 @@ int Connection::startServerConnection() {
 	asio::io_context context; //connects with the system net interface
 	asio::error_code errCode;
 
+	// Give fake task to asio context to not finish
+	//::io_context::work idleWork(context);
+
+	//Run de context in a separate thread
+	//std::thread threadContext = std::thread([&]() {context.run(); });
+
 	unsigned short portNum = 30000;
 
 	asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), portNum);
 
 	//passive socket to listen for new connections
 	asio::ip::tcp::acceptor acceptor(context, endpoint);
+	std::cout << "[SERVER] server ready for incoming connections" << std::endl;
+	
+	mtxServer.lock();
+	_serverConnected = true;
+	mtxServer.unlock();
 
-	//WORD wVersionRequested;
- //   WSADATA wsaData;
- //   int wsaErr;
+	asio::ip::tcp::socket socket = acceptor.accept();
+	std::cout << "[SERVER] client accepted: " << socket.remote_endpoint() << std::endl;
 
-	//wVersionRequested = MAKEWORD(2, 2);
+	if (socket.is_open())
+	{
+		std::cout << "[SERVER] prepared for sending messages to client: " << socket.remote_endpoint() << std::endl;
+	}
 
-	//wsaErr = WSAStartup(wVersionRequested, &wsaData);
-	//if (wsaErr != 0) {
-	//	std::cout << "Error starting WSA with code" << wsaErr;
-	//	std::cout << "Windsock DLL not found" << std::endl;
-	//	return 1;
-	//}
+	//std::cout << "start server connection Acceptor creado" << std::endl;
 
-	//_socket = socket(AF_INET, SOCK_STREAM ,IPPROTO_TCP);
+	//acceptor.async_accept([&](std::error_code ec, asio::ip::tcp::socket s) {
+	//	if (!ec) {
+	//		// Llamar a la función de manejo cuando se acepta una conexión
+	//		handle_accept(s);
+	//	}
+	//	else {
+	//		std::cerr << "Error while accepting the connection: " << ec.message() << std::endl;
+	//	}
+	//});
 
-	//if (_socket == INVALID_SOCKET) {
-	//	std::cout << "Error at socket " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
+	//std::cout << "acceptor async_accept " << std::endl;
 
-	////Binding socketAddress info to the Socket
-	//sockaddr_in sockInfo;
-	//sockInfo.sin_family = AF_INET;
-	//sockInfo.sin_port = htons(30000);
-	//InetPton(AF_INET, L"127.0.0.1", &sockInfo.sin_addr.s_addr);
+	//context.run();
 
-	//int bindErr = bind(_socket, (SOCKADDR*)&sockInfo, sizeof(SOCKADDR_IN));
-	//if (bindErr == SOCKET_ERROR) {
-	//	std::cout << "Error at binding socket " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
+	//std::cout << "contexr. run acabado" << std::endl;
 
-	////Listen to the socket
-	//const int MAX_NCONNECTIONS = 1;
-	//int listenErr = listen(_socket, MAX_NCONNECTIONS);
-	//if (listenErr == SOCKET_ERROR) {
-	//	std::cout << "Error at listening socket " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
-
-	//std::pair<std::string, int> socketInfo = getConnectionInfo();
-	//std::cout << "Your IP address is: " << socketInfo.first << std::endl;
-	//std::cout << "Your port is: " << socketInfo.second << std::endl;
-	//std::cout << "Share this with your friends" << std::endl;
-	//std::cout << "Waiting for a client connection..." << std::endl;
-
-	////Accept connection, TODO: accepter class to handle incoming connections
-	//SOCKET acceptSocket = accept(_socket, NULL, NULL);
-	//if (acceptSocket == INVALID_SOCKET)
-	//{
-	//	std::cout << "Error with accept socket: " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
-
-	//std::cout << "Accepted new client!" << std::endl;
-
-	//TODO: Start client server send-receive data
-	// Receive data from client
+	////if (threadContext.joinable()) threadContext.join();
+	//_serverConnected = true;
 
 	return 0;
 }
 
-int Connection::startClientConnection(char const* ip, int port) {
+void Connection::acceptNextConnection() {
+	//_socket = _acceptor.accept();
+}
 
+void Connection:: handle_accept(asio::ip::tcp::socket& socket) {
+	std::cout << "Connection accepted" << std::endl;
+
+	std::cout << "from client: " << socket.remote_endpoint() << std::endl;
+	//asio::error_code errCode;
+
+	//std::string message = "Hello client, im the server!";
+	//socket.write_some(asio::buffer(message.data(), message.size()), errCode);
+
+	//if (errCode)
+	//{
+	//	std::cerr << "Error writing some data to the client: " << errCode.message() << std::endl;
+
+	//}
+}
+
+int Connection::startClientConnection(std::string ip, int port) {
+	std::cout << "conenction-> starting client connection (handshake)" << std::endl;
 	asio::io_context context; 
 
 	asio::error_code errCode;
 
-	//unsigned short portNum = 30000;
-	//asio::ip::address ipAddress = asio::ip::make_address(ip, errCode);
-	unsigned short portNum = 80;
-	asio::ip::address ipAddress = asio::ip::make_address("51.38.81.49", errCode);
-	if (errCode) 
+	unsigned short portNum = port;
+
+	asio::ip::address ipAddress = asio::ip::make_address(ip, errCode);
+
+	if (errCode)
 	{
 		std::cout << "Error making address from a std::string:\n" << errCode.message() << std::endl;
 	}
@@ -107,95 +106,86 @@ int Connection::startClientConnection(char const* ip, int port) {
 	//endpoint(ip, port) we want to connect to
 	asio::ip::tcp::endpoint endpoint(ipAddress, portNum);
 
-
 	// Create a socket, the context deliver the implementation
 	asio::ip::tcp::socket socket(context);
 
 	socket.connect(endpoint, errCode);
 
-	if (!errCode) {
-		std::cout << "Connected!" << std::endl;
+	if (!errCode) 
+	{
+		std::cout << "Connected to the server!" << std::endl;
+
+		//beging handleshake
+
+		mtxClient.lock(); //shared variable among threads needs mutex to be accesed to write
+		_clientConnected = true;
+		mtxClient.unlock();
+
 	}
 	else
 	{
 		std::cout << "Failed to connect to address:\n" << errCode.message() << std::endl;
 	}
 
-	//WORD wVersionRequested;
-	//WSADATA wsaData;
-	//int wsaErr;
+	////TODO: socket is open explota
+	//if (socket.is_open())
+	//{
+	//	std::string sRequest = 
+	//		"TEST\r\n"
+	//		"Player: paco\r\n"
+	//		"Deck: 1\r\n\r\n";
 
-	//wVersionRequested = MAKEWORD(2, 2);
+	//	socket.write_some(asio::buffer(sRequest.data(), sRequest.size()), errCode);
+	//	std::this_thread::sleep_for(std::chrono::seconds(1));
+	//	size_t bytes = socket.available();
+	//	std::cout << "Bytes available!" << bytes << std::endl;
 
-	//wsaErr = WSAStartup(wVersionRequested, &wsaData);
-	//if (wsaErr != 0) {
-	//	std::cout << "Error starting WSA with code" << wsaErr;
-	//	std::cout << "Windsock DLL not found" << std::endl;
-	//	return 1;
+	//	if (bytes > 0)
+	//	{
+	//		std::vector<char> vBuffer;
+	//		socket.read_some(asio::buffer(vBuffer.data(), vBuffer.size()), errCode);
+
+	//		for (auto c : vBuffer) {
+	//			std::cout << c;
+	//		}
+	//	}
 	//}
-
-	//_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	//if (_socket == INVALID_SOCKET) {
-	//	std::cout << "Error at socket " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
+	//else {
+	//	std::cout << "socket not open" << std::endl;
 	//}
-
-	//std::cout << "Socket created" << std::endl;
-		
-	//// Server socket info
-	//sockaddr_in serverSocketInfo;
-	//serverSocketInfo.sin_family = AF_INET;
-	//serverSocketInfo.sin_port = htons(30000);
-	////InetPton(AF_INET, (PCWSTR)ip, &serverSocketInfo.sin_addr.s_addr);
-	//InetPton(AF_INET, L"127.0.0.1", &serverSocketInfo.sin_addr.s_addr);
-
-	//int connectErr = connect(_socket, (sockaddr*)&serverSocketInfo, sizeof(serverSocketInfo));
-	//if (connectErr == SOCKET_ERROR) {
-	//	std::cout << "Error connecting to a server socket " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
-
-	//std::cout << "Connected to the server" << std::endl;
-
-	//char* buffer;
-	//std::memcpy(&buffer, "mefumoseris", sizeof(buffer));
-
-	//int sendErr = send(_socket, buffer, sizeof(buffer), NULL);
-	//if (sendErr == SOCKET_ERROR) {
-	//	std::cout << "Error sending data " << WSAGetLastError() << std::endl;
-	//	clear();
-	//	return 1;
-	//}
-
-	//std::cout << "Data sended" << std::endl;
 
 	return 0;
 }
 
-std::pair<std::string, int> Connection::getConnectionInfo() {
-	char ip[16];
-	unsigned int port;
-	sockaddr_in socketInfo;
-	socklen_t len = sizeof(socketInfo);
-
-	// Get IP address
-	getsockname(_socket, (sockaddr*)&socketInfo, &len);
-
-	// Get port
-	inet_ntop(AF_INET, &socketInfo.sin_addr, ip, sizeof(ip));
-	port = ntohs(socketInfo.sin_port);
-
-	std::pair<std::string, int> IPport;
-	IPport.first = ip;
-	IPport.second = port;
-
-	return IPport;
-}
 
 void Connection::clear() {
-	closesocket(_socket);
-	WSACleanup();
+}
+
+void Connection::closeServerConnection()
+{
+	//acceptor.close();
+}
+
+bool Connection::isServerConnected()
+{
+	mtxServer.lock(); //shared variable among threads needs mutex to be accesed to read
+	bool isconnected = _serverConnected;
+	mtxServer.unlock();
+
+	return isconnected;
+}
+
+void Connection::closeClientConnection()
+{
+
+	_clientConnected = false;
+}
+
+bool Connection::isClientConnected()
+{
+	mtxClient.lock(); //shared variable among threads needs mutex to be accesed to read
+	bool isconnected = _clientConnected;
+	mtxClient.unlock();
+
+	return isconnected;
 }

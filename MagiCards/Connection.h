@@ -1,7 +1,10 @@
 #pragma once
 #include <utility>
 #include <iostream>
-#include <winsock2.h>
+
+#include <asio.hpp>
+#include <asio/ts/buffer.hpp>
+#include <asio/ts/internet.hpp>
 
 class Connection
 {
@@ -11,13 +14,25 @@ public:
 
 	int startServerConnection();
 
-	int startClientConnection(char const *ip, int port);
+	void acceptNextConnection();
 
-	std::pair<std::string, int> getConnectionInfo();
+	int startClientConnection(std::string ip, int port);
 
 	void clear();
 
+	void closeServerConnection();
+
+	void closeClientConnection();
+
+	bool isServerConnected();
+
+	bool isClientConnected();
+
 private:
-	SOCKET _socket;
+	bool _serverConnected = false;
+	bool _clientConnected = false;
+	//std::shared_ptr<asio::ip::tcp::socket>  _socket; //serverside active socket to communicate with client
+
+	void handle_accept(asio::ip::tcp::socket& socket);
 };
 
