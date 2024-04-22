@@ -22,6 +22,11 @@ RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* player, bool serverSide)
 	_dRect.w = windowW;
 	_dRect.h = windowH;
 
+	_dTextRect.w = 0;
+	_dTextRect.h = 0;
+	_dTextRect.x = 0;
+	_dTextRect.y = 0;
+
 
 	_startButton = new Button("StartGame", _renderer, 0, 600);
 	_startButton->setWindowXY((windowW / 2) - (250), 450);
@@ -72,11 +77,11 @@ void RoomMenu::render()
 	if (_playerHostConnected)
 	{
 		_surfaceText = TTF_RenderText_Solid(_textFont, _playerHost->getName().c_str(), _textColor);
-		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
 		_dTextRect.w = _surfaceText->w;
 		_dTextRect.h = _surfaceText->h;
 		_dTextRect.x = 50;
 		_dTextRect.y = 50;
+		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
 		SDL_FreeSurface(_surfaceText);
 		SDL_RenderCopy(_renderer, _textTexture, NULL, &_dTextRect);
 	}
@@ -84,11 +89,11 @@ void RoomMenu::render()
 	if (_playerClientConnected)
 	{
 		_surfaceText = TTF_RenderText_Solid(_textFont, _playerClient->getName().c_str(), _textColor);
-		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
 		_dTextRect.w = _surfaceText->w;
 		_dTextRect.h = _surfaceText->h;
 		_dTextRect.x = 50;
 		_dTextRect.y = 80;
+		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
 		SDL_FreeSurface(_surfaceText);
 		SDL_RenderCopy(_renderer, _textTexture, NULL, &_dTextRect);
 	}
@@ -121,17 +126,6 @@ bool RoomMenu::serverSide()
 	return _serverSide;
 }
 
-void RoomMenu::startConnection()
-{
-	//_connection = new Connection();
-	//if (_serverSide)
-	//{
-	//	_connection->startServerConnection();
-	//}
-	//else {
-	//	_connection->startClientConnection(_playerClient->getAdress(), _playerClient->getPort());
-	//}
-}
 
 void RoomMenu::playerHostConnected()
 {

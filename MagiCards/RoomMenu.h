@@ -47,7 +47,7 @@ private:
 	Button *_backButton, *_startButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
 
-	TTF_Font* _textFont = TTF_OpenFont("OpenSans-Regular.ttf", 18);
+	TTF_Font* _textFont = TTF_OpenFont("D:\\MagiCardsProject\\MagiCards\\MagiCards\\OpenSans-Regular.ttf", 18);
 	SDL_Color _textColor = { 0, 0, 0 }; // black
 	SDL_Surface* _surfaceText;
 	SDL_Texture* _textTexture;
