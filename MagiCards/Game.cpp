@@ -3,6 +3,13 @@
 #include "Connection.h"
 #include "MainMenu.h" //also includes Menu
 #include "CreateRoomMenu.h" //TODO: refactor menu creations to MenuFactoryMethod
+#include "JoinRoomMenu.h"
+#include "DecksMenu.h"
+#include "RoomMenu.h"
+#include "Player.h"
+
+//testing
+#include "MainMenuINH.h"
 
 Game::Game() {
 	_window = NULL;
@@ -19,12 +26,14 @@ void Game::init()
 	initSDL();
 	createWindowAndRenderer();
 	SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
-	_isRunning = true;
 
-	//Main Menu
-	Menu* mainMenu = new MainMenu(_renderer);
-	_menuStack.push(mainMenu);
+	if (TTF_Init() == -1) std::cerr << "failed to initialize ttf" << std::endl;
+
+	_isRunning = true;
 	_activeMenu = true;
+
+	_mainMenu = new MainMenu(_renderer);
+	_gameState = MAIN_MENU;
 
 	static Mouse* m = new Mouse(_renderer);
 	_mouse = m;
@@ -42,37 +51,77 @@ bool Game::isRunning() {
 
 void Game::createWindowAndRenderer()
 {
-	SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_SHOWN, &_window, &_renderer);
+	SDL_CreateWindowAndRenderer(1280, 720, SDL_WINDOW_SHOWN, &_window, &_renderer);
 	SDL_SetWindowTitle(_window, "MagiCards");
 	if (_window == NULL || _renderer == NULL) throw SDLException(SDL_GetError());
 }
 
 void Game::handleEvents()
 {
-	SDL_GetMouseState(&(_mouse->getCursor()->x), &(_mouse->getCursor()->y));
-	_mouse->setTipXY(_mouse->getCursor()->x, _mouse->getCursor()->y);
-
 	SDL_Event event;
 	if (SDL_PollEvent(&event)) {
 		switch (event.type)
 		{
+		case SDL_MOUSEMOTION:
+			SDL_GetMouseState(&(_mouse->getCursor()->x), &(_mouse->getCursor()->y));
+			_mouse->setTipXY(_mouse->getCursor()->x, _mouse->getCursor()->y);
+			break;
+
 		case SDL_QUIT:
 			_isRunning = false;
+			break;
+
 		case SDL_MOUSEBUTTONUP:
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				if (_activeMenu)
+				switch (_gameState)
 				{
-					(_menuStack.top())->handleEvents();
+					case MAIN_MENU:
+						_mainMenu->handleEvents();
+						break;
 
+					case CREATE_ROOM:
+						_createRoomMenu->handleEvents();
+						break;
+
+					case GAME_ROOM:
+						_gameRoomMenu->handleEvents();
+						break;
+
+					case JOIN_ROOM:
+						_joinRoomMenu->handleEvents();
+						break;
+
+					case DECKS_MENU:
+						_decksMenu->handleEvents();
+						break;
 				}
-				
 			}
-			
-		default:
 			break;
-		}
 
+		case SDL_TEXTINPUT:
+			std::cout << "gamestate text input sdl" << _gameState << std::endl;
+			switch (_gameState)
+			{
+				case CREATE_ROOM:
+					_createRoomMenu->handleTextInputEvent(event.text);
+					break;
+				case JOIN_ROOM:
+					_joinRoomMenu->handleTextInputEvent(event.text);
+					break;
+			}
+			break;
+		case SDL_KEYDOWN:
+			switch (_gameState)
+			{
+			case CREATE_ROOM:
+				_createRoomMenu->handleKeyDownEvent(event.key.keysym);
+				break;
+			case JOIN_ROOM:
+				_joinRoomMenu->handleKeyDownEvent(event.key.keysym);
+				break;
+			}
+		}
 	}
 }
 
@@ -80,54 +129,121 @@ void Game::update()
 {
 	if (_activeMenu)
 	{
-		Menu* tmpMenu = NULL;
-		Menu* activeMenu = _menuStack.top();
-		activeMenu->update(_mouse);
+		updateMenu();
+	}
+	else
+	{
+		//update game
+	}
+}
 
-		switch (activeMenu->menuType())
-		{
-		case 0://Main menu
-			switch (activeMenu->getButtonPressed())
+void Game::updateMenu()
+{
+	switch (_gameState)
+	{
+		case MAIN_MENU:
+			_mainMenu->update(_mouse);
+			switch (_mainMenu->getButtonPressed())
 			{
-			case CREATE_ROOM:
-				tmpMenu = new CreateRoomMenu(_renderer);
-				_menuStack.push(tmpMenu);
-				std::cout << "Game update: Main Menu -> Create Room" << std::endl;
-				break;
-			case JOIN_ROOM:
-				std::cout << "Game update: Main Menu -> Join Room" << std::endl;
-				break;
-			case DECKS:
-				std::cout << "Game update: Main Menu -> Decks" << std::endl;
-				break;
-			case QUIT_GAME:
-				_isRunning = false;
-				std::cout << "Game update: Main Menu -> Quit game" << std::endl;
-				break;
-			}
-			break;
-		case 1: //Create Room menu
-			switch (activeMenu->getButtonPressed())
-			{
-			case 0: // Back button
-				std::cout << "Game update: Create Room Menu -> Back" << std::endl;
-				_menuStack.pop();
-				break;
-			}
-			break;
-		}
+				case 0:
+					_createRoomMenu = new CreateRoomMenu(_renderer);
+					_gameState = CREATE_ROOM;
+					break;
 
-		activeMenu->clearPressedButton();
+				case 1:
+					_joinRoomMenu = new JoinRoomMenu(_renderer);
+					_gameState = JOIN_ROOM;
+					break;
+
+				case 2:
+					_decksMenu = new DecksMenu(_renderer);
+					_gameState = DECKS_MENU;
+					break;
+
+				case 3:
+					_isRunning = false;
+					break;
+			}
+			_mainMenu->clearPressedButton();
+			break;
+
+		case CREATE_ROOM:
+			_createRoomMenu->update(_mouse);
+			switch (_createRoomMenu->getButtonPressed())
+			{
+				case 0: //Create button
+					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
+					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
+					_gameState = GAME_ROOM;
+					break;
+				case 1: //Back button
+					_gameState = MAIN_MENU;
+					break;
+			}
+			_createRoomMenu->clearPressedButton();
+			break;
+
+		case JOIN_ROOM:
+			_joinRoomMenu->update(_mouse);
+			switch (_joinRoomMenu->getButtonPressed())
+			{
+				case 0: //Join button
+					// create player with name and selected deck got by user input
+					// make connection with the server game room
+					break;
+				case 1: //Back button
+					_gameState = MAIN_MENU;
+					break;
+			}
+			_joinRoomMenu->clearPressedButton();
+			break;
+
+		//TODO: Differentiate between server side GameRoom and client side GameRoom
+		case GAME_ROOM:
+			_gameRoomMenu->update(_mouse);
+			switch (_gameRoomMenu->getButtonPressed())
+			{
+				case 0: // Create button
+					// create the game table
+					std::cout << "Creating game table..." << std::endl;
+					break;
+				case 1: // Back button
+					// close connection, server or client
+					if (_gameRoomMenu->serverSide()) _gameState = CREATE_ROOM;
+					else _gameState = JOIN_ROOM;
+					break;
+			}
+			_gameRoomMenu->clearPressedButton();
+			break;
 	}
 }
 
 void Game::render()
 {	
-	// if: there is a menu active, render it
-	// else: render the game
 	if (_activeMenu)
 	{
-		(_menuStack.top())->render();
+		switch (_gameState)
+		{
+			case MAIN_MENU:
+				_mainMenu->render();
+				break;
+
+			case CREATE_ROOM:
+				_createRoomMenu->render();
+				break;
+
+			case GAME_ROOM:
+				_gameRoomMenu->render();
+				break;
+
+			case JOIN_ROOM:
+				_joinRoomMenu->render();
+				break;
+
+			case DECKS_MENU:
+				_decksMenu->render();
+				break;
+		}
 	}
 	else
 	{
@@ -140,10 +256,6 @@ void Game::render()
 	SDL_RenderPresent(_renderer);
 	//SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
 	SDL_RenderClear(_renderer);
-	
-	//SDL_RenderClear(_renderer);
-	//renderizar imagenes
-	//SDL_RenderPresent(_renderer); //muestra o "pinta" el render
 
 }
 

@@ -1,23 +1,21 @@
 #pragma once
 #include "Menu.h"
-#include "Mouse.h"
 #include "Button.h"
-#include "TextInput.h"
+#include "Player.h"
 
-class CreateRoomMenu : public Menu
+class RoomMenu :  public Menu
 {
 public:
-	CreateRoomMenu();
+	RoomMenu();
 
-	CreateRoomMenu(SDL_Renderer* renderer);
+	RoomMenu(SDL_Renderer* renderer, Player* playerHost, bool serverSide);
 
-	~CreateRoomMenu();
+	~RoomMenu();
 
+	// Inherited via Menu
 	void handleEvents() override;
 
 	void handleTextInputEvent(SDL_TextInputEvent event) override;
-
-	void handleKeyDownEvent(SDL_Keysym keysym);
 
 	void update(Mouse* mouse) override;
 
@@ -29,23 +27,19 @@ public:
 
 	void clearPressedButton() override;
 
-	std::string getPlayerName();
-
-	int getSelectedDeck();
+	bool serverSide();
 
 private:
-	const int _MENU_TYPE = 1;
+	const int _MENU_TYPE = 4;
 
 	SDL_Texture* _background;
 	SDL_Rect _sRect, _dRect;
 	SDL_Renderer* _renderer;
 
-	Button *_backButton, *_createButton;
+	Button *_backButton, *_startButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
 
-	TextInput* _playerNameInput;
-	TextInput* _deckSelector; //should be replaced by a proper selector
-
-	bool isValidText(const char text);
+	Player *_playerHost, *_playerClient;
+	bool _serverSide = false;
 };
 
