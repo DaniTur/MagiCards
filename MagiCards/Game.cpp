@@ -124,8 +124,8 @@ void Game::handleEvents()
 	}
 }
 
-std::queue<int> netEvents;
-bool serverReady = false;
+//std::queue<int> netEvents;
+//bool serverReady = false;
 
 void Game::update()
 {
@@ -152,24 +152,24 @@ void Game::update()
 	//}
 }
 
-void Game::networkUpdate(int e)
-{
-	if (e == 0 && !_connection->isServerConnected()) //start server connection
-	{
-		_connection->startServerConnection();
-		serverReady = true;
-		std::cout << "waiting for next client connection..." << std::endl;
-		_connection->acceptNextConnection();
-	}
-
-	//for (size_t i = 0; i < 5; i++)
-	//{
-	//	std::cout << "processing net event: " << e << std::endl;
-	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	//}
-	//std::cout << "net thread finish" << std::endl;
-	
-}
+//void Game::networkUpdate(int e)
+//{
+//	if (e == 0 && !_connection->isServerConnected()) //start server connection
+//	{
+//		_connection->startServerConnection();
+//		serverReady = true;
+//		std::cout << "waiting for next client connection..." << std::endl;
+//		_connection->acceptNextConnection();
+//	}
+//
+//	//for (size_t i = 0; i < 5; i++)
+//	//{
+//	//	std::cout << "processing net event: " << e << std::endl;
+//	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//	//}
+//	//std::cout << "net thread finish" << std::endl;
+//	
+//}
 
 
 void Game::updateMenu()

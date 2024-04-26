@@ -18,12 +18,6 @@ int Connection::startServerConnection() {
 	asio::io_context context; //connects with the system net interface
 	asio::error_code errCode;
 
-	// Give fake task to asio context to not finish
-	//::io_context::work idleWork(context);
-
-	//Run de context in a separate thread
-	//std::thread threadContext = std::thread([&]() {context.run(); });
-
 	unsigned short portNum = 30000;
 
 	asio::ip::tcp::endpoint endpoint(asio::ip::tcp::v4(), portNum);
@@ -43,6 +37,8 @@ int Connection::startServerConnection() {
 	{
 		std::cout << "[SERVER] prepared for sending messages to client: " << socket.remote_endpoint() << std::endl;
 	}
+
+	//TODO: hacer que cuando se cierra una aplicacion o se pulsa Back con una conexión abierta se desconecte correctamente, comprobar conexión cada X tiempo
 
 	//std::cout << "start server connection Acceptor creado" << std::endl;
 
