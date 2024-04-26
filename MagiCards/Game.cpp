@@ -1,20 +1,18 @@
 #include "Game.h"
 #include "SDLException.h"
 #include "Connection.h"
-#include "MainMenu.h" //also includes Menu
-#include "CreateRoomMenu.h" //TODO: refactor menu creations to MenuFactoryMethod
+#include "MainMenu.h"
+#include "CreateRoomMenu.h"
 #include "JoinRoomMenu.h"
 #include "DecksMenu.h"
 #include "RoomMenu.h"
 #include "Player.h"
+#include <SDL_image.h>
 
-//testing
-#include "MainMenuINH.h"
 
 Game::Game() {
-	_window = NULL;
-	_renderer = NULL;
 	_isRunning = true;
+	_connection = new Connection();
 }
 
 Game::~Game()
@@ -100,7 +98,7 @@ void Game::handleEvents()
 			break;
 
 		case SDL_TEXTINPUT:
-			std::cout << "gamestate text input sdl" << _gameState << std::endl;
+			
 			switch (_gameState)
 			{
 				case CREATE_ROOM:
@@ -111,6 +109,7 @@ void Game::handleEvents()
 					break;
 			}
 			break;
+
 		case SDL_KEYDOWN:
 			switch (_gameState)
 			{
@@ -125,6 +124,9 @@ void Game::handleEvents()
 	}
 }
 
+//std::queue<int> netEvents;
+//bool serverReady = false;
+
 void Game::update()
 {
 	if (_activeMenu)
@@ -133,9 +135,42 @@ void Game::update()
 	}
 	else
 	{
+		// go to Preparing game menu
+		//prepareGameTable(); //execute funcion on a new thread
+		// check connection with the other user, if something wrong show connection error panel to user
+		// create the game table
+		//obtain 
 		//update game
 	}
+	//std::queue<int> netEvents;
+	//if (!netEvents.empty())
+	//{
+	//	int poped = netEvents.front();
+	//	netEvents.pop();
+	//	std::thread netThread([&]() { networkUpdate(poped); });
+	//	netThread.detach();
+	//}
 }
+
+//void Game::networkUpdate(int e)
+//{
+//	if (e == 0 && !_connection->isServerConnected()) //start server connection
+//	{
+//		_connection->startServerConnection();
+//		serverReady = true;
+//		std::cout << "waiting for next client connection..." << std::endl;
+//		_connection->acceptNextConnection();
+//	}
+//
+//	//for (size_t i = 0; i < 5; i++)
+//	//{
+//	//	std::cout << "processing net event: " << e << std::endl;
+//	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//	//}
+//	//std::cout << "net thread finish" << std::endl;
+//	
+//}
+
 
 void Game::updateMenu()
 {
@@ -172,23 +207,65 @@ void Game::updateMenu()
 			switch (_createRoomMenu->getButtonPressed())
 			{
 				case 0: //Create button
+				{
+					if (!_connection->isServerConnected())
+					{
+						std::thread t([&]() {_connection->startServerConnection(); });
+						t.detach(); // release the thread from parent as a daemon process
+					}
 					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
 					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
 					_gameState = GAME_ROOM;
 					break;
+				}
 				case 1: //Back button
+					delete _gameRoomMenu;
 					_gameState = MAIN_MENU;
 					break;
 			}
 			_createRoomMenu->clearPressedButton();
 			break;
 
+		case LOADING_SCREEN: // from joinRoom
+		{
+			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+
+			if (!_connection->isClientConnected())
+			{
+				std::thread t([&]() {
+					_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+					});
+				t.detach(); // release the thread from parent as a daemon process
+			}
+			else {
+				_gameRoomMenu->playerClientConnected();
+				_gameState = GAME_ROOM;
+			}
+
+			break;
+		}
+
 		case JOIN_ROOM:
 			_joinRoomMenu->update(_mouse);
 			switch (_joinRoomMenu->getButtonPressed())
 			{
 				case 0: //Join button
-					// create player with name and selected deck got by user input
+					
+					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
+					//_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+					//try
+					//{
+					//	_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+					//	_gameRoomMenu->playerClientConnected();
+					//}
+					//catch (const std::exception&)
+					//{
+					//	std::cout << "Connection Exception error: " << std::endl;
+					//	//renderErrorMessage() on top of the current menu
+					//}
+					_loadingScreen = new LoadingScreen(_renderer, "Creating game room...");
+					_gameState = LOADING_SCREEN;
+					//_gameState = GAME_ROOM;
 					// make connection with the server game room
 					break;
 				case 1: //Back button
@@ -198,19 +275,32 @@ void Game::updateMenu()
 			_joinRoomMenu->clearPressedButton();
 			break;
 
-		//TODO: Differentiate between server side GameRoom and client side GameRoom
 		case GAME_ROOM:
 			_gameRoomMenu->update(_mouse);
+			if (_connection->isServerConnected())
+			{
+				_gameRoomMenu->playerHostConnected();
+			}
+			if (_connection->isClientConnected())
+			{
+				_gameRoomMenu->playerClientConnected();
+			}
 			switch (_gameRoomMenu->getButtonPressed())
 			{
-				case 0: // Create button
-					// create the game table
-					std::cout << "Creating game table..." << std::endl;
+				case 0: // Play button
+					//_loadingScreen = new PreparingGameTableScreen(_renderer);
+					//_activeMenu = false;
+					//_gameState = PREPARING_GAMETABLE;
 					break;
 				case 1: // Back button
 					// close connection, server or client
-					if (_gameRoomMenu->serverSide()) _gameState = CREATE_ROOM;
-					else _gameState = JOIN_ROOM;
+					if (_gameRoomMenu->serverSide()) {
+						_gameState = CREATE_ROOM;
+					}
+					else {
+						_connection->closeClientConnection();
+						_gameState = JOIN_ROOM;
+					} 
 					break;
 			}
 			_gameRoomMenu->clearPressedButton();
@@ -243,11 +333,14 @@ void Game::render()
 			case DECKS_MENU:
 				_decksMenu->render();
 				break;
+			case LOADING_SCREEN:
+				_loadingScreen->render();
+				break;
 		}
 	}
 	else
 	{
-		// render game
+		// render game table
 		SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
 	}
 
@@ -256,12 +349,11 @@ void Game::render()
 	SDL_RenderPresent(_renderer);
 	//SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
 	SDL_RenderClear(_renderer);
-
 }
 
 void Game::release()
 {
-	_connection.clear();
+	_connection->clear();
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();

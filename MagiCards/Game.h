@@ -5,15 +5,16 @@
 #include <stack>
 #include "Menu.h"
 #include "Mouse.h"
-
-//testing
 #include "MainMenu.h"
 #include "CreateRoomMenu.h"
 #include "RoomMenu.h"
 #include "JoinRoomMenu.h"
 #include "DecksMenu.h"
+#include "PreparingGameTableScreen.h"
+#include "Connection.h"
+#include "LoadingScreen.h"
 
-enum gameStates {MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU};
+enum gameStates { MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU, LOADING_SCREEN, PREPARING_GAMETABLE };
 
 class Game
 {
@@ -47,24 +48,22 @@ private:
 private:
 	bool _isRunning;
 
-	SDL_Window* _window;
-	SDL_Renderer* _renderer;
+	SDL_Window* _window = NULL;
+	SDL_Renderer* _renderer = NULL;
 
-	Connection _connection;
-
-	std::stack<Menu*> _menuStack;
-	//std::stack<MenuINH*> _menuINHStack;
 	bool _activeMenu = false;
 
-	Mouse* _mouse;
+	Mouse* _mouse = NULL;
 
 	int _gameState = -1;
-	MainMenu* _mainMenu;
-	CreateRoomMenu* _createRoomMenu;
-	RoomMenu* _gameRoomMenu;
-	JoinRoomMenu* _joinRoomMenu;
-	DecksMenu* _decksMenu;	
-	
-	Player *_playerHost, *_playerClient;
+	MainMenu* _mainMenu = NULL;
+	CreateRoomMenu* _createRoomMenu = NULL;
+	RoomMenu* _gameRoomMenu = NULL;
+	JoinRoomMenu* _joinRoomMenu = NULL;
+	DecksMenu* _decksMenu = NULL;
+	LoadingScreen* _loadingScreen = NULL;
+
+	Player *_playerHost = NULL, *_playerClient = NULL;
+	Connection* _connection = NULL;
 };
 

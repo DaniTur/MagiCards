@@ -11,7 +11,7 @@ JoinRoomMenu::JoinRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-    _background = IMG_LoadTexture(_renderer, "JoinRoomMenu.png");
+    _background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\JoinRoomMenu.png");
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -78,8 +78,8 @@ bool JoinRoomMenu::isValidText(const char text) {
 	//check if character is not ASCII (non english characters)
 	if (static_cast<unsigned char>(text) > 127) return false;
 
-	if (isdigit(text) || isalpha(text)) return true;
-	else return false;
+	if (!isdigit(text) && !isalpha(text) 
+		&& (static_cast<unsigned char>(text) != 46)) return false;
 
 	return true;
 }
@@ -93,6 +93,26 @@ void JoinRoomMenu::handleKeyDownEvent(SDL_Keysym keysym)
 			input->deleteChar();
 		}
 	}
+}
+
+std::string JoinRoomMenu::getPlayerName()
+{
+	return _textInputs[PLAYER_NAME]->getText();
+}
+
+int JoinRoomMenu::getSelectedDeck()
+{
+	return std::stoi(_textInputs[DECK_SELECTOR]->getText());
+}
+
+std::string JoinRoomMenu::getServerAddress()
+{
+	return _textInputs[SERVER_IP]->getText();
+}
+
+int JoinRoomMenu::getServerPort()
+{
+	return stoi(_textInputs[SERVER_PORT]->getText());
 }
 
 void JoinRoomMenu::update(Mouse* mouse)

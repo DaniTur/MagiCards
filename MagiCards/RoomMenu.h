@@ -2,6 +2,8 @@
 #include "Menu.h"
 #include "Button.h"
 #include "Player.h"
+#include "Connection.h"
+#include <SDL_ttf.h>
 
 class RoomMenu :  public Menu
 {
@@ -29,6 +31,12 @@ public:
 
 	bool serverSide();
 
+	void startConnection();
+
+	void playerHostConnected();
+
+	void playerClientConnected();
+
 private:
 	const int _MENU_TYPE = 4;
 
@@ -39,7 +47,21 @@ private:
 	Button *_backButton, *_startButton;
 	int _buttonSelected = -1; // default: -1 no buttonSelected
 
+	TTF_Font* _textFont = TTF_OpenFont("D:\\MagiCardsProject\\MagiCards\\MagiCards\\OpenSans-Regular.ttf", 18);
+	SDL_Color _textColor = { 0, 0, 0 }; // black
+	SDL_Surface* _surfaceText;
+	SDL_Texture* _textTexture;
+	SDL_Rect _dTextRect;
+
 	Player *_playerHost, *_playerClient;
 	bool _serverSide = false;
+	Connection* _connection;
+
+	bool _playerHostConnected = false;
+	bool _playerClientConnected = false;
+
+	//client info about server
+	std::string endpointAdress;
+	int endpointPort;
 };
 

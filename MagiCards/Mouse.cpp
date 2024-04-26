@@ -3,7 +3,7 @@
 
 Mouse::Mouse(SDL_Renderer * renderer) : _renderer(renderer)
 {
-	_texture = IMG_LoadTexture(_renderer, "Mouse.png");
+	_texture = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\Mouse.png");
 	
 	_cursor.x = 0;
 	_cursor.y = 0;
