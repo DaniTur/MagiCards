@@ -37,6 +37,8 @@ public:
 
 	void playerClientConnected();
 
+	void playerHostDisconnected();
+
 private:
 	const int _MENU_TYPE = 4;
 

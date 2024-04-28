@@ -12,7 +12,6 @@
 
 Game::Game() {
 	_isRunning = true;
-	_connection = new Connection();
 }
 
 Game::~Game()
@@ -191,19 +190,19 @@ void Game::updateMenu()
 
 		case LOADING_SCREEN: // from joinRoom
 		{
-			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+			//_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 
-			if (!_connection->isClientConnected())
-			{
-				std::thread t([&]() {
-					_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-					});
-				t.detach(); // release the thread from parent as a daemon process
-			}
-			else {
-				_gameRoomMenu->playerClientConnected();
-				_gameState = GAME_ROOM;
-			}
+			//if (!_connection->isClientConnected())
+			//{
+			//	std::thread t([&]() {
+			//		_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+			//		});
+			//	t.detach(); // release the thread from parent as a daemon process
+			//}
+			//else {
+			//	_gameRoomMenu->playerClientConnected();
+			//	_gameState = GAME_ROOM;
+			//}
 
 			break;
 		}
@@ -243,6 +242,7 @@ void Game::updateMenu()
 
 			if (_gameRoomMenu->serverSide() && !netServer_->IsRunning()) {
 				netServer_->Start();
+				_gameRoomMenu->playerHostConnected();
 			}
 
 			switch (_gameRoomMenu->getButtonPressed())
@@ -257,10 +257,10 @@ void Game::updateMenu()
 					// close connection, server or client
 					if (_gameRoomMenu->serverSide()) {
 						netServer_->Stop();
+						_gameRoomMenu->playerHostDisconnected();
 						_gameState = CREATE_ROOM;
 					}
 					else {
-						_connection->closeClientConnection();
 						_gameState = JOIN_ROOM;
 					} 
 					break;
@@ -315,7 +315,6 @@ void Game::render()
 
 void Game::release()
 {
-	_connection->clear();
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();

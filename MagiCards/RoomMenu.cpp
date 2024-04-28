@@ -135,3 +135,8 @@ void RoomMenu::playerHostConnected()
 void RoomMenu::playerClientConnected() {
 	_playerClientConnected = true;
 }
+
+void RoomMenu::playerHostDisconnected()
+{
+	_playerHostConnected = false;
+}

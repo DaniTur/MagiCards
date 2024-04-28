@@ -22,7 +22,7 @@ bool NetServer::Start()
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "[SERVER] Exception: " << e.what() << std::endl;
+		std::cerr << "[SERVER] Exception on Start(): " << e.what() << std::endl;
 		return false;
 	}
 
@@ -40,6 +40,7 @@ void NetServer::Stop()
 	{
 		contextThread_.join();
 	}
+	std::cout << "[SERVER] Stopped." << std::endl;
 	running_ = false;
 }
 
