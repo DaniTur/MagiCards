@@ -16,6 +16,10 @@ public:
 	// Asynchronous
 	void WaitForClientConnection(); 
 
+	void OnMessageReceived();
+
+	void MessageClient(std::string message);
+
 	bool ConnectionIsValid(std::shared_ptr<NetConnection> connection);
 
 	bool IsRunning();

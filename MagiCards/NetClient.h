@@ -17,6 +17,8 @@ public:
 	
 	bool IsConnected();
 
+	void GrabSomeData();
+
 private:
 	
 	asio::io_context context_;

@@ -49,37 +49,67 @@ void NetServer::WaitForClientConnection()
 	acceptor_.async_accept([this](std::error_code errorCode, asio::ip::tcp::socket socket) {
 		if (!errorCode)
 		{
-			std::cout << "[SERVER] New Client connected: " << socket.remote_endpoint() << std::endl;
+			std::cout << "[SERVER] New Client connection: " << socket.remote_endpoint() << std::endl;
+			
+			// Check if server is full of connections, for now 1 maximum client connection allowed
+			if (!clientConnection_)
+			{
+				std::shared_ptr<NetConnection> newConnection = std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket));
 
-			std::shared_ptr<NetConnection> newConnection = std::make_shared<NetConnection>(context_);
-
-			if (ConnectionIsValid(newConnection)) {
-				std::cout << "[SERVER] Connection from: " << socket.remote_endpoint() << " Approved." << std::endl;
-				clientConnection_ = std::move(newConnection);
+				if (ConnectionIsValid(newConnection)) {
+					std::cout << "[SERVER] Connection Approved." << std::endl;
+					clientConnection_ = std::move(newConnection);
+					clientConnection_->Send("[SERVER] connection approved.");
+				}
+				else
+				{
+					// newConnection will go out of scope and will be automaticaly deleted(because of shared_ptr)
+					std::cout << "[SERVER] Connection Denied." << std::endl;
+				}
 			}
 			else
 			{
-				// newConnection will go out of scope and will be automaticaly deleted(because of shared_ptr)
-				std::cout << "[SERVER] Connection from: " << socket.remote_endpoint() << " Denied." << std::endl;
+				std::cout << "[SERVER] Connection Denied, server is full" << std::endl;
+				MessageClient("[SERVER] Connection Denied, server is full");
 			}
-			// Uncomment for handling multiple client connetecions, handle connections in a container,
-			// otherwise the last conenction will replace the previous.
-			//WaitForClientConnection(); 
 		}
 		else
 		{
 			std::cout << "[SERVER] New Connection Error: " << errorCode.message() << std::endl;
 		}
+
+		// For handling multiple client connetecions, a connections container is needed,
+		// otherwise the last conenction will replace the previous one.
+		WaitForClientConnection(); 
 	});
 }
 
+
 bool NetServer::ConnectionIsValid(std::shared_ptr<NetConnection> connection)
 {
+	//TODO: Implement the handshake
 	// Check if the connection is valid(bad source endpoint, banned address, etc)
 	return true;
+}
+
+void NetServer::OnMessageReceived()
+{
+}
+
+void NetServer::MessageClient(std::string message)
+{
+	if (clientConnection_ && clientConnection_->IsConnected())
+	{
+		clientConnection_->Send(message);
+	}
+	else
+	{
+		clientConnection_.reset();
+	}
 }
 
 bool NetServer::IsRunning()
 {
 	return running_;
 }
+

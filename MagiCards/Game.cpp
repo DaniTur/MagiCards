@@ -16,6 +16,7 @@ Game::Game() {
 
 Game::~Game()
 {
+	release();
 }
 
 void Game::init()
@@ -188,47 +189,15 @@ void Game::updateMenu()
 			_createRoomMenu->clearPressedButton();
 			break;
 
-		case LOADING_SCREEN: // from joinRoom
-		{
-			//_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-
-			//if (!_connection->isClientConnected())
-			//{
-			//	std::thread t([&]() {
-			//		_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-			//		});
-			//	t.detach(); // release the thread from parent as a daemon process
-			//}
-			//else {
-			//	_gameRoomMenu->playerClientConnected();
-			//	_gameState = GAME_ROOM;
-			//}
-
-			break;
-		}
-
 		case JOIN_ROOM:
 			_joinRoomMenu->update(_mouse);
 			switch (_joinRoomMenu->getButtonPressed())
 			{
 				case 0: //Join button
-					
 					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
-					//_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-					//try
-					//{
-					//	_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-					//	_gameRoomMenu->playerClientConnected();
-					//}
-					//catch (const std::exception&)
-					//{
-					//	std::cout << "Connection Exception error: " << std::endl;
-					//	//renderErrorMessage() on top of the current menu
-					//}
+					netClient_ = new NetClient();
 					_loadingScreen = new LoadingScreen(_renderer, "Creating game room...");
 					_gameState = LOADING_SCREEN;
-					//_gameState = GAME_ROOM;
-					// make connection with the server game room
 					break;
 				case 1: //Back button
 					_gameState = MAIN_MENU;
@@ -236,6 +205,27 @@ void Game::updateMenu()
 			}
 			_joinRoomMenu->clearPressedButton();
 			break;
+
+		case LOADING_SCREEN: // from joinRoom
+		{
+			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected())
+			{
+				bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+				if (!connectionStatus)
+				{
+					std::cout << "Connection to the server failed." << std::endl;
+				}
+				else
+				{
+					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+					_gameRoomMenu->playerClientConnected();
+					_gameState = GAME_ROOM;
+				}
+			}
+
+			break;
+		}
 
 		case GAME_ROOM:
 			_gameRoomMenu->update(_mouse);
@@ -261,6 +251,8 @@ void Game::updateMenu()
 						_gameState = CREATE_ROOM;
 					}
 					else {
+						netClient_->Disconnect();
+						_gameRoomMenu->playerClientDisconnected();
 						_gameState = JOIN_ROOM;
 					} 
 					break;
@@ -315,6 +307,9 @@ void Game::render()
 
 void Game::release()
 {
+	if (netClient_ != nullptr) delete netClient_;
+	if (netServer_ != nullptr) delete netServer_;
+
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();

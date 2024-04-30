@@ -31,13 +31,13 @@ public:
 
 	bool serverSide();
 
-	void startConnection();
-
 	void playerHostConnected();
 
 	void playerClientConnected();
 
 	void playerHostDisconnected();
+
+	void playerClientDisconnected();
 
 private:
 	const int _MENU_TYPE = 4;
