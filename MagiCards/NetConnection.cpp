@@ -20,7 +20,6 @@ void NetConnection::ConnectToServer(asio::ip::tcp::endpoint endpoint)
 		socket_.async_connect(endpoint, [this](std::error_code errorCode) {
 			if (!errorCode)
 			{
-				std::cout << "reading header..." << std::endl;
 				ReadHeader();
 			}
 		});
@@ -70,8 +69,6 @@ void NetConnection::ReadHeader()
 			std::cout << "bytesLength: " << bytesLength << std::endl;
 			if (!errorCode)
 			{
-				std::cout << "primer caracter del header: " << sBuffer[1] << std::endl;
-				std::cout << "bytesLength: " << bytesLength << std::endl;
 				if (bytesLength > 0)
 				{
 					for (int i = 0; i < bytesLength; i++)
@@ -85,24 +82,6 @@ void NetConnection::ReadHeader()
 				std::cout << "Error reading header, error code: " << errorCode  << std::endl;
 			}
 		});
-	//socket_.async_read_some(asio::buffer(sBuffer.data(), sBuffer.size()), 
-	//	[this](std::error_code errorCode, std::size_t bytes) {
-	//		if (!errorCode)
-	//		{
-	//			if (bytes > 0)
-	//			{
-	//				for (int i = 0; i < bytes; i++)
-	//				{
-	//					std::cout << sBuffer[i];
-	//				}
-	//			}
-	//		}
-	//		else
-	//		{
-	//			std::cout << "Error reading header, error code: " << errorCode << std::endl;
-	//		}
-
-	//	});
 }
 
 void NetConnection::WriteHeader(std::string header)
