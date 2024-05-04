@@ -59,7 +59,12 @@ void NetServer::WaitForClientConnection()
 				if (ConnectionIsValid(newConnection)) {
 					std::cout << "[SERVER] Connection Approved." << std::endl;
 					clientConnection_ = std::move(newConnection);
-					clientConnection_->Send("[SERVER] connection approved.");
+					
+					Message welcomeMessage;
+					welcomeMessage.header.id = MessageType::WelcomeClient;
+					welcomeMessage << "[SERVER] connection approved.";
+
+					MessageClient(welcomeMessage);
 				}
 				else
 				{
@@ -69,8 +74,12 @@ void NetServer::WaitForClientConnection()
 			}
 			else
 			{
+				Message errorMessage;
+				errorMessage.header.id = MessageType::Error;
+				errorMessage << "[SERVER] Connection Denied, server is full";
+
 				std::cout << "[SERVER] Connection Denied, server is full" << std::endl;
-				MessageClient("[SERVER] Connection Denied, server is full");
+				MessageClient(errorMessage);
 			}
 		}
 		else
@@ -96,7 +105,7 @@ void NetServer::OnMessageReceived()
 {
 }
 
-void NetServer::MessageClient(std::string message)
+void NetServer::MessageClient(Message message)
 {
 	if (clientConnection_ && clientConnection_->IsConnected())
 	{

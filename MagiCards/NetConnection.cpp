@@ -47,12 +47,17 @@ bool NetConnection::IsConnected()
 	return socket_.is_open();
 }
 
-void NetConnection::Send(std::string message)
+void NetConnection::Send(const Message message)
 {
 	asio::post(context_, 
 		[this, message] 
 		{
-			WriteHeader(message);
+			bool bWritingMessage = !messageOutQueue.empty();
+			messageOutQueue.push(message);
+			if (!bWritingMessage)
+			{
+				WriteHeader();
+			}
 		});
 }
 
@@ -62,20 +67,13 @@ void NetConnection::ReadHeader()
 {
 	// asio::async_read() needs a buffer with the EXACT same size as the message length sended, otherwise
 	// the function wont work, and no exception is called.
-	asio::async_read(socket_, asio::buffer(sBuffer.data(), sBuffer.size()),
+	asio::async_read(socket_, asio::buffer(&messageInTmp.header, sizeof(MessageHeader)),
 		[this](std::error_code errorCode, std::size_t bytesLength) 
 		{
-			std::cout << "primer caracter del header: " << sBuffer[0] << std::endl;
-			std::cout << "bytesLength: " << bytesLength << std::endl;
 			if (!errorCode)
 			{
-				if (bytesLength > 0)
-				{
-					for (int i = 0; i < bytesLength; i++)
-					{
-						std::cout << sBuffer[i];
-					}
-				}
+				std::cout << messageInTmp;
+				//TODO: mirar qué hacer con los mensajes recibidos, si ponerlos en una cola para procesarlos en server.update() o procesarlos cuando llegan aquí
 			}
 			else
 			{
@@ -84,10 +82,10 @@ void NetConnection::ReadHeader()
 		});
 }
 
-void NetConnection::WriteHeader(std::string header)
+void NetConnection::WriteHeader()
 {
-	std::vector<char> hBuffer(header.begin(), header.end());
-	asio::async_write(socket_, asio::buffer(hBuffer.data(), hBuffer.size()),
+	//std::vector<char> hBuffer(header.begin(), header.end());
+	asio::async_write(socket_, asio::buffer(&messageOutQueue.front().header, sizeof(MessageHeader)),
 		[this](std::error_code errorCode, std::size_t length) {
 			if (!errorCode)
 			{

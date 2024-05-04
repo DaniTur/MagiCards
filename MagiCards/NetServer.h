@@ -1,6 +1,7 @@
 #pragma once
 #include <asio.hpp>
 #include "NetConnection.h"
+#include "Message.h"
 
 class NetServer
 {
@@ -18,7 +19,7 @@ public:
 
 	void OnMessageReceived();
 
-	void MessageClient(std::string message);
+	void MessageClient(Message message);
 
 	bool ConnectionIsValid(std::shared_ptr<NetConnection> connection);
 

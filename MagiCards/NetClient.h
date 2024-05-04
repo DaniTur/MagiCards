@@ -2,6 +2,7 @@
 #include <asio.hpp>
 #include <thread>
 #include "NetConnection.h"
+#include "Message.h"
 
 class NetClient
 {

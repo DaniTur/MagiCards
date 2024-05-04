@@ -9,6 +9,8 @@
 #include <asio/ts/internet.hpp>
 #include <thread>
 #include <iostream>
+#include "Message.h"
+#include <queue>
 
 class NetConnection
 {
@@ -29,11 +31,11 @@ public:
 
 	bool IsConnected();
 
-	void Send(std::string message);
+	void Send(const Message message);
 
 	void ReadHeader();
 
-	void WriteHeader(std::string header);
+	void WriteHeader();
 
 private:
 	asio::io_context& context_; //Needed to implement a socket
@@ -43,5 +45,9 @@ private:
 	asio::ip::tcp::socket socket_;
 
 	Owner owner_;
+
+	std::queue<Message> messageOutQueue, messageInQueue;
+
+	Message messageInTmp;
 };
 
