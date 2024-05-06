@@ -21,7 +21,7 @@ public:
 
 	void MessageClient(Message message);
 
-	bool ConnectionIsValid(std::shared_ptr<NetConnection> connection);
+	bool OnClientConnect(std::shared_ptr<NetConnection> clientConnection);
 
 	bool IsRunning();
 

@@ -56,15 +56,10 @@ void NetServer::WaitForClientConnection()
 			{
 				std::shared_ptr<NetConnection> newConnection = std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket));
 
-				if (ConnectionIsValid(newConnection)) {
+				if (OnClientConnect(newConnection)) 
+				{
 					std::cout << "[SERVER] Connection Approved." << std::endl;
 					clientConnection_ = std::move(newConnection);
-					
-					Message welcomeMessage;
-					welcomeMessage.header.id = MessageType::WelcomeClient;
-					welcomeMessage << "[SERVER] connection approved.";
-
-					MessageClient(welcomeMessage);
 				}
 				else
 				{
@@ -94,10 +89,13 @@ void NetServer::WaitForClientConnection()
 }
 
 
-bool NetServer::ConnectionIsValid(std::shared_ptr<NetConnection> connection)
+bool NetServer::OnClientConnect(std::shared_ptr<NetConnection> clientConnection)
 {
-	//TODO: Implement the handshake
+	// Implement a handshake if needed or a security check
 	// Check if the connection is valid(bad source endpoint, banned address, etc)
+	Message message;
+	message.header.id = MessageType::ServerAccept;
+	clientConnection->Send(message);
 	return true;
 }
 

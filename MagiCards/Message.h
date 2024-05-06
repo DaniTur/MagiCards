@@ -6,7 +6,7 @@
 struct MessageHeader
 {
 	MessageType id;
-	uint32_t size = 0;
+	uint32_t size = sizeof(uint32_t) + sizeof(MessageType); //whole message size
 };
 
 struct Message

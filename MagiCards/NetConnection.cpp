@@ -23,7 +23,8 @@ void NetConnection::ConnectToServer(asio::ip::tcp::endpoint endpoint)
 				ReadHeader();
 			}
 		});
-		//asio::async_connect(socket_, endpoint, 
+		// Version for DNS resolver endpoints 
+		//asio::async_connect(socket_, endpoints, 
 		//	[this](std::error_code ec, asio::ip::tcp::endpoint endpoint)
 		//	{
 		//		if (!ec)
@@ -74,6 +75,19 @@ void NetConnection::ReadHeader()
 			{
 				std::cout << messageInTmp;
 				//TODO: mirar qué hacer con los mensajes recibidos, si ponerlos en una cola para procesarlos en server.update() o procesarlos cuando llegan aquí
+				if (messageInTmp.header.size > sizeof(MessageHeader))
+				{
+					std::cout << "the message has a body" << std::endl;
+
+					// make room in temporary message for body data read from the socket 
+					messageInTmp.body.resize(messageInTmp.header.size - sizeof(MessageHeader));
+					ReadBody();
+				}
+				else
+				{
+					// Add the message to to queue, and get ready to read next message
+					ReadHeader(); // provides to the io_context the task to read next incoming message
+				}
 			}
 			else
 			{
@@ -94,6 +108,27 @@ void NetConnection::WriteHeader()
 			else
 			{
 				std::cout << "Error writing header: errorCode: " << errorCode << std::endl;
+			}
+		});
+}
+
+void NetConnection::ReadBody()
+{
+	asio::async_read(socket_, asio::buffer(messageInTmp.body.data(), messageInTmp.body.size()),
+		[this](std::error_code errorCode, std::size_t bytesLength) 
+		{
+			if (!errorCode)
+			{	
+				// Add the message to to queue, and get ready to read next message
+				std::cout << "Body data: " << messageInTmp.body.data() << std::endl;
+				ReadHeader(); // provides to the io_context the task to read next incoming message
+			}
+			else
+			{
+				std::cout << "Error reading body from message type: ";
+				std::cout << messageInTmp << std::endl;
+				std::cout << ". Socket will be closed" << std::endl;
+				socket_.close();
 			}
 		});
 }
