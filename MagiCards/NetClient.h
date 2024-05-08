@@ -3,6 +3,7 @@
 #include <thread>
 #include "NetConnection.h"
 #include "Message.h"
+#include "TSQueue.h"
 
 class NetClient
 {
@@ -18,7 +19,7 @@ public:
 	
 	bool IsConnected();
 
-	void GrabSomeData();
+	void Update(size_t nMaxMessages = -1);
 
 private:
 	
@@ -29,5 +30,11 @@ private:
 	asio::ip::tcp::socket socket_;
 
 	std::unique_ptr<NetConnection> connection_;
+
+	TSQueue<Message> messagesInQueue_;
+
+	TSQueue<Message>& IncomingMessageQueue();
+
+	void HandleMessage(Message message);
 };
 

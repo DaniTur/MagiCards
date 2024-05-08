@@ -11,7 +11,7 @@
 #include <thread>
 #include <iostream>
 #include "Message.h"
-#include <queue>
+#include "TSQueue.h"
 
 class NetConnection
 {
@@ -22,7 +22,7 @@ public:
 		client
 	};
 
-	NetConnection(Owner owner, asio::io_context& context, asio::ip::tcp::socket socket);
+	NetConnection(Owner owner, asio::io_context& context, asio::ip::tcp::socket socket, TSQueue<Message>& messagesQueueIn);
 
 	~NetConnection();
 
@@ -36,9 +36,9 @@ public:
 
 	void ReadHeader();
 
-	void WriteHeader();
-
 	void ReadBody();
+
+	void WriteHeader();
 
 private:
 	asio::io_context& context_; //Needed to implement a socket
@@ -49,7 +49,8 @@ private:
 
 	Owner owner_;
 
-	std::queue<Message> messageOutQueue, messageInQueue;
+	TSQueue<Message>& messagesInQueue_;
+	TSQueue<Message> messagesOutQueue_;
 
 	Message messageInTmp;
 };

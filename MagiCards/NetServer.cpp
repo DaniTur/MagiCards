@@ -54,7 +54,8 @@ void NetServer::WaitForClientConnection()
 			// Check if server is full of connections, for now 1 maximum client connection allowed
 			if (!clientConnection_)
 			{
-				std::shared_ptr<NetConnection> newConnection = std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket));
+				std::shared_ptr<NetConnection> newConnection = 
+					std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket), messegesInQueue_);
 
 				if (OnClientConnect(newConnection)) 
 				{
@@ -99,9 +100,31 @@ bool NetServer::OnClientConnect(std::shared_ptr<NetConnection> clientConnection)
 	return true;
 }
 
-void NetServer::OnMessageReceived()
+// nMaxMessages: number of maximum messages processed per processing window (per frame)
+void NetServer::Update(size_t nMaxMessages)
 {
+	size_t nProcessedMessages = 0;
+	while (nProcessedMessages < nMaxMessages && !messegesInQueue_.empty())
+	{
+		Message msg = messegesInQueue_.pop_front();;
+		HandleMessage(clientConnection_, msg);
+		nProcessedMessages++;
+	}
 }
+
+void NetServer::HandleMessage(std::shared_ptr<NetConnection> client, Message message)
+{
+	std::cout << "Handeling message..." << std::endl;
+	switch (message.header.id)
+	{
+	case MessageType::JoinRoom:
+		std::cout << "JoinRoom message read" << std::endl;
+		std::cout << "Header: \n" << message << std::endl;
+		std::cout << "Body: \n" << message.body.data() << std::endl;
+		break;
+	}
+}
+
 
 void NetServer::MessageClient(Message message)
 {

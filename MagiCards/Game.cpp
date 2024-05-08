@@ -127,6 +127,16 @@ void Game::handleEvents()
 
 void Game::update()
 {
+	// update the server, processing the incoming messages from the peer
+	if (netServer_)
+	{
+		netServer_->Update(-1);
+	}
+	else if (netClient_)
+	{
+		netClient_->Update(-1);
+	}
+
 	if (_activeMenu)
 	{
 		updateMenu();

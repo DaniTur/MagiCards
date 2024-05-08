@@ -36,10 +36,6 @@ public:
 
 	bool isRunning();
 
-	void createGameRoom();
-
-	void joinGameRoom();
-
 private:
 	void createWindowAndRenderer();
 

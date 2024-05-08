@@ -3,8 +3,8 @@
 #include <asio/ts/buffer.hpp>
 #include <asio/ts/internet.hpp>
 
-NetConnection::NetConnection(Owner owner, asio::io_context& context, asio::ip::tcp::socket socket)
-	: context_(context), socket_(std::move(socket))
+NetConnection::NetConnection(Owner owner, asio::io_context& context, asio::ip::tcp::socket socket, TSQueue<Message>& messagesQueueIn)
+	: context_(context), socket_(std::move(socket)), messagesInQueue_(messagesQueueIn)
 {
 	owner_ = owner;
 }
@@ -53,8 +53,8 @@ void NetConnection::Send(const Message message)
 	asio::post(context_, 
 		[this, message] 
 		{
-			bool bWritingMessage = !messageOutQueue.empty();
-			messageOutQueue.push(message);
+			bool bWritingMessage = !messagesOutQueue_.empty();
+			messagesOutQueue_.push_back(message);
 			if (!bWritingMessage)
 			{
 				WriteHeader();
@@ -73,33 +73,33 @@ void NetConnection::ReadHeader()
 		{
 			if (!errorCode)
 			{
-				std::cout << messageInTmp;
-				//TODO: mirar qué hacer con los mensajes recibidos, si ponerlos en una cola para procesarlos en server.update() o procesarlos cuando llegan aquí
+				// Check if the message has a body
 				if (messageInTmp.header.size > sizeof(MessageHeader))
 				{
-					std::cout << "the message has a body" << std::endl;
-
 					// make room in temporary message for body data read from the socket 
 					messageInTmp.body.resize(messageInTmp.header.size - sizeof(MessageHeader));
 					ReadBody();
 				}
 				else
 				{
-					// Add the message to to queue, and get ready to read next message
+					// Add the message to the queue, and get ready to read next message
+					messagesInQueue_.push_back(messageInTmp);
 					ReadHeader(); // provides to the io_context the task to read next incoming message
 				}
 			}
 			else
 			{
 				std::cout << "Error reading header, error code: " << errorCode  << std::endl;
+				std::cout << messageInTmp << std::endl;
+				std::cout << ". Socket will be closed" << std::endl;
+				socket_.close();
 			}
 		});
 }
 
 void NetConnection::WriteHeader()
 {
-	//std::vector<char> hBuffer(header.begin(), header.end());
-	asio::async_write(socket_, asio::buffer(&messageOutQueue.front().header, sizeof(MessageHeader)),
+	asio::async_write(socket_, asio::buffer(&messagesOutQueue_.front().header, sizeof(MessageHeader)),
 		[this](std::error_code errorCode, std::size_t length) {
 			if (!errorCode)
 			{
@@ -120,7 +120,8 @@ void NetConnection::ReadBody()
 			if (!errorCode)
 			{	
 				// Add the message to to queue, and get ready to read next message
-				std::cout << "Body data: " << messageInTmp.body.data() << std::endl;
+				std::cout << " Body data: " << messageInTmp.body.data() << std::endl; //TODO: remove
+				messagesInQueue_.push_back(messageInTmp);
 				ReadHeader(); // provides to the io_context the task to read next incoming message
 			}
 			else

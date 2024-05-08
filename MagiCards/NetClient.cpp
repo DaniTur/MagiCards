@@ -18,7 +18,7 @@ bool NetClient::Connect(const std::string& host, const int port)
 {
 	try
 	{
-		connection_ = std::make_unique<NetConnection>(NetConnection::Owner::client, context_, asio::ip::tcp::socket(context_));
+		connection_ = std::make_unique<NetConnection>(NetConnection::Owner::client, context_, asio::ip::tcp::socket(context_), messagesInQueue_);
 
 		asio::error_code errCode;
 		asio::ip::address ipAddress = asio::ip::make_address(host, errCode);
@@ -31,13 +31,6 @@ bool NetClient::Connect(const std::string& host, const int port)
 		{
 			asio::ip::tcp::endpoint endpoint(ipAddress, port);
 			connection_->ConnectToServer(endpoint);
-
-			//TODO
-			//std::string sRequest = "im this player [player2], i want to join the game room";
-
-			//socket_.write_some(asio::buffer(sRequest.data(), sRequest.size()));
-
-			//GrabSomeData();
 
 			std::cout << "connecting to the server..." << std::endl;
 
@@ -84,23 +77,33 @@ bool NetClient::IsConnected()
 	}
 }
 
-std::vector<char> vBuffer(1024);
-
-void NetClient::GrabSomeData()
+// nMaxMessages: number of maximum messages processed per processing window (per frame)
+void NetClient::Update(size_t nMaxMessages)
 {
+	size_t nProcessedMessages = 0;
+	while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
+	{
+		Message msg = messagesInQueue_.pop_front();
+		HandleMessage(msg);
+		nProcessedMessages++;
+	}
+}
 
-	socket_.async_read_some(asio::buffer(vBuffer.data(), vBuffer.size()),
-		[&](std::error_code errorCode, std::size_t bytesRead)
+void NetClient::HandleMessage(Message message)
+{
+	if (IsConnected())
+	{
+		switch (message.header.id)
 		{
-			if (!errorCode)
-			{
-				std::cout << "Bytes read: " << bytesRead << std::endl;
-
-				for (int i = 0; i < bytesRead; i++)
-					std::cout << vBuffer[i];
-
-				GrabSomeData();
-			}
+		case MessageType::ServerAccept:
+			std::cout << "Connected to server!" << std::endl;
+			std::cout << message;
+			break;
 		}
-	);
+	}
+}
+
+TSQueue<Message>& NetClient::IncomingMessageQueue()
+{
+	return messagesInQueue_;
 }
