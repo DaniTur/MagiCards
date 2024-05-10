@@ -5,6 +5,6 @@ enum class MessageType : uint32_t
 {
 	ServerAccept,
 	JoinRoom,
-	Error,
+	ServerError,
 	PlayerData
 };

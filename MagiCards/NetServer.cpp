@@ -50,33 +50,25 @@ void NetServer::WaitForClientConnection()
 		if (!errorCode)
 		{
 			std::cout << "[SERVER] New Client connection: " << socket.remote_endpoint() << std::endl;
-			
-			// Check if server is full of connections, for now 1 maximum client connection allowed
-			if (!clientConnection_)
-			{
-				std::shared_ptr<NetConnection> newConnection = 
-					std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket), messegesInQueue_);
 
-				if (OnClientConnect(newConnection)) 
-				{
-					std::cout << "[SERVER] Connection Approved." << std::endl;
-					clientConnection_ = std::move(newConnection);
-				}
-				else
-				{
-					// newConnection will go out of scope and will be automaticaly deleted(because of shared_ptr)
-					std::cout << "[SERVER] Connection Denied." << std::endl;
-				}
+			std::shared_ptr<NetConnection> newConnection = 
+				std::make_shared<NetConnection>(NetConnection::Owner::server, context_, std::move(socket), messegesInQueue_);
+
+			// Check the new connection
+			if (OnClientConnect(newConnection)) 
+			{
+				std::cout << "[SERVER] Connection Approved." << std::endl;
+				clientConnection_ = std::move(newConnection);
+
+				// Listen for incoming messages from the accepted connection
+				clientConnection_->ConnectToClient();
 			}
 			else
 			{
-				Message errorMessage;
-				errorMessage.header.id = MessageType::Error;
-				errorMessage << "[SERVER] Connection Denied, server is full";
-
-				std::cout << "[SERVER] Connection Denied, server is full" << std::endl;
-				MessageClient(errorMessage);
+				// newConnection will go out of scope and will be automaticaly deleted(because of shared_ptr)
+				std::cout << "[SERVER] Connection Denied, server is full." << std::endl;
 			}
+
 		}
 		else
 		{
@@ -92,12 +84,23 @@ void NetServer::WaitForClientConnection()
 
 bool NetServer::OnClientConnect(std::shared_ptr<NetConnection> clientConnection)
 {
-	// Implement a handshake if needed or a security check
-	// Check if the connection is valid(bad source endpoint, banned address, etc)
-	Message message;
-	message.header.id = MessageType::ServerAccept;
-	clientConnection->Send(message);
-	return true;
+	// Check if server is full of connections, for now 1 maximum client connection allowed
+	if (!clientConnection_)
+	{
+		Message message;
+		message.header.id = MessageType::ServerAccept;
+		clientConnection->Send(message);
+		return true;	
+	}
+	else
+	{ 
+		Message message;
+		message.header.id = MessageType::ServerError;
+		message << "Connection Denied, server is full";
+		clientConnection->Send(message);
+		return false;
+	}
+
 }
 
 // nMaxMessages: number of maximum messages processed per processing window (per frame)
@@ -106,7 +109,8 @@ void NetServer::Update(size_t nMaxMessages)
 	size_t nProcessedMessages = 0;
 	while (nProcessedMessages < nMaxMessages && !messegesInQueue_.empty())
 	{
-		Message msg = messegesInQueue_.pop_front();;
+		std::cout << "messegesInQueue_ not empty, processing a message"<< std::endl;
+		Message msg = messegesInQueue_.pop_front();
 		HandleMessage(clientConnection_, msg);
 		nProcessedMessages++;
 	}
@@ -119,6 +123,11 @@ void NetServer::HandleMessage(std::shared_ptr<NetConnection> client, Message mes
 	{
 	case MessageType::JoinRoom:
 		std::cout << "JoinRoom message read" << std::endl;
+		std::cout << "Header: \n" << message << std::endl;
+		std::cout << "Body: \n" << message.body.data() << std::endl;
+		break;
+	case MessageType::PlayerData:
+		std::cout << "Player message read" << std::endl;
 		std::cout << "Header: \n" << message << std::endl;
 		std::cout << "Body: \n" << message.body.data() << std::endl;
 		break;

@@ -28,6 +28,8 @@ public:
 
 	void ConnectToServer(asio::ip::tcp::endpoint endpoint);
 
+	void ConnectToClient();
+
 	void Disconnect();
 
 	bool IsConnected();
@@ -39,6 +41,8 @@ public:
 	void ReadBody();
 
 	void WriteHeader();
+
+	void WriteBody();
 
 private:
 	asio::io_context& context_; //Needed to implement a socket

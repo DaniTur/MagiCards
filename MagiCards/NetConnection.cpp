@@ -17,6 +17,7 @@ void NetConnection::ConnectToServer(asio::ip::tcp::endpoint endpoint)
 {
 	if (owner_ == Owner::client)
 	{
+		std::cout << "Connect To Server connecting to the server..." << std::endl;
 		socket_.async_connect(endpoint, [this](std::error_code errorCode) {
 			if (!errorCode)
 			{
@@ -35,6 +36,17 @@ void NetConnection::ConnectToServer(asio::ip::tcp::endpoint endpoint)
 	}
 }
 
+void NetConnection::ConnectToClient()
+{
+	if (owner_ == Owner::server)
+	{
+		if (socket_.is_open())
+		{
+			ReadHeader();
+		}
+	}
+}
+
 void NetConnection::Disconnect()
 {
 	if (IsConnected())
@@ -50,12 +62,15 @@ bool NetConnection::IsConnected()
 
 void NetConnection::Send(const Message message)
 {
+	// Enqueue the lambda function to the asio::io_context, to be executed when possible
 	asio::post(context_, 
 		[this, message] 
 		{
-			bool bWritingMessage = !messagesOutQueue_.empty();
+			std::cout << "Sending message: " << message << std::endl;
+			bool writingMessage = !messagesOutQueue_.empty();
+			//std::cout << "writingMessage: " << writingMessage << std::endl;
 			messagesOutQueue_.push_back(message);
-			if (!bWritingMessage)
+			if (!writingMessage)
 			{
 				WriteHeader();
 			}
@@ -73,6 +88,7 @@ void NetConnection::ReadHeader()
 		{
 			if (!errorCode)
 			{
+				std::cout << "ReadHeader: reading header..." << std::endl;
 				// Check if the message has a body
 				if (messageInTmp.header.size > sizeof(MessageHeader))
 				{
@@ -84,6 +100,7 @@ void NetConnection::ReadHeader()
 				{
 					// Add the message to the queue, and get ready to read next message
 					messagesInQueue_.push_back(messageInTmp);
+					std::cout << "message read, stored in the messagesInQueue" << std::endl;
 					ReadHeader(); // provides to the io_context the task to read next incoming message
 				}
 			}
@@ -103,11 +120,38 @@ void NetConnection::WriteHeader()
 		[this](std::error_code errorCode, std::size_t length) {
 			if (!errorCode)
 			{
-				std::cout << "message header sended" << std::endl;
+				// if the message has a body, write the body to the socket
+				if (messagesOutQueue_.front().body.size() > 0)
+				{
+					std::cout << "message has a body" << std::endl;
+					WriteBody();
+				}
 			}
 			else
 			{
 				std::cout << "Error writing header: errorCode: " << errorCode << std::endl;
+			}
+		});
+}
+
+void NetConnection::WriteBody()
+{
+	asio::async_write(socket_, asio::buffer(messagesOutQueue_.front().body.data(), messagesOutQueue_.front().body.size()),
+		[this](std::error_code errorCode, std::size_t length) {
+			if (!errorCode)
+			{
+				messagesOutQueue_.pop_front(); //remove the message of the out queue
+				if (!messagesOutQueue_.empty())
+				{
+					WriteHeader();
+				}
+			}
+			else
+			{
+				std::cout << "Error writing body: errorCode: " << errorCode << std::endl;
+				std::cout << messagesOutQueue_.front() << std::endl;
+				std::cout << ". Socket will be closed" << std::endl;
+				socket_.close();
 			}
 		});
 }

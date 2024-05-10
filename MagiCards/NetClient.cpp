@@ -32,8 +32,6 @@ bool NetClient::Connect(const std::string& host, const int port)
 			asio::ip::tcp::endpoint endpoint(ipAddress, port);
 			connection_->ConnectToServer(endpoint);
 
-			std::cout << "connecting to the server..." << std::endl;
-
 			contextThread_ = std::thread([this]() { context_.run(); });
 		}
 
@@ -80,13 +78,32 @@ bool NetClient::IsConnected()
 // nMaxMessages: number of maximum messages processed per processing window (per frame)
 void NetClient::Update(size_t nMaxMessages)
 {
-	size_t nProcessedMessages = 0;
-	while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
+	if (IsConnected())
 	{
-		Message msg = messagesInQueue_.pop_front();
-		HandleMessage(msg);
-		nProcessedMessages++;
+		size_t nProcessedMessages = 0;
+		while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
+		{
+			Message msg = messagesInQueue_.pop_front();
+			HandleMessage(msg);
+			nProcessedMessages++;
+		}
 	}
+}
+
+void NetClient::Send(const Message& message)
+{
+	if (IsConnected())
+	{
+		connection_->Send(message);
+	}
+}
+
+void NetClient::SendPlayerData(const Player* player)
+{
+	Message msg;
+	msg.header.id = MessageType::PlayerData;
+	msg << "name:" << player->getName().data() << ",deck:" << player->getDeck();
+	Send(msg);
 }
 
 void NetClient::HandleMessage(Message message)
@@ -97,7 +114,9 @@ void NetClient::HandleMessage(Message message)
 		{
 		case MessageType::ServerAccept:
 			std::cout << "Connected to server!" << std::endl;
-			std::cout << message;
+			break;
+		case MessageType::ServerError:
+			std::cout << "Server error: " << message.body.data() << std::endl;
 			break;
 		}
 	}

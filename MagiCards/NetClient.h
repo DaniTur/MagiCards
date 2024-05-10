@@ -4,6 +4,7 @@
 #include "NetConnection.h"
 #include "Message.h"
 #include "TSQueue.h"
+#include "Player.h"
 
 class NetClient
 {
@@ -20,6 +21,10 @@ public:
 	bool IsConnected();
 
 	void Update(size_t nMaxMessages = -1);
+
+	void Send(const Message& message);
+
+	void SendPlayerData(const Player* player);
 
 private:
 	

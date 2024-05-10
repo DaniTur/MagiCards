@@ -228,6 +228,8 @@ void Game::updateMenu()
 				}
 				else
 				{
+					netClient_->SendPlayerData(_playerClient);
+
 					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 					_gameRoomMenu->playerClientConnected();
 					_gameState = GAME_ROOM;
