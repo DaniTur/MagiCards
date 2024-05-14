@@ -6,6 +6,9 @@
 #include "TSQueue.h"
 #include "Player.h"
 
+// Esta clase es la responsable de generar un espacio de procesamiento para el contexto de la biblioteca Asio 
+// de la parte cliente de la aplicación, que hace de interfaz y gestiona la comunicación entre la capa más cercana 
+// a la de red(mediante una Connection)  y la parte responsable de la gestión general del juego(Game) 
 class NetClient
 {
 public:
@@ -20,7 +23,8 @@ public:
 	
 	bool IsConnected();
 
-	void Update(size_t nMaxMessages = -1);
+	//void Update(size_t nMaxMessages = -1);
+	std::vector<Message> GetMessagesToUpdate(size_t nMaxMessages = -1);
 
 	void Send(const Message& message);
 
@@ -37,9 +41,5 @@ private:
 	std::unique_ptr<NetConnection> connection_;
 
 	TSQueue<Message> messagesInQueue_;
-
-	TSQueue<Message>& IncomingMessageQueue();
-
-	void HandleMessage(Message message);
 };
 

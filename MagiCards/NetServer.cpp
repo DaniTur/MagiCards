@@ -1,6 +1,6 @@
 #include "NetServer.h"
 #include <iostream>
-
+#include <vector>
 
 NetServer::NetServer(int port) 
 	: acceptor_(context_, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port))
@@ -104,36 +104,17 @@ bool NetServer::OnClientConnect(std::shared_ptr<NetConnection> clientConnection)
 }
 
 // nMaxMessages: number of maximum messages processed per processing window (per frame)
-void NetServer::Update(size_t nMaxMessages)
+std::vector<Message> NetServer::GetMessagesToUpdate(size_t nMaxMessages = -1)
 {
+	std::vector<Message> messagesToUpdate;
 	size_t nProcessedMessages = 0;
 	while (nProcessedMessages < nMaxMessages && !messegesInQueue_.empty())
 	{
-		std::cout << "messegesInQueue_ not empty, processing a message"<< std::endl;
-		Message msg = messegesInQueue_.pop_front();
-		HandleMessage(clientConnection_, msg);
+		messagesToUpdate.push_back(messegesInQueue_.pop_front());
 		nProcessedMessages++;
 	}
+	return messagesToUpdate;
 }
-
-void NetServer::HandleMessage(std::shared_ptr<NetConnection> client, Message message)
-{
-	std::cout << "Handeling message..." << std::endl;
-	switch (message.header.id)
-	{
-	case MessageType::JoinRoom:
-		std::cout << "JoinRoom message read" << std::endl;
-		std::cout << "Header: \n" << message << std::endl;
-		std::cout << "Body: \n" << message.body.data() << std::endl;
-		break;
-	case MessageType::PlayerData:
-		std::cout << "Player message read" << std::endl;
-		std::cout << "Header: \n" << message << std::endl;
-		std::cout << "Body: \n" << message.body.data() << std::endl;
-		break;
-	}
-}
-
 
 void NetServer::MessageClient(Message message)
 {

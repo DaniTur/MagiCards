@@ -1,7 +1,7 @@
 #include "NetClient.h"
 #include <iostream>
 #include <vector>
-
+#include <cstring>
 
 NetClient::NetClient() : socket_(context_)
 {
@@ -76,18 +76,30 @@ bool NetClient::IsConnected()
 }
 
 // nMaxMessages: number of maximum messages processed per processing window (per frame)
-void NetClient::Update(size_t nMaxMessages)
+//void NetClient::Update(size_t nMaxMessages)
+//{
+//	if (IsConnected())
+//	{
+//		size_t nProcessedMessages = 0;
+//		while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
+//		{
+//			Message msg = messagesInQueue_.pop_front();
+//			HandleMessage(msg);
+//			nProcessedMessages++;
+//		}
+//	}
+//}
+
+std::vector<Message> NetClient::GetMessagesToUpdate(size_t nMaxMessages)
 {
-	if (IsConnected())
+	std::vector<Message> messagesToUpdate;
+	size_t nProcessedMessages = 0;
+	while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
 	{
-		size_t nProcessedMessages = 0;
-		while (nProcessedMessages < nMaxMessages && !messagesInQueue_.empty())
-		{
-			Message msg = messagesInQueue_.pop_front();
-			HandleMessage(msg);
-			nProcessedMessages++;
-		}
+		messagesToUpdate.push_back(messagesInQueue_.pop_front());
+		nProcessedMessages++;
 	}
+	return messagesToUpdate;
 }
 
 void NetClient::Send(const Message& message)
@@ -100,29 +112,16 @@ void NetClient::Send(const Message& message)
 
 void NetClient::SendPlayerData(const Player* player)
 {
+	//TODO: fix how send a message with a complete body
+	std::cout << "SendPlayerData" << std::endl;
 	Message msg;
 	msg.header.id = MessageType::PlayerData;
-	msg << "name:" << player->getName().data() << ",deck:" << player->getDeck();
+	msg << "name:player2,deck:1";
+	//std::string data = "name:" + player->getName() + ",deck:" + std::to_string(player->getDeck());
+	//std::cout << data << std::endl;
+	//msg << data.data();
+	
+
 	Send(msg);
 }
 
-void NetClient::HandleMessage(Message message)
-{
-	if (IsConnected())
-	{
-		switch (message.header.id)
-		{
-		case MessageType::ServerAccept:
-			std::cout << "Connected to server!" << std::endl;
-			break;
-		case MessageType::ServerError:
-			std::cout << "Server error: " << message.body.data() << std::endl;
-			break;
-		}
-	}
-}
-
-TSQueue<Message>& NetClient::IncomingMessageQueue()
-{
-	return messagesInQueue_;
-}

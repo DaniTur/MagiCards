@@ -127,15 +127,7 @@ void Game::handleEvents()
 
 void Game::update()
 {
-	// update the server, processing the incoming messages from the peer
-	if (netServer_)
-	{
-		netServer_->Update(-1);
-	}
-	else if (netClient_)
-	{
-		netClient_->Update(-1);
-	}
+	updateNetworking();
 
 	if (_activeMenu)
 	{
@@ -147,7 +139,6 @@ void Game::update()
 	}
 
 }
-
 
 void Game::updateMenu()
 {
@@ -228,7 +219,7 @@ void Game::updateMenu()
 				}
 				else
 				{
-					netClient_->SendPlayerData(_playerClient);
+					//netClient_->SendPlayerData(_playerClient);
 
 					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 					_gameRoomMenu->playerClientConnected();
@@ -271,6 +262,59 @@ void Game::updateMenu()
 			}
 			_gameRoomMenu->clearPressedButton();
 			break;
+	}
+}
+
+void Game::updateNetworking()
+{
+	std::vector<Message> messagesToProcess;
+	// update the server, processing the incoming messages from the peer
+	if (netServer_)
+	{
+		messagesToProcess =  netServer_->GetMessagesToUpdate(-1);
+		for (Message msg : messagesToProcess)
+		{
+			switch (msg.header.id)
+			{
+				case MessageType::PlayerData:
+				{
+					std::cout << "*Player data*" << std::endl;
+					std::cout << "Header: \n" << msg << std::endl;
+					std::cout << "Body: \n" << msg.body.data() << std::endl;
+					Message m;
+					m.header.id = MessageType::PlayerData;
+					m << "ThisIsServerPlayerData";
+					netServer_->MessageClient(m);
+					break;
+				}
+			}
+		}
+	}
+	else if (netClient_)
+	{
+		messagesToProcess = netClient_->GetMessagesToUpdate(-1);
+		for (Message msg : messagesToProcess)
+		{
+			switch (msg.header.id)
+			{
+				case MessageType::ServerAccept:
+				{
+					std::cout << "Connected to server!" << std::endl;
+					Message m;
+					m.header.id = MessageType::PlayerData;
+					m << "ThisIsClientPlayerData";
+					netClient_->Send(m);
+					break;
+				}
+				case MessageType::PlayerData:
+				{
+					std::cout << "*Player data*" << std::endl;
+					std::cout << "Header: \n" << msg << std::endl;
+					std::cout << "Body: \n" << msg.body.data() << std::endl;
+					break;
+				}
+			}
+		}
 	}
 }
 

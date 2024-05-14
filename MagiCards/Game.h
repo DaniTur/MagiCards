@@ -43,6 +43,8 @@ private:
 
 	void updateMenu();
 
+	void updateNetworking();
+
 private:
 	bool _isRunning;
 
