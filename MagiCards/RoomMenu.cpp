@@ -99,7 +99,7 @@ void RoomMenu::render()
 	}
 
 
-	if (_serverSide)
+	if (_serverSide && _playerHostConnected && _playerClientConnected)
 	{
 		_startButton->render();
 	}
@@ -144,4 +144,14 @@ void RoomMenu::playerHostDisconnected()
 void RoomMenu::playerClientDisconnected()
 {
 	_playerClientConnected = false;
+}
+
+void RoomMenu::joinPlayerAsClient(Player* player)
+{
+	_playerClient = player;
+}
+
+void RoomMenu::joinPlayerAsHost(Player* player)
+{
+	_playerHost = player;
 }

@@ -45,6 +45,8 @@ private:
 
 	void updateNetworking();
 
+	Player* constructPlayerFromData(std::string data);
+
 private:
 	bool _isRunning;
 

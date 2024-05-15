@@ -280,10 +280,19 @@ void Game::updateNetworking()
 				{
 					std::cout << "*Player data*" << std::endl;
 					std::cout << "Header: \n" << msg << std::endl;
-					std::cout << "Body: \n" << msg.body.data() << std::endl;
+					char bodydata[20] = "";
+					msg >> bodydata;
+					std::cout << "Body: \n" << bodydata << std::endl;
+
+					//create the client player object
+					_playerClient = constructPlayerFromData(std::string(bodydata));
+					std::cout << "player created from data" << std::endl;
+					_gameRoomMenu->joinPlayerAsClient(_playerClient);
+					_gameRoomMenu->playerClientConnected();
+					//std::cout << "Body: \n" << msg.body.data() << std::endl;
 					Message m;
 					m.header.id = MessageType::PlayerData;
-					m << "ThisIsServerPlayerData";
+					m << "name:player1,deck:1";
 					netServer_->MessageClient(m);
 					break;
 				}
@@ -302,7 +311,14 @@ void Game::updateNetworking()
 					std::cout << "Connected to server!" << std::endl;
 					Message m;
 					m.header.id = MessageType::PlayerData;
-					m << "ThisIsClientPlayerData";
+					//std::string name = _playerClient->getName();
+					//const char* body = name.data();
+
+					//size_t len = std::strlen(body);
+					//for (size_t i = 0; i < len; ++i) {
+					//	m << body[i];
+					//}
+					m << "name:player2,deck:2";
 					netClient_->Send(m);
 					break;
 				}
@@ -310,12 +326,46 @@ void Game::updateNetworking()
 				{
 					std::cout << "*Player data*" << std::endl;
 					std::cout << "Header: \n" << msg << std::endl;
-					std::cout << "Body: \n" << msg.body.data() << std::endl;
+					char bodydata[20] = "";
+					msg >> bodydata;
+					std::cout << "Body: \n" << bodydata << std::endl;
+
+					_playerHost = constructPlayerFromData(std::string(bodydata));
+					_gameRoomMenu->joinPlayerAsHost(_playerHost);
+					_gameRoomMenu->playerHostConnected();
 					break;
 				}
 			}
 		}
 	}
+}
+
+Player* Game::constructPlayerFromData(std::string data)
+{
+	std::string name;
+	int deck;
+
+	// Obtain player name
+	size_t namePos = data.find("name:");
+
+	// check if "name:" is part of the string 
+	if (namePos != std::string::npos) {
+
+		// Extract the name from the position "name:" untill find a comma ","
+		size_t commaPos = data.find(",", namePos);
+		if (commaPos != std::string::npos) {
+			name = data.substr(namePos + 5, commaPos - (namePos + 5)); // 5 is the length of "name:"
+		}
+	}
+
+	// Obtain player deck
+	size_t deckPos = data.find("deck:");
+	if (deckPos != std::string::npos) {
+		// Extract the deck from the posición "deck:" hasta el final de la cadena
+		std::istringstream(data.substr(deckPos + 5)) >> deck; // 5 es la longitud de "deck:"
+	}
+	Player* player = new Player(name, deck);
+	return player;
 }
 
 void Game::render()

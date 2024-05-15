@@ -39,6 +39,10 @@ public:
 
 	void playerClientDisconnected();
 
+	void joinPlayerAsClient(Player* player);
+
+	void joinPlayerAsHost(Player* player);
+
 private:
 	const int _MENU_TYPE = 4;
 

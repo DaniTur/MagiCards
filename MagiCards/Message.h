@@ -49,7 +49,7 @@ struct Message
 	}
 
 	template<typename DataType>
-	friend Message& operator >> (Message& message, const DataType& data)
+	friend Message& operator >> (Message& message, DataType& data)
 	{
 		static_assert(std::is_standard_layout<DataType>::value, "Data is too complex to be pushed into vector");
 
