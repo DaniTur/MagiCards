@@ -1,5 +1,6 @@
 #include "Button.h"
 #include <SDL_image.h>
+#include "ResourcesList.h"
 
 Button::Button()
 {
@@ -8,7 +9,7 @@ Button::Button()
 Button::Button(const char* text, SDL_Renderer* renderer, int textureX, int textureY) 
 	: _text(text), _renderer(renderer), _x(textureX), _y(textureY)
 {
-	static SDL_Texture* texture = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\buttonTexture1.png");
+	static SDL_Texture* texture = IMG_LoadTexture(_renderer, IMG_BUTTON_TEXTURE);
 	_texture = texture;
 
 	// source rectangle (from texture)

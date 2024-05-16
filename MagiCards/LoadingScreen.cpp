@@ -1,13 +1,13 @@
 #include "LoadingScreen.h"
 #include <SDL_image.h>
-
+#include "ResourcesList.h"
 
 LoadingScreen::LoadingScreen(SDL_Renderer* renderer, std::string message) : _renderer(renderer), _message(message)
 {
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\LoadingScreen.png");
+	_background = IMG_LoadTexture(_renderer, IMG_LOADING_SCREEN);
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -18,7 +18,7 @@ LoadingScreen::LoadingScreen(SDL_Renderer* renderer, std::string message) : _ren
 	_dRect.w = windowW;
 	_dRect.h = windowH;
 
-	_textFont = TTF_OpenFont("D:\\MagiCardsProject\\MagiCards\\MagiCards\\OpenSans-Regular.ttf", _fontSize);
+	_textFont = TTF_OpenFont(TEXT_FONT, _fontSize);
 	_surfaceText = TTF_RenderText_Solid(_textFont, message.c_str(), { 0, 0, 0, 255 });
 
 	_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);

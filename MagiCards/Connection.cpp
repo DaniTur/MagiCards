@@ -72,16 +72,7 @@ void Connection:: handle_accept(asio::ip::tcp::socket& socket) {
 	std::cout << "Connection accepted" << std::endl;
 
 	std::cout << "from client: " << socket.remote_endpoint() << std::endl;
-	//asio::error_code errCode;
 
-	//std::string message = "Hello client, im the server!";
-	//socket.write_some(asio::buffer(message.data(), message.size()), errCode);
-
-	//if (errCode)
-	//{
-	//	std::cerr << "Error writing some data to the client: " << errCode.message() << std::endl;
-
-	//}
 }
 
 int Connection::startClientConnection(std::string ip, int port) {
@@ -123,32 +114,6 @@ int Connection::startClientConnection(std::string ip, int port) {
 		std::cout << "Failed to connect to address:\n" << errCode.message() << std::endl;
 	}
 
-	////TODO: socket is open explota
-	//if (socket.is_open())
-	//{
-	//	std::string sRequest = 
-	//		"TEST\r\n"
-	//		"Player: paco\r\n"
-	//		"Deck: 1\r\n\r\n";
-
-	//	socket.write_some(asio::buffer(sRequest.data(), sRequest.size()), errCode);
-	//	std::this_thread::sleep_for(std::chrono::seconds(1));
-	//	size_t bytes = socket.available();
-	//	std::cout << "Bytes available!" << bytes << std::endl;
-
-	//	if (bytes > 0)
-	//	{
-	//		std::vector<char> vBuffer;
-	//		socket.read_some(asio::buffer(vBuffer.data(), vBuffer.size()), errCode);
-
-	//		for (auto c : vBuffer) {
-	//			std::cout << c;
-	//		}
-	//	}
-	//}
-	//else {
-	//	std::cout << "socket not open" << std::endl;
-	//}
 
 	return 0;
 }

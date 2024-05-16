@@ -7,9 +7,9 @@ public:
 	Player(std::string name, int deck);
 	~Player();
 
-	std::string getName();
+	std::string getName() const;
 
-	int getDeck();
+	int getDeck() const;
 
 private:
 	std::string _name;

@@ -12,11 +12,11 @@
 
 Game::Game() {
 	_isRunning = true;
-	_connection = new Connection();
 }
 
 Game::~Game()
 {
+	release();
 }
 
 void Game::init()
@@ -124,53 +124,21 @@ void Game::handleEvents()
 	}
 }
 
-//std::queue<int> netEvents;
-//bool serverReady = false;
 
 void Game::update()
 {
+	updateNetworking();
+
 	if (_activeMenu)
 	{
 		updateMenu();
 	}
 	else
 	{
-		// go to Preparing game menu
-		//prepareGameTable(); //execute funcion on a new thread
-		// check connection with the other user, if something wrong show connection error panel to user
-		// create the game table
-		//obtain 
 		//update game
 	}
-	//std::queue<int> netEvents;
-	//if (!netEvents.empty())
-	//{
-	//	int poped = netEvents.front();
-	//	netEvents.pop();
-	//	std::thread netThread([&]() { networkUpdate(poped); });
-	//	netThread.detach();
-	//}
+
 }
-
-//void Game::networkUpdate(int e)
-//{
-//	if (e == 0 && !_connection->isServerConnected()) //start server connection
-//	{
-//		_connection->startServerConnection();
-//		serverReady = true;
-//		std::cout << "waiting for next client connection..." << std::endl;
-//		_connection->acceptNextConnection();
-//	}
-//
-//	//for (size_t i = 0; i < 5; i++)
-//	//{
-//	//	std::cout << "processing net event: " << e << std::endl;
-//	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-//	//}
-//	//std::cout << "net thread finish" << std::endl;
-//	
-//}
-
 
 void Game::updateMenu()
 {
@@ -208,13 +176,9 @@ void Game::updateMenu()
 			{
 				case 0: //Create button
 				{
-					if (!_connection->isServerConnected())
-					{
-						std::thread t([&]() {_connection->startServerConnection(); });
-						t.detach(); // release the thread from parent as a daemon process
-					}
 					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
 					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
+					netServer_ = new NetServer(30000);
 					_gameState = GAME_ROOM;
 					break;
 				}
@@ -226,47 +190,15 @@ void Game::updateMenu()
 			_createRoomMenu->clearPressedButton();
 			break;
 
-		case LOADING_SCREEN: // from joinRoom
-		{
-			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-
-			if (!_connection->isClientConnected())
-			{
-				std::thread t([&]() {
-					_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-					});
-				t.detach(); // release the thread from parent as a daemon process
-			}
-			else {
-				_gameRoomMenu->playerClientConnected();
-				_gameState = GAME_ROOM;
-			}
-
-			break;
-		}
-
 		case JOIN_ROOM:
 			_joinRoomMenu->update(_mouse);
 			switch (_joinRoomMenu->getButtonPressed())
 			{
 				case 0: //Join button
-					
 					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
-					//_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-					//try
-					//{
-					//	_connection->startClientConnection(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-					//	_gameRoomMenu->playerClientConnected();
-					//}
-					//catch (const std::exception&)
-					//{
-					//	std::cout << "Connection Exception error: " << std::endl;
-					//	//renderErrorMessage() on top of the current menu
-					//}
+					netClient_ = new NetClient();
 					_loadingScreen = new LoadingScreen(_renderer, "Creating game room...");
 					_gameState = LOADING_SCREEN;
-					//_gameState = GAME_ROOM;
-					// make connection with the server game room
 					break;
 				case 1: //Back button
 					_gameState = MAIN_MENU;
@@ -275,19 +207,41 @@ void Game::updateMenu()
 			_joinRoomMenu->clearPressedButton();
 			break;
 
+		case LOADING_SCREEN: // from joinRoom
+		{
+			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected())
+			{
+				bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+				if (!connectionStatus)
+				{
+					std::cout << "Connection to the server failed." << std::endl;
+				}
+				else
+				{
+					//netClient_->SendPlayerData(_playerClient);
+
+					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+					_gameRoomMenu->playerClientConnected();
+					_gameState = GAME_ROOM;
+				}
+			}
+
+			break;
+		}
+
 		case GAME_ROOM:
 			_gameRoomMenu->update(_mouse);
-			if (_connection->isServerConnected())
-			{
+
+			if (_gameRoomMenu->serverSide() && !netServer_->IsRunning()) {
+				netServer_->Start();
 				_gameRoomMenu->playerHostConnected();
 			}
-			if (_connection->isClientConnected())
-			{
-				_gameRoomMenu->playerClientConnected();
-			}
+
 			switch (_gameRoomMenu->getButtonPressed())
 			{
 				case 0: // Play button
+					std::cout << "Play button pressed" << std::endl;
 					//_loadingScreen = new PreparingGameTableScreen(_renderer);
 					//_activeMenu = false;
 					//_gameState = PREPARING_GAMETABLE;
@@ -295,10 +249,13 @@ void Game::updateMenu()
 				case 1: // Back button
 					// close connection, server or client
 					if (_gameRoomMenu->serverSide()) {
+						netServer_->Stop();
+						_gameRoomMenu->playerHostDisconnected();
 						_gameState = CREATE_ROOM;
 					}
 					else {
-						_connection->closeClientConnection();
+						netClient_->Disconnect();
+						_gameRoomMenu->playerClientDisconnected();
 						_gameState = JOIN_ROOM;
 					} 
 					break;
@@ -306,6 +263,109 @@ void Game::updateMenu()
 			_gameRoomMenu->clearPressedButton();
 			break;
 	}
+}
+
+void Game::updateNetworking()
+{
+	std::vector<Message> messagesToProcess;
+	// update the server, processing the incoming messages from the peer
+	if (netServer_)
+	{
+		messagesToProcess =  netServer_->GetMessagesToUpdate(-1);
+		for (Message msg : messagesToProcess)
+		{
+			switch (msg.header.id)
+			{
+				case MessageType::PlayerData:
+				{
+					std::cout << "*Player data*" << std::endl;
+					std::cout << "Header: \n" << msg << std::endl;
+					char bodydata[20] = "";
+					msg >> bodydata;
+					std::cout << "Body: \n" << bodydata << std::endl;
+
+					//create the client player object
+					_playerClient = constructPlayerFromData(std::string(bodydata));
+					std::cout << "player created from data" << std::endl;
+					_gameRoomMenu->joinPlayerAsClient(_playerClient);
+					_gameRoomMenu->playerClientConnected();
+					//std::cout << "Body: \n" << msg.body.data() << std::endl;
+					Message m;
+					m.header.id = MessageType::PlayerData;
+					m << "name:player1,deck:1";
+					netServer_->MessageClient(m);
+					break;
+				}
+			}
+		}
+	}
+	else if (netClient_)
+	{
+		messagesToProcess = netClient_->GetMessagesToUpdate(-1);
+		for (Message msg : messagesToProcess)
+		{
+			switch (msg.header.id)
+			{
+				case MessageType::ServerAccept:
+				{
+					std::cout << "Connected to server!" << std::endl;
+					Message m;
+					m.header.id = MessageType::PlayerData;
+					//std::string name = _playerClient->getName();
+					//const char* body = name.data();
+
+					//size_t len = std::strlen(body);
+					//for (size_t i = 0; i < len; ++i) {
+					//	m << body[i];
+					//}
+					m << "name:player2,deck:2";
+					netClient_->Send(m);
+					break;
+				}
+				case MessageType::PlayerData:
+				{
+					std::cout << "*Player data*" << std::endl;
+					std::cout << "Header: \n" << msg << std::endl;
+					char bodydata[20] = "";
+					msg >> bodydata;
+					std::cout << "Body: \n" << bodydata << std::endl;
+
+					_playerHost = constructPlayerFromData(std::string(bodydata));
+					_gameRoomMenu->joinPlayerAsHost(_playerHost);
+					_gameRoomMenu->playerHostConnected();
+					break;
+				}
+			}
+		}
+	}
+}
+
+Player* Game::constructPlayerFromData(std::string data)
+{
+	std::string name;
+	int deck;
+
+	// Obtain player name
+	size_t namePos = data.find("name:");
+
+	// check if "name:" is part of the string 
+	if (namePos != std::string::npos) {
+
+		// Extract the name from the position "name:" untill find a comma ","
+		size_t commaPos = data.find(",", namePos);
+		if (commaPos != std::string::npos) {
+			name = data.substr(namePos + 5, commaPos - (namePos + 5)); // 5 is the length of "name:"
+		}
+	}
+
+	// Obtain player deck
+	size_t deckPos = data.find("deck:");
+	if (deckPos != std::string::npos) {
+		// Extract the deck from the posición "deck:" hasta el final de la cadena
+		std::istringstream(data.substr(deckPos + 5)) >> deck; // 5 es la longitud de "deck:"
+	}
+	Player* player = new Player(name, deck);
+	return player;
 }
 
 void Game::render()
@@ -353,33 +413,11 @@ void Game::render()
 
 void Game::release()
 {
-	_connection->clear();
+	if (netClient_ != nullptr) delete netClient_;
+	if (netServer_ != nullptr) delete netServer_;
+
 	SDL_DestroyRenderer(_renderer);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();
 }
 
-void Game::createGameRoom() {
-	std::cout << "creating a server socket" << std::endl;
-	Connection connection;
-	if (connection.startServerConnection() != 0)
-		std::cout << "Throw ConnectionException at server" << std::endl;
-	
-}
-
-void Game::joinGameRoom() {
-	std::string ip;
-	int port;
-
-	std::cout << "Introduce the IP adress: " << std::endl;
-	std::cin >> ip;
-
-	std::cout << "Introduce the Port: " << std::endl;
-	std::cin >> port;
-	//TODO: check the input format
-
-	std::cout << "creating a client socket" << std::endl;
-	Connection connection;
-	if (connection.startClientConnection(ip.c_str(), port) != 0)
-		std::cout << "Throw ConnectionException at client" << std::endl;
-}

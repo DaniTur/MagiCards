@@ -13,6 +13,8 @@
 #include "PreparingGameTableScreen.h"
 #include "Connection.h"
 #include "LoadingScreen.h"
+#include "NetServer.h"
+#include "NetClient.h"
 
 enum gameStates { MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU, LOADING_SCREEN, PREPARING_GAMETABLE };
 
@@ -34,16 +36,16 @@ public:
 
 	bool isRunning();
 
-	void createGameRoom();
-
-	void joinGameRoom();
-
 private:
 	void createWindowAndRenderer();
 
 	void initSDL();
 
 	void updateMenu();
+
+	void updateNetworking();
+
+	Player* constructPlayerFromData(std::string data);
 
 private:
 	bool _isRunning;
@@ -64,6 +66,9 @@ private:
 	LoadingScreen* _loadingScreen = NULL;
 
 	Player *_playerHost = NULL, *_playerClient = NULL;
-	Connection* _connection = NULL;
+	//Connection* _connection = NULL;
+
+	NetClient* netClient_ = nullptr;
+	NetServer* netServer_ = nullptr;
 };
 

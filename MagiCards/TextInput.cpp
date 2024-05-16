@@ -1,7 +1,7 @@
 #include "TextInput.h"
 #include <SDL.h>
 #include <SDL_image.h>
-
+#include "ResourcesList.h"
 
 TextInput::TextInput()
 {
@@ -10,7 +10,7 @@ TextInput::TextInput()
 TextInput::TextInput(SDL_Renderer* renderer, int dRectX, int dRectY, std::string defaultText)
 	: _renderer(renderer), _defaultText(defaultText)
 {
-	_texture = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\TextInput.png");
+	_texture = IMG_LoadTexture(_renderer, IMG_TEXT_INPUT);
 
 	_sRect.x = 0;
 	_sRect.y = 0;
@@ -29,7 +29,7 @@ TextInput::TextInput(SDL_Renderer* renderer, int dRectX, int dRectY, std::string
 
 	_surfaceText = NULL;
 
-	_textFont = TTF_OpenFont("D:\\MagiCardsProject\\MagiCards\\MagiCards\\OpenSans-Regular.ttf", _fontSize);
+	_textFont = TTF_OpenFont(TEXT_FONT, _fontSize);
 }
 
 TextInput::~TextInput()

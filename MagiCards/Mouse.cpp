@@ -1,9 +1,10 @@
 #include "Mouse.h"
 #include <SDL_image.h>
+#include "ResourcesList.h"
 
 Mouse::Mouse(SDL_Renderer * renderer) : _renderer(renderer)
 {
-	_texture = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\Mouse.png");
+	_texture = IMG_LoadTexture(_renderer, IMG_MOUSE);
 	
 	_cursor.x = 0;
 	_cursor.y = 0;
