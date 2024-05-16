@@ -1,6 +1,6 @@
 #include <SDL_image.h>
 #include "JoinRoomMenu.h"
-
+#include "ResourcesList.h"
 
 JoinRoomMenu::JoinRoomMenu()
 {
@@ -11,7 +11,7 @@ JoinRoomMenu::JoinRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-    _background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\JoinRoomMenu.png");
+    _background = IMG_LoadTexture(_renderer, IMG_JOIN_ROOM_MENU);
 
 	_sRect.x = 0;
 	_sRect.y = 0;

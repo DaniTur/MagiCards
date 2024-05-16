@@ -1,6 +1,7 @@
 #include "MainMenu.h"
 #include <SDL_image.h>
 #include <iostream>
+#include "ResourcesList.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -17,7 +18,7 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer,  "D:\\MagiCardsProject\\MagiCards\\MagiCards\\MainMenu.png");
+	_background = IMG_LoadTexture(_renderer, IMG_MAIN_MENU);
 
 	_sRect.x = 0;
 	_sRect.y = 0;

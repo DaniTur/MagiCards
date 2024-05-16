@@ -1,6 +1,7 @@
 #include "CreateRoomMenu.h"
 #include <SDL_image.h>
 #include <iostream>
+#include "ResourcesList.h"
 
 CreateRoomMenu::CreateRoomMenu()
 {
@@ -11,7 +12,7 @@ CreateRoomMenu::CreateRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\CreateRoomMenu.png");
+	_background = IMG_LoadTexture(_renderer, IMG_CREATE_ROOM_MENU);
 
 	_sRect.x = 0;
 	_sRect.y = 0;

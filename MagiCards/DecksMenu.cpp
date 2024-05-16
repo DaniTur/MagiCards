@@ -1,5 +1,6 @@
 #include "DecksMenu.h"
 #include <SDL_image.h>
+#include "ResourcesList.h"
 
 DecksMenu::DecksMenu()
 {
@@ -7,7 +8,7 @@ DecksMenu::DecksMenu()
 
 DecksMenu::DecksMenu(SDL_Renderer* renderer) : _renderer(renderer)
 {
-	_background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\DecksMenu.png");
+	_background = IMG_LoadTexture(_renderer, IMG_DECK_MENU);
 
 	_sRect.x = 0;
 	_sRect.y = 0;

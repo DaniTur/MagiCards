@@ -1,6 +1,7 @@
 #include "RoomMenu.h"
 #include <SDL_image.h>
-
+//#include "ResourceManager.h"
+#include "ResourcesList.h"
 
 RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* player, bool serverSide) 
 	: _renderer(renderer), _serverSide(serverSide)
@@ -11,7 +12,15 @@ RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* player, bool serverSide)
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	_background = IMG_LoadTexture(_renderer, "D:\\MagiCardsProject\\MagiCards\\MagiCards\\RoomMenu.png");
+	// TODO: arreglar esto para que funcione con los recursos de windows
+	// Load the image resource from the compiled resources
+	//HINSTANCE hInstance = GetModuleHandle(NULL);
+	//SDL_Surface* surface = ResourceManager::LoadImageFromResource(hInstance, MAKEINTRESOURCE(IDB_ROOM_MENU));
+	//_background = SDL_CreateTextureFromSurface(_renderer, surface);
+	//SDL_FreeSurface(surface);
+	
+	_background = IMG_LoadTexture(_renderer, IMG_ROOM_MENU);
+	_textFont = TTF_OpenFont(TEXT_FONT, 18);
 
 	_sRect.x = 0;
 	_sRect.y = 0;
