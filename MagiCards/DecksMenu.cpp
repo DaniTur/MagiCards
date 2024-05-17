@@ -26,6 +26,10 @@ DecksMenu::DecksMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	_backButton->setWindowXY((windowX / 2) - (250), 500);
 }
 
+DecksMenu::~DecksMenu()
+{
+}
+
 void DecksMenu::handleEvents()
 {
     if (_backButton->isSelected()) _buttonSelected = 0;

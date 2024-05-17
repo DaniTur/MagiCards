@@ -47,9 +47,12 @@ RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* player, bool serverSide)
 
 RoomMenu::~RoomMenu()
 {
+	SDL_DestroyTexture(_background);
 	delete _startButton;
 	delete _backButton;
-	SDL_DestroyTexture(_background);
+	delete _textFont;
+	SDL_FreeSurface(_surfaceText);
+	SDL_DestroyTexture(_textTexture);
 }
 
 void RoomMenu::handleEvents()
@@ -82,29 +85,37 @@ void RoomMenu::render()
 
 	//render player (name + deck)
 
+	SDL_Surface* textSurface = nullptr;
+	SDL_Texture* textTexture = nullptr;
 
 	if (_playerHostConnected)
 	{
-		_surfaceText = TTF_RenderText_Solid(_textFont, _playerHost->getName().c_str(), _textColor);
-		_dTextRect.w = _surfaceText->w;
-		_dTextRect.h = _surfaceText->h;
+		textSurface = TTF_RenderText_Solid(_textFont, _playerHost->getName().c_str(), _textColor);
+		_dTextRect.w = textSurface->w;
+		_dTextRect.h = textSurface->h;
 		_dTextRect.x = 50;
 		_dTextRect.y = 50;
-		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
-		SDL_FreeSurface(_surfaceText);
-		SDL_RenderCopy(_renderer, _textTexture, NULL, &_dTextRect);
+		textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
+
+		SDL_RenderCopy(_renderer, textTexture, NULL, &_dTextRect);
+		
+		SDL_FreeSurface(textSurface);
+		SDL_DestroyTexture(textTexture);
 	}
 
 	if (_playerClientConnected)
 	{
-		_surfaceText = TTF_RenderText_Solid(_textFont, _playerClient->getName().c_str(), _textColor);
-		_dTextRect.w = _surfaceText->w;
-		_dTextRect.h = _surfaceText->h;
+		textSurface = TTF_RenderText_Solid(_textFont, _playerClient->getName().c_str(), _textColor);
+		_dTextRect.w = textSurface->w;
+		_dTextRect.h = textSurface->h;
 		_dTextRect.x = 50;
 		_dTextRect.y = 80;
-		_textTexture = SDL_CreateTextureFromSurface(_renderer, _surfaceText);
+		textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
+
+		SDL_RenderCopy(_renderer, textTexture, NULL, &_dTextRect);
+
 		SDL_FreeSurface(_surfaceText);
-		SDL_RenderCopy(_renderer, _textTexture, NULL, &_dTextRect);
+		SDL_DestroyTexture(textTexture);
 	}
 
 

@@ -55,6 +55,7 @@ private:
 
 	TTF_Font* _textFont;
 	SDL_Color _textColor = { 0, 0, 0 }; // black
+	
 	SDL_Surface* _surfaceText;
 	SDL_Texture* _textTexture;
 	SDL_Rect _dTextRect;

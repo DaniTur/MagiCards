@@ -35,9 +35,11 @@ CreateRoomMenu::CreateRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 
 CreateRoomMenu::~CreateRoomMenu()
 {
-	delete _createButton;
-	delete _backButton;
 	SDL_DestroyTexture(_background);
+	delete _backButton;
+	delete _createButton;
+	delete _playerNameInput;
+	delete _deckSelector;
 }
 
 void CreateRoomMenu::handleEvents()

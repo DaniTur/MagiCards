@@ -149,16 +149,22 @@ void Game::updateMenu()
 			switch (_mainMenu->getButtonPressed())
 			{
 				case 0:
+					if (!_createRoomMenu) {
+						delete _createRoomMenu;
+						std::cout << "deleted _createRoomMenu" << std::endl;
+					} 
 					_createRoomMenu = new CreateRoomMenu(_renderer);
 					_gameState = CREATE_ROOM;
 					break;
 
 				case 1:
+					if (!_joinRoomMenu) delete _joinRoomMenu;
 					_joinRoomMenu = new JoinRoomMenu(_renderer);
 					_gameState = JOIN_ROOM;
 					break;
 
 				case 2:
+					if (!_decksMenu) delete _decksMenu;
 					_decksMenu = new DecksMenu(_renderer);
 					_gameState = DECKS_MENU;
 					break;
@@ -183,7 +189,6 @@ void Game::updateMenu()
 					break;
 				}
 				case 1: //Back button
-					delete _gameRoomMenu;
 					_gameState = MAIN_MENU;
 					break;
 			}
@@ -196,8 +201,9 @@ void Game::updateMenu()
 			{
 				case 0: //Join button
 					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
+					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 					netClient_ = new NetClient();
-					_loadingScreen = new LoadingScreen(_renderer, "Creating game room...");
+					_loadingScreen = new LoadingScreen(_renderer, "Joining game room...");
 					_gameState = LOADING_SCREEN;
 					break;
 				case 1: //Back button
@@ -207,24 +213,29 @@ void Game::updateMenu()
 			_joinRoomMenu->clearPressedButton();
 			break;
 
-		case LOADING_SCREEN: // from joinRoom
+		case LOADING_SCREEN:
 		{
-			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected())
+			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected()) // Client and not connected to a server
 			{
 				bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
 				if (!connectionStatus)
 				{
 					std::cout << "Connection to the server failed." << std::endl;
 				}
-				else
-				{
-					//netClient_->SendPlayerData(_playerClient);
-
-					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-					_gameRoomMenu->playerClientConnected();
-					_gameState = GAME_ROOM;
-				}
+			}
+			else if (!_gameRoomMenu->serverSide() && !_playerClient->deckLoaded()) // Client connected to a server
+			{
+				// cargar(crearlo a partir del id del deck) los deck tanto del jugador propio como del oponente
+				// loadDecks();
+				std::cout << "loading decks..." << std::endl;
+				_playerClient->loadDeck();
+				// crear/cargar tablero con los jugadores y decks
+				// enviar mensaje al server de que esta todo cargado y se puede empezar la partida
+			}
+			else if (!_playerHost->deckLoaded()) // Server
+			{
+				std::cout << "loading decks..." << std::endl;
+				_playerHost->loadDeck();
 			}
 
 			break;
@@ -240,12 +251,18 @@ void Game::updateMenu()
 
 			switch (_gameRoomMenu->getButtonPressed())
 			{
-				case 0: // Play button
+				case 0: // Start button, only server side can press it
+				{
 					std::cout << "Play button pressed" << std::endl;
-					//_loadingScreen = new PreparingGameTableScreen(_renderer);
-					//_activeMenu = false;
-					//_gameState = PREPARING_GAMETABLE;
+					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
+
+					Message msg;
+					msg.header.id = MessageType::StartGame;
+					netServer_->MessageClient(msg);
+
+					_gameState = LOADING_SCREEN;
 					break;
+				}
 				case 1: // Back button
 					// close connection, server or client
 					if (_gameRoomMenu->serverSide()) {
@@ -309,6 +326,8 @@ void Game::updateNetworking()
 				case MessageType::ServerAccept:
 				{
 					std::cout << "Connected to server!" << std::endl;
+					_gameRoomMenu->playerClientConnected();
+
 					Message m;
 					m.header.id = MessageType::PlayerData;
 					//std::string name = _playerClient->getName();
@@ -333,8 +352,13 @@ void Game::updateNetworking()
 					_playerHost = constructPlayerFromData(std::string(bodydata));
 					_gameRoomMenu->joinPlayerAsHost(_playerHost);
 					_gameRoomMenu->playerHostConnected();
+
+					_gameState = GAME_ROOM;
 					break;
 				}
+				case MessageType::StartGame:
+					_gameState = LOADING_SCREEN;
+					break;
 			}
 		}
 	}

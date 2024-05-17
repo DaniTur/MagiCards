@@ -47,7 +47,6 @@ private:
 
 	TTF_Font* _textFont;
 	SDL_Color _textColor = { 0, 0, 0 }; // black
-	SDL_Surface* _surfaceText;
 
 	int _fontSize = 18;
 	const int _MAX_CHARS = 15;
