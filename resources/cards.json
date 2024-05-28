@@ -1,0 +1,56 @@
+[
+	{
+		"id":1,
+		"name":"Red Dragon",
+		"color": 0,
+		"cost":0,
+		"damage":4,
+		"defense":3,
+		"texture":"redDragon.png"
+	},
+	{
+		"id":2,
+		"name":"Red Warrior",
+		"color": 0,
+		"cost":0,
+		"damage":3,
+		"defense":2,
+		"texture":"redDragon.png"
+	},
+	{
+		"id":3,
+		"name":"Red Mage",
+		"color": 0,
+		"cost":0,
+		"damage":5,
+		"defense":1,
+		"texture":"redDragon.png"
+	},
+	{
+		"id":4,
+		"name":"Green Dragon",
+		"color": 1,
+		"cost":0,
+		"damage":3,
+		"defense":4,
+		"texture":"greenDragon.png"
+	},
+	{
+		"id":5,
+		"name":"Green Warrior",
+		"color": 1,
+		"cost":0,
+		"damage":2,
+		"defense":3,
+		"texture":"greenDragon.png"
+	},
+	{
+		"id":6,
+		"name":"Green Mage",
+		"color": 1,
+		"cost":0,
+		"damage":4,
+		"defense":2,
+		"texture":"greenDragon.png"
+	}
+]

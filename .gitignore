@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # External libraries
 vclib/
+/MagiCards/MagiCards.vcxproj
+/MagiCards/MagiCards.vcxproj.filters

@@ -16,6 +16,15 @@ Game::Game() {
 
 Game::~Game()
 {
+	delete _mouse;
+	delete _mainMenu;
+	delete _createRoomMenu;
+	delete _gameRoomMenu;
+	delete _joinRoomMenu;
+	delete _decksMenu;
+	delete _loadingScreen;
+	delete _playerHost;
+	delete _playerClient;
 	release();
 }
 
@@ -149,16 +158,22 @@ void Game::updateMenu()
 			switch (_mainMenu->getButtonPressed())
 			{
 				case 0:
+					if (!_createRoomMenu) {
+						delete _createRoomMenu;
+						std::cout << "deleted _createRoomMenu" << std::endl;
+					} 
 					_createRoomMenu = new CreateRoomMenu(_renderer);
 					_gameState = CREATE_ROOM;
 					break;
 
 				case 1:
+					if (!_joinRoomMenu) delete _joinRoomMenu;
 					_joinRoomMenu = new JoinRoomMenu(_renderer);
 					_gameState = JOIN_ROOM;
 					break;
 
 				case 2:
+					if (!_decksMenu) delete _decksMenu;
 					_decksMenu = new DecksMenu(_renderer);
 					_gameState = DECKS_MENU;
 					break;
@@ -176,14 +191,13 @@ void Game::updateMenu()
 			{
 				case 0: //Create button
 				{
-					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
+					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck(), _renderer);
 					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
 					netServer_ = new NetServer(30000);
 					_gameState = GAME_ROOM;
 					break;
 				}
 				case 1: //Back button
-					delete _gameRoomMenu;
 					_gameState = MAIN_MENU;
 					break;
 			}
@@ -195,11 +209,23 @@ void Game::updateMenu()
 			switch (_joinRoomMenu->getButtonPressed())
 			{
 				case 0: //Join button
-					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
+				{
+					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck(), _renderer);
+					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 					netClient_ = new NetClient();
-					_loadingScreen = new LoadingScreen(_renderer, "Creating game room...");
-					_gameState = LOADING_SCREEN;
+
+					bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+					if (!connectionStatus)
+					{
+						std::cout << "Connection to the server failed." << std::endl;
+					}
+					else
+					{
+						_gameState = GAME_ROOM;
+					}
+
 					break;
+				}
 				case 1: //Back button
 					_gameState = MAIN_MENU;
 					break;
@@ -207,24 +233,44 @@ void Game::updateMenu()
 			_joinRoomMenu->clearPressedButton();
 			break;
 
-		case LOADING_SCREEN: // from joinRoom
+		case LOADING_SCREEN:
 		{
-			_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected())
+			if (!_gameRoomMenu->serverSide())	// Client side
 			{
-				bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-				if (!connectionStatus)
+				if (!_playerClient->deckLoaded())
 				{
-					std::cout << "Connection to the server failed." << std::endl;
+					std::cout << "Loading my deck..." << std::endl;
+					_playerClient->loadDeck();
+					std::cout << "My deck loaded." << std::endl;
 				}
-				else
-				{
-					//netClient_->SendPlayerData(_playerClient);
 
-					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
-					_gameRoomMenu->playerClientConnected();
-					_gameState = GAME_ROOM;
+				if (!_playerHost->deckLoaded()) // Servr is the opponent of client
+				{
+					std::cout << "Loading opponent deck..." << std::endl;
+					_playerHost->loadDeck();
+					std::cout << "Opponent deck loaded." << std::endl;
 				}
+				
+				// Create / load game table
+				// Send message to the server MessageType::GameTableLoaded
+			}
+			else // Server side
+			{
+				if (!_playerHost->deckLoaded())
+				{
+					std::cout << "Loading my deck..." << std::endl;
+					_playerHost->loadDeck();
+					std::cout << "My deck loaded." << std::endl;
+				}
+
+				if (!_playerClient->deckLoaded()) // Client is the opponent of server
+				{
+					std::cout << "Loading opponent deck..." << std::endl;
+					_playerClient->loadDeck();
+					std::cout << "Opponent deck loaded." << std::endl;
+				}
+
+				// Create / load game table
 			}
 
 			break;
@@ -240,12 +286,18 @@ void Game::updateMenu()
 
 			switch (_gameRoomMenu->getButtonPressed())
 			{
-				case 0: // Play button
+				case 0: // Start button, only server side can press it
+				{
 					std::cout << "Play button pressed" << std::endl;
-					//_loadingScreen = new PreparingGameTableScreen(_renderer);
-					//_activeMenu = false;
-					//_gameState = PREPARING_GAMETABLE;
+					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
+
+					Message msg;
+					msg.header.id = MessageType::StartGame;
+					netServer_->MessageClient(msg);
+
+					_gameState = LOADING_SCREEN;
 					break;
+				}
 				case 1: // Back button
 					// close connection, server or client
 					if (_gameRoomMenu->serverSide()) {
@@ -309,6 +361,8 @@ void Game::updateNetworking()
 				case MessageType::ServerAccept:
 				{
 					std::cout << "Connected to server!" << std::endl;
+					_gameRoomMenu->playerClientConnected();
+
 					Message m;
 					m.header.id = MessageType::PlayerData;
 					//std::string name = _playerClient->getName();
@@ -333,6 +387,13 @@ void Game::updateNetworking()
 					_playerHost = constructPlayerFromData(std::string(bodydata));
 					_gameRoomMenu->joinPlayerAsHost(_playerHost);
 					_gameRoomMenu->playerHostConnected();
+					break;
+				}
+				case MessageType::StartGame:
+				{
+					if (!_loadingScreen) delete _loadingScreen;
+					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
+					_gameState = LOADING_SCREEN;
 					break;
 				}
 			}
@@ -364,7 +425,7 @@ Player* Game::constructPlayerFromData(std::string data)
 		// Extract the deck from the posición "deck:" hasta el final de la cadena
 		std::istringstream(data.substr(deckPos + 5)) >> deck; // 5 es la longitud de "deck:"
 	}
-	Player* player = new Player(name, deck);
+	Player* player = new Player(name, deck, _renderer);
 	return player;
 }
 

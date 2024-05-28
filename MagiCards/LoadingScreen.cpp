@@ -31,6 +31,14 @@ LoadingScreen::LoadingScreen(SDL_Renderer* renderer, std::string message) : _ren
 	SDL_FreeSurface(_surfaceText);
 }
 
+LoadingScreen::~LoadingScreen()
+{
+	SDL_DestroyTexture(_background);
+	SDL_DestroyTexture(_textTexture);
+	SDL_FreeSurface(_surfaceText);
+	delete _textFont;
+}
+
 void LoadingScreen::render()
 {
 	//render background
