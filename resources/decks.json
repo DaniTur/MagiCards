@@ -1,0 +1,36 @@
+[
+	{
+		"deck_id": 1,
+		"cards": [
+			{
+				"card_id": 1,
+				"units": 4
+			},
+			{
+				"card_id": 2,
+				"units": 4
+			},
+			{
+				"card_id": 3,
+				"units": 4
+			}
+		]
+	},
+	{
+		"deck_id": 2,
+		"cards": [
+			{
+				"card_id": 4,
+				"units": 4
+			},
+			{
+				"card_id": 5,
+				"units": 4
+			},
+			{
+				"card_id": 6,
+				"units":4
+			}
+		]
+	}
+]
