@@ -16,6 +16,15 @@ Game::Game() {
 
 Game::~Game()
 {
+	delete _mouse;
+	delete _mainMenu;
+	delete _createRoomMenu;
+	delete _gameRoomMenu;
+	delete _joinRoomMenu;
+	delete _decksMenu;
+	delete _loadingScreen;
+	delete _playerHost;
+	delete _playerClient;
 	release();
 }
 
@@ -182,7 +191,7 @@ void Game::updateMenu()
 			{
 				case 0: //Create button
 				{
-					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck());
+					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck(), _renderer);
 					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
 					netServer_ = new NetServer(30000);
 					_gameState = GAME_ROOM;
@@ -200,12 +209,23 @@ void Game::updateMenu()
 			switch (_joinRoomMenu->getButtonPressed())
 			{
 				case 0: //Join button
-					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck());
+				{
+					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck(), _renderer);
 					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
 					netClient_ = new NetClient();
-					_loadingScreen = new LoadingScreen(_renderer, "Joining game room...");
-					_gameState = LOADING_SCREEN;
+
+					bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+					if (!connectionStatus)
+					{
+						std::cout << "Connection to the server failed." << std::endl;
+					}
+					else
+					{
+						_gameState = GAME_ROOM;
+					}
+
 					break;
+				}
 				case 1: //Back button
 					_gameState = MAIN_MENU;
 					break;
@@ -215,27 +235,42 @@ void Game::updateMenu()
 
 		case LOADING_SCREEN:
 		{
-			if (!_gameRoomMenu->serverSide() && !netClient_->IsConnected()) // Client and not connected to a server
+			if (!_gameRoomMenu->serverSide())	// Client side
 			{
-				bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
-				if (!connectionStatus)
+				if (!_playerClient->deckLoaded())
 				{
-					std::cout << "Connection to the server failed." << std::endl;
+					std::cout << "Loading my deck..." << std::endl;
+					_playerClient->loadDeck();
+					std::cout << "My deck loaded." << std::endl;
 				}
+
+				if (!_playerHost->deckLoaded()) // Servr is the opponent of client
+				{
+					std::cout << "Loading opponent deck..." << std::endl;
+					_playerHost->loadDeck();
+					std::cout << "Opponent deck loaded." << std::endl;
+				}
+				
+				// Create / load game table
+				// Send message to the server MessageType::GameTableLoaded
 			}
-			else if (!_gameRoomMenu->serverSide() && !_playerClient->deckLoaded()) // Client connected to a server
+			else // Server side
 			{
-				// cargar(crearlo a partir del id del deck) los deck tanto del jugador propio como del oponente
-				// loadDecks();
-				std::cout << "loading decks..." << std::endl;
-				_playerClient->loadDeck();
-				// crear/cargar tablero con los jugadores y decks
-				// enviar mensaje al server de que esta todo cargado y se puede empezar la partida
-			}
-			else if (!_playerHost->deckLoaded()) // Server
-			{
-				std::cout << "loading decks..." << std::endl;
-				_playerHost->loadDeck();
+				if (!_playerHost->deckLoaded())
+				{
+					std::cout << "Loading my deck..." << std::endl;
+					_playerHost->loadDeck();
+					std::cout << "My deck loaded." << std::endl;
+				}
+
+				if (!_playerClient->deckLoaded()) // Client is the opponent of server
+				{
+					std::cout << "Loading opponent deck..." << std::endl;
+					_playerClient->loadDeck();
+					std::cout << "Opponent deck loaded." << std::endl;
+				}
+
+				// Create / load game table
 			}
 
 			break;
@@ -352,13 +387,15 @@ void Game::updateNetworking()
 					_playerHost = constructPlayerFromData(std::string(bodydata));
 					_gameRoomMenu->joinPlayerAsHost(_playerHost);
 					_gameRoomMenu->playerHostConnected();
-
-					_gameState = GAME_ROOM;
 					break;
 				}
 				case MessageType::StartGame:
+				{
+					if (!_loadingScreen) delete _loadingScreen;
+					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
 					_gameState = LOADING_SCREEN;
 					break;
+				}
 			}
 		}
 	}
@@ -388,7 +425,7 @@ Player* Game::constructPlayerFromData(std::string data)
 		// Extract the deck from the posición "deck:" hasta el final de la cadena
 		std::istringstream(data.substr(deckPos + 5)) >> deck; // 5 es la longitud de "deck:"
 	}
-	Player* player = new Player(name, deck);
+	Player* player = new Player(name, deck, _renderer);
 	return player;
 }
 

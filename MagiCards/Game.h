@@ -22,6 +22,7 @@ class Game
 {
 public:
 	Game();
+
 	~Game();
 
 	void init();
@@ -66,7 +67,6 @@ private:
 	LoadingScreen* _loadingScreen = NULL;
 
 	Player *_playerHost = NULL, *_playerClient = NULL;
-	//Connection* _connection = NULL;
 
 	NetClient* netClient_ = nullptr;
 	NetServer* netServer_ = nullptr;
