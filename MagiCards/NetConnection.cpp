@@ -81,7 +81,7 @@ void NetConnection::ReadHeader()
 	// asio::async_read() needs a buffer with the EXACT same size as the message length sended, otherwise
 	// the function wont work, and no exception is called.
 	asio::async_read(socket_, asio::buffer(&messageInTmp.header, sizeof(MessageHeader)),
-		[this](std::error_code errorCode, std::size_t bytesLength) 
+		[this](std::error_code errorCode, std::size_t bytesLength)
 		{
 			if (!errorCode)
 			{

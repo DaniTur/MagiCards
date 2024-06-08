@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <string>
 #include "DeckLoader.h"
+#include <vector>
 
 class Player
 {
@@ -16,14 +17,29 @@ public:
 
 	bool deckLoaded() const;
 
-	void loadDeck(); //testing, remove
+	void loadDeck();
+
+	void shuffleDeck();
+
+	void draw(int number);
+
+	void render();
+
+	int deckSize() const;
+
+	int deckMaxSize() const;
+
+	std::vector<Card> hand(); //returns a copy of the hand
 
 private:
 	std::string _name;
-	int _deckIndex = -1;
+	int deckId_ = -1;
 
-	Deck deck_;
+	//Deck deck_;
+	std::vector<Card> deck_;
+	std::vector<Card> hand_;
 	SDL_Renderer* renderer_;
 	bool loaded_ = false; //testing, remove
+	int deckMaxSize_ = -1;
 };
 

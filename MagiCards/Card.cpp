@@ -23,3 +23,15 @@ Card::~Card()
 {
 	SDL_DestroyTexture(texture_);
 }
+
+int Card::getId() const
+{
+	return static_cast<int>(id_);
+}
+
+void Card::render(SDL_Rect* destination, float proportion) const
+{
+	destination->w = sRect_.w * proportion;
+	destination->h = sRect_.h * proportion;
+	SDL_RenderCopy(renderer_, texture_, NULL, destination);
+}

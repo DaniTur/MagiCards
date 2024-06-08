@@ -6,5 +6,6 @@ enum class MessageType : uint32_t
 	ServerAccept,
 	ServerError,
 	PlayerData,
-	StartGame
+	StartGame,
+	GameTableLoaded
 };

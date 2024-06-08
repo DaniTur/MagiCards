@@ -38,8 +38,6 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	_buttons[DECKS_BTN]->setWindowXY((windowW / 2) - (250), 220 + 50);
 	_buttons[QUIT_GAME_BTN] = new Button("Quit Game", _renderer, 0, 300);
 	_buttons[QUIT_GAME_BTN]->setWindowXY((windowW / 2) - (250), 330 + 50);
-
-	//_createRoomMenu = new CreateRoomMenu(_renderer);
 }
 
 MainMenu::~MainMenu()

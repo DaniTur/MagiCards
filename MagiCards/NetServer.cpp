@@ -100,7 +100,6 @@ bool NetServer::OnClientConnect(std::shared_ptr<NetConnection> clientConnection)
 		clientConnection->Send(message);
 		return false;
 	}
-
 }
 
 // nMaxMessages: number of maximum messages processed per processing window (per frame)

@@ -11,7 +11,7 @@ class DeckLoader
 {
 public:
 	// Fills the deck passed as reference with the cards from the deck.json with deckId as identifier
-	static void load(uint8_t deckId, Deck& deck, SDL_Renderer* renderer)
+	static void load(uint8_t deckId, std::vector<Card>& deck, SDL_Renderer* renderer)
 	{
 		std::ifstream decksFile(DECKS_JSON);
 		if (!decksFile.is_open()) {
@@ -63,7 +63,8 @@ public:
 						Card card = CardFactory::create(cardId, renderer);
 						for (int i = 0; i < units; i++)
 						{
-							deck.cards.push_back(card);
+							//deck.cards.push_back(card);
+							deck.push_back(card);
 						}
 					}
 					else

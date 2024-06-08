@@ -144,7 +144,8 @@ void Game::update()
 	}
 	else
 	{
-		//update game
+		//update game table
+		gameTable_->update();
 	}
 
 }
@@ -239,38 +240,64 @@ void Game::updateMenu()
 			{
 				if (!_playerClient->deckLoaded())
 				{
-					std::cout << "Loading my deck..." << std::endl;
 					_playerClient->loadDeck();
 					std::cout << "My deck loaded." << std::endl;
 				}
 
-				if (!_playerHost->deckLoaded()) // Servr is the opponent of client
+				if (!_playerHost->deckLoaded()) // Server is the opponent of client
 				{
-					std::cout << "Loading opponent deck..." << std::endl;
 					_playerHost->loadDeck();
 					std::cout << "Opponent deck loaded." << std::endl;
 				}
 				
 				// Create / load game table
-				// Send message to the server MessageType::GameTableLoaded
+				if (!gameTable_)
+				{
+					gameTable_ = new GameTable(_renderer, _playerClient, _playerHost, GameTable::Owner::client);
+					std::cout << "game table ready" << std::endl;
+					Message m;
+					m.header.id = MessageType::GameTableLoaded;
+					netClient_->Send(m);
+					waiting_ = true;
+				}
+				//wait for server to load the game table
+				if (!waiting_)
+				{
+					_gameState = GAME_TABLE;
+					_activeMenu = false;
+				}
 			}
 			else // Server side
 			{
 				if (!_playerHost->deckLoaded())
 				{
-					std::cout << "Loading my deck..." << std::endl;
 					_playerHost->loadDeck();
 					std::cout << "My deck loaded." << std::endl;
 				}
 
 				if (!_playerClient->deckLoaded()) // Client is the opponent of server
 				{
-					std::cout << "Loading opponent deck..." << std::endl;
 					_playerClient->loadDeck();
 					std::cout << "Opponent deck loaded." << std::endl;
 				}
 
 				// Create / load game table
+				if (!gameTable_) {
+					gameTable_ = new GameTable(_renderer, _playerHost, _playerClient, GameTable::Owner::server);
+					std::cout << "game table ready" << std::endl;
+
+					Message m;
+					m.header.id = MessageType::GameTableLoaded;
+					netServer_->MessageClient(m);
+
+					waiting_ = true;
+				}
+				//wait client to load the game table
+				if (!waiting_)
+				{
+					_gameState = GAME_TABLE;
+					_activeMenu = false;
+				}
 			}
 
 			break;
@@ -348,6 +375,13 @@ void Game::updateNetworking()
 					netServer_->MessageClient(m);
 					break;
 				}
+				// the client has the game table ready
+				case MessageType::GameTableLoaded: 
+				{
+					std::cout << "Client table ready" << std::endl;
+					waiting_ = false;
+					break;
+				}
 			}
 		}
 	}
@@ -396,6 +430,10 @@ void Game::updateNetworking()
 					_gameState = LOADING_SCREEN;
 					break;
 				}
+				case MessageType::GameTableLoaded: // Server has loaded the game table
+					std::cout << "Server table ready" << std::endl;
+					waiting_ = false;
+					break;
 			}
 		}
 	}
@@ -430,7 +468,9 @@ Player* Game::constructPlayerFromData(std::string data)
 }
 
 void Game::render()
-{	
+{
+	SDL_RenderClear(_renderer);
+
 	if (_activeMenu)
 	{
 		switch (_gameState)
@@ -462,14 +502,19 @@ void Game::render()
 	else
 	{
 		// render game table
-		SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
+		gameTable_->render();
+		//SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
 	}
 
 	_mouse->render();
 
 	SDL_RenderPresent(_renderer);
+	//if (gameTable_)
+	//{
+	//	SDL_Texture* tmp = gameTable_->getBackground();
+	//}
 	//SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
-	SDL_RenderClear(_renderer);
+	//SDL_RenderClear(_renderer);
 }
 
 void Game::release()

@@ -25,3 +25,7 @@ constexpr auto IMG_RED_MAGE_CARD = "D:\\MagiCardsProject\\MagiCards\\resources\\
 constexpr auto IMG_GREEN_DRAGON_CARD = "D:\\MagiCardsProject\\MagiCards\\resources\\greenDragon.png";
 constexpr auto IMG_GREEN_WARRIOR_CARD = "D:\\MagiCardsProject\\MagiCards\\resources\\greenWarrior.png";
 constexpr auto IMG_GREEN_MAGE_CARD = "D:\\MagiCardsProject\\MagiCards\\resources\\greenMage.png";
+
+// Table
+constexpr auto IMG_GAME_TABLE = "D:\\MagiCardsProject\\MagiCards\\resources\\gameTable.png";
+constexpr auto IMG_DECK = "D:\\MagiCardsProject\\MagiCards\\resources\\deck.png";

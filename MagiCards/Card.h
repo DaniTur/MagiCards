@@ -14,6 +14,10 @@ public:
 
 	~Card();
 
+	int getId() const; // testing, remove
+
+	void render(SDL_Rect* destination, float proportion) const;
+
 private:
 	SDL_Renderer* renderer_ = nullptr;
 	SDL_Texture* texture_ = nullptr, *textureBack_ = nullptr;

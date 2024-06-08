@@ -13,10 +13,11 @@
 #include "PreparingGameTableScreen.h"
 #include "Connection.h"
 #include "LoadingScreen.h"
+#include "GameTable.h"
 #include "NetServer.h"
 #include "NetClient.h"
 
-enum gameStates { MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU, LOADING_SCREEN, PREPARING_GAMETABLE };
+enum gameStates { MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU, LOADING_SCREEN, GAME_TABLE };
 
 class Game
 {
@@ -51,24 +52,27 @@ private:
 private:
 	bool _isRunning;
 
-	SDL_Window* _window = NULL;
-	SDL_Renderer* _renderer = NULL;
+	SDL_Window* _window = nullptr;
+	SDL_Renderer* _renderer = nullptr;
 
 	bool _activeMenu = false;
 
-	Mouse* _mouse = NULL;
+	Mouse* _mouse = nullptr;
 
 	int _gameState = -1;
-	MainMenu* _mainMenu = NULL;
-	CreateRoomMenu* _createRoomMenu = NULL;
-	RoomMenu* _gameRoomMenu = NULL;
-	JoinRoomMenu* _joinRoomMenu = NULL;
-	DecksMenu* _decksMenu = NULL;
-	LoadingScreen* _loadingScreen = NULL;
+	MainMenu* _mainMenu = nullptr;
+	CreateRoomMenu* _createRoomMenu = nullptr;
+	RoomMenu* _gameRoomMenu = nullptr;
+	JoinRoomMenu* _joinRoomMenu = nullptr;
+	DecksMenu* _decksMenu = nullptr;
+	LoadingScreen* _loadingScreen = nullptr;
+	GameTable* gameTable_ = nullptr;
 
-	Player *_playerHost = NULL, *_playerClient = NULL;
+	Player *_playerHost = nullptr, *_playerClient = nullptr;
 
 	NetClient* netClient_ = nullptr;
 	NetServer* netServer_ = nullptr;
+
+	bool waiting_ = false;
 };
 
