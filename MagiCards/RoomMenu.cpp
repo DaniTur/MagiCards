@@ -22,27 +22,21 @@ RoomMenu::RoomMenu(SDL_Renderer* renderer, Player* player, bool serverSide)
 	_background = IMG_LoadTexture(_renderer, IMG_ROOM_MENU);
 	_textFont = TTF_OpenFont(TEXT_FONT, 18);
 
-	_sRect.x = 0;
-	_sRect.y = 0;
-	_sRect.w = 1000;
-	_sRect.h = 1000;
-	_dRect.x = 0;
-	_dRect.y = 0;
-	_dRect.w = windowW;
-	_dRect.h = windowH;
+	_sRect = {0, 0, 1000, 1000}; // x, y, width, height
 
-	_dTextRect.w = 0;
-	_dTextRect.h = 0;
-	_dTextRect.x = 0;
-	_dTextRect.y = 0;
+	_dRect = {0, 0, windowW, windowH};
 
+	_dTextRect = {0, 0, 0, 0};
 
-	_startButton = new Button("StartGame", _renderer, 0, 600);
-	_startButton->setWindowXY((windowW / 2) - (250), 450);
+	SDL_Rect dst;
+	dst.x = (windowW / 2) - (250); // 250 is half the button texture width
+	dst.y = 450;
+	dst.w = 500;
+	dst.h = 100;
+	_startButton = new Button("", _renderer, {0, 600}, dst);
 
-
-	_backButton = new Button("Back", _renderer, 0, 400);
-	_backButton->setWindowXY((windowW / 2) - (250), 580);
+	dst.y = 580;
+	_backButton = new Button("", _renderer, {0, 400}, dst);
 }
 
 RoomMenu::~RoomMenu()

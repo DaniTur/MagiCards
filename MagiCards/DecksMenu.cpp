@@ -8,22 +8,21 @@ DecksMenu::DecksMenu()
 
 DecksMenu::DecksMenu(SDL_Renderer* renderer) : _renderer(renderer)
 {
+	const int windowW = 1280;
+	const int windowH = 720;
+
 	_background = IMG_LoadTexture(_renderer, IMG_DECK_MENU);
 
-	_sRect.x = 0;
-	_sRect.y = 0;
-	_sRect.w = 1000;
-	_sRect.h = 1000;
-	_dRect.x = 0;
-	_dRect.y = 0;
-	_dRect.w = 800;
-	_dRect.h = 600;
+	_sRect = {0, 0, 1000, 1000}; // x, y, width, height
 
-	const int windowX = 800;
-	const int windowY = 600;
+	_dRect = {0, 0, windowW , windowH};
 
-	_backButton = new Button("Back", _renderer, 0, 400);
-	_backButton->setWindowXY((windowX / 2) - (250), 500);
+	SDL_Rect dst;
+	dst.x = (windowW / 2) - (250);
+	dst.y = 500;
+	dst.w = 500;
+	dst.h = 100;
+	_backButton = new Button("", _renderer, {0, 400}, dst);
 }
 
 DecksMenu::~DecksMenu()

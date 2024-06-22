@@ -13,25 +13,24 @@ JoinRoomMenu::JoinRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 
     _background = IMG_LoadTexture(_renderer, IMG_JOIN_ROOM_MENU);
 
-	_sRect.x = 0;
-	_sRect.y = 0;
-	_sRect.w = 1000;
-	_sRect.h = 1000;
-	_dRect.x = 0;
-	_dRect.y = 0;
-	_dRect.w = windowW;
-	_dRect.h = windowH;
+	_sRect = {0, 0, 1000, 1000}; // x, y, width, height
+
+	_dRect = {0, 0, windowW, windowH };
 
 	_textInputs.push_back(new TextInput(_renderer, (windowW / 2) - (175), 100, "player2"));
 	_textInputs.push_back(new TextInput(_renderer, (windowW / 2) - (175), 150, "deck index"));
 	_textInputs.push_back(new TextInput(_renderer, (windowW / 2) - (175), 200, "ip address"));
 	_textInputs.push_back(new TextInput(_renderer, (windowW / 2) - (175), 250, "port"));
 
-	_joinButton = new Button("Join", _renderer, 0, 700);
-	_joinButton->setWindowXY((windowW / 2) - (250), 450);
-
-	_backButton = new Button("Back", _renderer, 0, 400);
-	_backButton->setWindowXY((windowW / 2) - (250), 570);
+	SDL_Rect dst;
+	dst.x = (windowW / 2) - (250);
+	dst.y = 450;
+	dst.w = 500;
+	dst.h = 100;
+	_joinButton = new Button("", _renderer, {0, 700}, dst);
+	
+	dst.y = 570;
+	_backButton = new Button("", _renderer, {0, 400}, dst);
 }
 
 JoinRoomMenu::~JoinRoomMenu()

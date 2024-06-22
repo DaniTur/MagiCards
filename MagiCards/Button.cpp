@@ -6,37 +6,24 @@ Button::Button()
 {
 }
 
-Button::Button(const char* text, SDL_Renderer* renderer, int textureX, int textureY) 
-	: _text(text), _renderer(renderer), _x(textureX), _y(textureY)
+Button::Button(const char* text, SDL_Renderer* renderer, SDL_Rect src, SDL_Rect dstRect)
+	: text_(text), _renderer(renderer)
 {
 	static SDL_Texture* texture = IMG_LoadTexture(_renderer, IMG_BUTTON_TEXTURE);
 	_texture = texture;
 
 	// source rectangle (from texture)
-	_sRect.x = textureX;
-	_sRect.y = textureY;
-	_sRect.h = 100;
-	_sRect.w = 500;
-
+	_sRect = {src.x , src.y, 500, 100}; // 500 w, 100 h of texture image 
 
 	//destination rectangle(to screen)
-	_dRect.x = textureX;
-	_dRect.y = textureY;
-	_dRect.h = 100;
-	_dRect.w = 500;
+	_dRect = dstRect;
 
+	textFont_ = TTF_OpenFont(TEXT_FONT, 16);
 }
 
 Button::~Button()
 {
 	SDL_DestroyTexture(_texture);
-}
-
-// set the destination
-void Button::setWindowXY(int x, int y)
-{
-	_dRect.x = x;
-	_dRect.y = y;
 }
 
 void Button::update(Mouse* mouse)
@@ -68,4 +55,25 @@ void Button::render()
 		_sRect.x = 0;
 	}
 	SDL_RenderCopy(_renderer, _texture, &_sRect, &_dRect);
+
+	if (!text_.empty())
+	{
+		SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text_.c_str(), { 0, 0, 0, 255 });
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
+		SDL_Rect dst;
+		dst.w = _dRect.w * 0.85;
+		dst.h = _dRect.h * 0.85;
+		dst.x = _dRect.x + (_dRect.w / 2) - (dst.w / 2);
+		dst.y = _dRect.y + (_dRect.h / 2) - (dst.h / 2);
+
+		SDL_RenderCopy(_renderer, texture, NULL, &dst);
+
+		SDL_FreeSurface(surface);
+		SDL_DestroyTexture(texture);
+	}
+}
+
+void Button::changeText(std::string newText)
+{
+	text_ = newText;
 }

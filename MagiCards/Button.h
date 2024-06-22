@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
-#include <iostream>
+#include <string>
+#include <SDL_ttf.h>
 #include "Mouse.h"
 
 class Button
@@ -8,11 +9,9 @@ class Button
 public:
 	Button();
 
-	Button(const char* text, SDL_Renderer* renderer, int x, int y);
+	Button(const char* text, SDL_Renderer* renderer, SDL_Rect src, SDL_Rect dstRect);
 	
 	~Button();
-
-	void setWindowXY(int x, int y);
 
 	void update(Mouse* mouse);
 
@@ -20,15 +19,17 @@ public:
 
 	void render();
 
+protected:
+	void changeText(std::string newText);
+
 private:
 	SDL_Texture* _texture;
 	SDL_Rect _sRect, _dRect;
 
 	SDL_Renderer* _renderer;
 
-	int _x, _y, _width, _height;
-	std::string _text;
+	TTF_Font* textFont_ = nullptr;
+	std::string text_;
 	bool _mouseHover = false;
-
 };
 

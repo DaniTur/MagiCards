@@ -19,25 +19,26 @@ MainMenu::MainMenu(SDL_Renderer* renderer) :  _renderer(renderer)
 	const int windowH = 720;
 
 	_background = IMG_LoadTexture(_renderer, IMG_MAIN_MENU);
+	
+	_sRect = {0, 0, 1000, 1000}; // x, y, width, height
 
-	_sRect.x = 0;
-	_sRect.y = 0;
-	_sRect.w = 1000;
-	_sRect.h = 1000;
-	_dRect.x = 0;
-	_dRect.y = 0;
-	_dRect.w = windowW;
-	_dRect.h = windowH;
+	_dRect = {0, 0, windowW, windowH};
 
+	SDL_Rect dst;
+	dst.x = (windowW / 2) - (250); // 250 is half the button texture width
+	dst.y = 0 + 50;
+	dst.w = 500;
+	dst.h = 100;
+	_buttons[CREATE_ROOM_BTN] = new Button("", _renderer, { 0, 0 }, dst);
 
-	_buttons[CREATE_ROOM_BTN] = new Button("Create Room", _renderer, 0, 0);
-	_buttons[CREATE_ROOM_BTN]->setWindowXY((windowW/2) - (250), 0 + 50);
-	_buttons[JOIN_ROOM_BTN] = new Button("Join Room", _renderer, 0, 100);
-	_buttons[JOIN_ROOM_BTN]->setWindowXY((windowW / 2) - (250), 110 + 50);
-	_buttons[DECKS_BTN] = new Button("Decks", _renderer, 0, 200);
-	_buttons[DECKS_BTN]->setWindowXY((windowW / 2) - (250), 220 + 50);
-	_buttons[QUIT_GAME_BTN] = new Button("Quit Game", _renderer, 0, 300);
-	_buttons[QUIT_GAME_BTN]->setWindowXY((windowW / 2) - (250), 330 + 50);
+	dst.y = 110 + 50;
+	_buttons[JOIN_ROOM_BTN] = new Button("", _renderer, {0, 100}, dst);
+
+	dst.y = 220 + 50;
+	_buttons[DECKS_BTN] = new Button("", _renderer, {0, 200}, dst);
+
+	dst.y = 330 + 50;
+	_buttons[QUIT_GAME_BTN] = new Button("", _renderer, {0, 300}, dst);
 }
 
 MainMenu::~MainMenu()

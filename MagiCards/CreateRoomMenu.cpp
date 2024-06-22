@@ -23,11 +23,15 @@ CreateRoomMenu::CreateRoomMenu(SDL_Renderer* renderer) : _renderer(renderer)
 	_dRect.w = windowW;
 	_dRect.h = windowH;
 
-	_createButton = new Button("Create", _renderer, 0, 500);
-	_createButton->setWindowXY((windowW / 2) - (250), 450);
+	SDL_Rect dst;
+	dst.x = (windowW / 2) - (250);
+	dst.y = 450;
+	dst.w = 500;
+	dst.h = 100;
+	_createButton = new Button("", _renderer, {0, 500}, dst);
 
-	_backButton = new Button("Back", _renderer, 0, 400);
-	_backButton->setWindowXY((windowW / 2) - (250), 580);
+	dst.y = 580;
+	_backButton = new Button("", _renderer, {0, 400}, dst);
 
 	_playerNameInput = new TextInput(_renderer, (windowW / 2) - (175), 100, "player1");
 	_deckSelector = new TextInput(_renderer, (windowW / 2) - (175), 300, "deck index");
