@@ -1,7 +1,9 @@
 #pragma once
 #include <SDL.h>
-#include "Player.h"
 #include <SDL_ttf.h>
+#include "Player.h"
+#include "ActionButton.h"
+#include "Mouse.h"
 
 class GameTable
 {
@@ -19,14 +21,30 @@ public:
 
 	void handleEvents();
 
-	void update();
+	void update(Mouse* mouse);
 	
 	void render();
 
 	//return true if the turn belongs to the player side calling the function
 	bool isMyTurn() const; 
 
-	SDL_Texture* getBackground() const; // testing, remove
+	SDL_Texture* getBackground() const; // testing, remove.
+
+	bool actionButtonPressed() const;
+
+	ActionButtonType actionButtonType() const;
+
+	bool preparationTurn() const;
+
+	void playerDraw(int cards);
+
+	void playerDeckShuffle();
+
+	void opponentPlayerDraw(int cardsDrawed);
+
+	void nextTurn();
+
+	void clearButtonPressed();
 
 private:
 	
@@ -37,19 +55,20 @@ private:
 
 	TTF_Font* textFont_ = nullptr;
 
-	//	_dividerLine
-
 	Player  *player_, *playerOpponent_;
 	//	_playerTableCards
 	//	_playerManaResource
 
-	//	Button* _actionButton;
+	ActionButton* actionButton_;
+	bool actionButtonPressed_ = false;
+
+	int selectedCardIndex_ = -1; // seleccted card index of the hand vector
 
 	//_oponentTableCards
 	//_oponentManaResource
 
 	//_inGameMenu
 
-	static inline uint8_t turn_ = 0; // starts with value zero
+	int turn_ = -1; // preparation turn
 };
 

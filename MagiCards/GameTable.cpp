@@ -2,21 +2,13 @@
 #include <SDL_image.h>
 #include "ResourcesList.h"
 
+
 GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, Owner owner)
 	: renderer_(renderer), player_(player), playerOpponent_(opponent)
 {
 	const int windowW = 1280;
 	const int windowH = 720;
 
-	// testing, remove
-	//if (owner == Owner::server)
-	//{
-	//	background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
-	//}
-	//else
-	//{
-	//	background_ = IMG_LoadTexture(renderer_, "D:\\MagiCardsProject\\MagiCards\\resources\\gameTable2.png");
-	//}
 	background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
 
 	sRect_.x = 0;
@@ -30,32 +22,36 @@ GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, O
 	dRect_.h = windowH;
 
 	textFont_ = TTF_OpenFont(TEXT_FONT, 14);
+
+	SDL_Rect dst;
+	// 25 right marging deck to screen, 115 deck aprox, 20 maring to deck
+	dst.w = 70;
+	dst.h = 35;
+	dst.x = windowW - 25 - 115 - 20 - dst.w; 
+	dst.y = windowH - 25 - dst.h;
+
+	actionButton_ = new ActionButton(ActionButtonType::DECK_SHUFFLE, renderer_, dst);
 }
 
 GameTable::~GameTable()
 {
-	//SDL_DestroyTexture(background_);
+	SDL_DestroyTexture(background_);
+	TTF_CloseFont(textFont_);
 }
 
 void GameTable::handleEvents()
 {
+	if (actionButton_->isSelected()) actionButtonPressed_ = true;
+	else actionButtonPressed_ = false;
 }
 
-void GameTable::update()
+void GameTable::update(Mouse* mouse)
 {
-	if (turn_ == 0) // starting turn
-	{
-		// shuffle deck
-		player_->shuffleDeck();
+	player_->update(mouse);
 
-		// draw first 5 cards to hand, and remove them from the deck
-		player_->draw(5);
-		turn_++;
-	}
-	//else if (true) // if my turn
-	//{
+	//selectedCardIndex_ = player_->selectedCard();
 
-	//}
+	actionButton_->update(mouse);
 }
 
 void GameTable::render()
@@ -65,6 +61,9 @@ void GameTable::render()
 
 	// PLAYER
 	// Player deck
+	// player_->renderDeck(SDL_Rect dstRect);
+	//		
+	// player_->renderHand(SDL_Rect dstRect); first card destination rectangle
 	SDL_Texture* background = IMG_LoadTexture(renderer_, IMG_DECK);
 	SDL_Rect src, dst;
 	src.x = 0;
@@ -72,10 +71,10 @@ void GameTable::render()
 	src.w = 225;
 	src.h = 310;
 
-	dst.x = 1280 - 225 * (0.5) - 25;
-	dst.y = 720 - 310 * (0.5) - 25;
-	dst.w = 225 * (0.5);
-	dst.h = 310 * (0.5);
+	dst.x = (int)(1280 - 225 * 0.5 - 25);
+	dst.y = (int)(720 - 310 * 0.5 - 25);
+	dst.w = (int)(225 * 0.5);
+	dst.h = (int)(310 * 0.5);
 	SDL_RenderCopy(renderer_, background, &src, &dst);
 
 	// Player deck data(cards left)
@@ -98,7 +97,7 @@ void GameTable::render()
 		dst.x = (1280 / 4) + (i * 215) + 2; // 215 card default width +2 margin between cards
 		dst.y = (720 * 3 / 4) + 10; // 3/4 of the screen heigth + 10 of margin
 		// render a card
-		hand[i].render(&dst, 0.15);
+		hand[i].render(&dst, 0.15f);
 	}
 
 	// OPPONENT
@@ -106,8 +105,8 @@ void GameTable::render()
 	//SDL_Rect dstOpponent;
 	dst.x =  25;
 	dst.y =  25;
-	dst.w = 225 * (0.50);
-	dst.h = 310 * (0.50);
+	dst.w = (int)(225 * 0.5);
+	dst.h = (int)(310 * 0.5);
 	SDL_RenderCopy(renderer_, background, &src, &dst);
 
 	// Opponent deck data(cards left)
@@ -121,6 +120,9 @@ void GameTable::render()
 	SDL_RenderCopy(renderer_, textTexture, NULL, &dst);
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(textTexture);
+
+	// Acction Button
+	actionButton_->render();
 }
 
 bool GameTable::isMyTurn() const
@@ -131,4 +133,48 @@ bool GameTable::isMyTurn() const
 SDL_Texture* GameTable::getBackground() const
 {
 	return background_;
+}
+
+bool GameTable::actionButtonPressed() const
+{
+	return actionButtonPressed_;
+}
+
+ActionButtonType GameTable::actionButtonType() const
+{
+	return actionButton_->getType();
+}
+
+bool GameTable::preparationTurn() const
+{
+	return turn_ == -1;
+}
+
+void GameTable::playerDraw(int cards)
+{
+	player_->draw(cards);
+}
+
+void GameTable::playerDeckShuffle()
+{
+	player_->shuffleDeck();
+	actionButton_->changeButtonType(ActionButtonType::DRAW);
+	std::cout << "action button type changed to DRAW" << std::endl;
+}
+
+void GameTable::opponentPlayerDraw(int cardsDrawed)
+{
+	// nosotros no sabemos que le ha tocado al mezclar al rival, si nos dice que ha robado 5, no sabemos cuales cartas, por lo tanto tenemos que restar al deck size del oponente
+	// el numero de cartas que nos envia por red que ha robado, 
+	playerOpponent_.updateDeckSize(cardsDrawed);
+}
+
+void GameTable::nextTurn()
+{
+	turn_++;
+}
+
+void GameTable::clearButtonPressed()
+{
+	actionButtonPressed_ = false;
 }
