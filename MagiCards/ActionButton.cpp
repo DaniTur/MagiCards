@@ -15,6 +15,11 @@ void ActionButton::changeButtonType(ActionButtonType newType)
 	changeText(buttonTextByType(type_));
 }
 
+ActionButtonType ActionButton::getType() const
+{
+	return type_;
+}
+
 const char* ActionButton::buttonTextByType(ActionButtonType type)
 {
 	switch (type)
@@ -25,7 +30,7 @@ const char* ActionButton::buttonTextByType(ActionButtonType type)
 	case ActionButtonType::DRAW:
 		return "DRAW";
 
-	case ActionButtonType::PLAY:
+	case ActionButtonType::PLAY_CARD:
 		return "PLAY";
 
 	default:

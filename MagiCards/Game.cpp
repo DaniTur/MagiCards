@@ -102,6 +102,9 @@ void Game::handleEvents()
 					case DECKS_MENU:
 						_decksMenu->handleEvents();
 						break;
+					case GAME_TABLE:
+						gameTable_->handleEvents();
+						break;
 				}
 			}
 			break;
@@ -145,7 +148,51 @@ void Game::update()
 	else
 	{
 		//update game table
-		gameTable_->update();
+		gameTable_->update(_mouse); // update table objects
+		// do whatever the button clicked type is about
+		if (gameTable_->actionButtonPressed())
+		{
+			switch (gameTable_->actionButtonType())
+			{
+				case ActionButtonType::DECK_SHUFFLE:
+					if (gameTable_->preparationTurn())
+					{
+						gameTable_->playerDeckShuffle();
+					}
+				break;
+
+				case ActionButtonType::DRAW:
+				{
+					int cardsToDraw = 0;
+
+					if (!gameTable_->preparationTurn()) cardsToDraw = 1;
+					else cardsToDraw = 5;
+					
+					gameTable_->playerDraw(cardsToDraw);
+
+					Message m;
+					m.header.id = MessageType::DrawCard;
+					m << cardsToDraw;
+					// TODO: estandarizar la manera de saber si soy el cliente o el servidor a través de todo el programa
+					if (netClient_) netClient_->Send(m);
+					else netServer_->MessageClient(m);
+
+					// TODO: cambiar la gestión de los turnos porque no siempre que se robe se pasará el turno
+					gameTable_->nextTurn();
+					break;
+				}
+
+				case ActionButtonType::PLAY_CARD:
+					// aplicar restricciones para poder ejecutar la funcionalidad del botón aquí?
+					// las restricciones para 
+
+					break;
+
+				default:
+					break;
+			}
+			gameTable_->clearButtonPressed();
+		}
 	}
 
 }
@@ -159,10 +206,7 @@ void Game::updateMenu()
 			switch (_mainMenu->getButtonPressed())
 			{
 				case 0:
-					if (!_createRoomMenu) {
-						delete _createRoomMenu;
-						std::cout << "deleted _createRoomMenu" << std::endl;
-					} 
+					if (!_createRoomMenu) delete _createRoomMenu;
 					_createRoomMenu = new CreateRoomMenu(_renderer);
 					_gameState = CREATE_ROOM;
 					break;
@@ -382,6 +426,12 @@ void Game::updateNetworking()
 					waiting_ = false;
 					break;
 				}
+				case MessageType::DrawCard: //opponent has drawed cards
+					int cardsDrawed;
+					msg >> cardsDrawed;
+					gameTable_->opponentPlayerDraw(cardsDrawed);
+					std::cout << "opponent drawed " << cardsDrawed << " cards" << std::endl;
+					break;
 			}
 		}
 	}
@@ -430,9 +480,16 @@ void Game::updateNetworking()
 					_gameState = LOADING_SCREEN;
 					break;
 				}
+
 				case MessageType::GameTableLoaded: // Server has loaded the game table
 					std::cout << "Server table ready" << std::endl;
 					waiting_ = false;
+					break;
+
+				case MessageType::DrawCard:
+					char cardsDrawed;
+					msg >> cardsDrawed;
+					std::cout << "opponent drawed " << cardsDrawed << "cards" << std::endl;
 					break;
 			}
 		}
@@ -502,6 +559,7 @@ void Game::render()
 	else
 	{
 		// render game table
+		//std::cout << "game table render()" << std::endl;
 		gameTable_->render();
 		//SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
 	}

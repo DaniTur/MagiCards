@@ -5,7 +5,7 @@ enum class ActionButtonType {
 	OTHER,
 	DECK_SHUFFLE,
 	DRAW,
-	PLAY
+	PLAY_CARD
 };
 
 class ActionButton : public Button
@@ -16,6 +16,8 @@ public:
 	~ActionButton();
 
 	void changeButtonType(ActionButtonType newType);
+
+	ActionButtonType getType() const;
 
 private:
 
