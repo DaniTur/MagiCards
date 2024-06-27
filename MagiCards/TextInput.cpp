@@ -33,7 +33,7 @@ TextInput::TextInput(SDL_Renderer* renderer, int dRectX, int dRectY, std::string
 TextInput::~TextInput()
 {
 	SDL_DestroyTexture(_texture);
-	delete _textFont;
+	TTF_CloseFont(_textFont);
 }
 
 void TextInput::handleEvents()
