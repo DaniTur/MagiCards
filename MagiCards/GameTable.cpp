@@ -155,18 +155,16 @@ void GameTable::playerDraw(int cards)
 	player_->draw(cards);
 }
 
-void GameTable::playerDeckShuffle()
+std::vector<int> GameTable::playerDeckShuffle()
 {
-	player_->shuffleDeck();
 	actionButton_->changeButtonType(ActionButtonType::DRAW);
-	std::cout << "action button type changed to DRAW" << std::endl;
+
+	return player_->shuffleDeck();
 }
 
 void GameTable::opponentPlayerDraw(int cardsDrawed)
 {
-	// nosotros no sabemos que le ha tocado al mezclar al rival, si nos dice que ha robado 5, no sabemos cuales cartas, por lo tanto tenemos que restar al deck size del oponente
-	// el numero de cartas que nos envia por red que ha robado, 
-	playerOpponent_.updateDeckSize(cardsDrawed);
+	playerOpponent_->draw(cardsDrawed);
 }
 
 void GameTable::nextTurn()

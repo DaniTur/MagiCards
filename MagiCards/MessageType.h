@@ -8,5 +8,6 @@ enum class MessageType : uint32_t
 	PlayerData,
 	StartGame,
 	GameTableLoaded,
-	DrawCard
+	DrawCard,
+	ShuffleDeck
 };

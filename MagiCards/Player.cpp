@@ -38,45 +38,39 @@ void Player::loadDeck()
     deckMaxSize_ = deck_.size();
 }
 
-void Player::shuffleDeck()
+std::vector<int> Player::shuffleDeck()
 {
     std::random_device rd;
     std::mt19937 urng(rd()); // Uniform Random Number Generator
-    //std::shuffle(deck_.cards.begin(), deck_.cards.end(), urng); // O(n)
 
     std::shuffle(deck_.begin(), deck_.end(), urng); // O(n)
 
-    std::cout << "Deck shuffled, cards id are:" << std::endl;
-    for (Card card : deck_)
-    {
-        std::cout << card.getId() << ",";
-    }
-    std::cout << std::endl;
+    std::vector<int> cardIDs;
+    for (Card card : deck_) 
+        cardIDs.push_back(card.getId());
+
+    return cardIDs;
 }
 
 void Player::draw(int number = 1)
 {
-    //if (deck_.cards.size() >= number)
     if (deck_.size() >= number)
     {
         for (int i = 0; i < number; i++)
         {
-            //hand_.push_back(deck_.cards.back());
             hand_.push_back(deck_.back());
             deck_.pop_back();
         }
-        std::cout << "the actual hand is:" << std::endl;
-        for (Card c : hand_)
-        {
-            std::cout << c.getId() << ", ";
-        }
-        std::cout << std::endl;
-        std::cout << "deck size: " << deck_.size() << std::endl;
     }
     else
     {
         std::cout << "Error: trying to draw more cards than the deck has." << std::endl;
     }
+}
+
+void Player::update(Mouse* mouse)
+{
+
 }
 
 void Player::render()

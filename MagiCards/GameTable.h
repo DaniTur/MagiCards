@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <vector>
 #include "Player.h"
 #include "ActionButton.h"
 #include "Mouse.h"
@@ -38,7 +39,7 @@ public:
 
 	void playerDraw(int cards);
 
-	void playerDeckShuffle();
+	std::vector<int> playerDeckShuffle();
 
 	void opponentPlayerDraw(int cardsDrawed);
 

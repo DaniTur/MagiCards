@@ -3,6 +3,7 @@
 #include <string>
 #include "DeckLoader.h"
 #include <vector>
+#include "Mouse.h"
 
 class Player
 {
@@ -19,9 +20,12 @@ public:
 
 	void loadDeck();
 
-	void shuffleDeck();
+	// shufles the deck and returns the shuffled card IDs
+	std::vector<int> shuffleDeck(); 
 
-	void draw(int number);
+	void draw(int number); // draw cards
+
+	void update(Mouse* mouse);
 
 	void render();
 
@@ -41,5 +45,6 @@ private:
 	SDL_Renderer* renderer_;
 	bool loaded_ = false; //testing, remove
 	int deckMaxSize_ = -1;
+	int actualDeckSize;
 };
 

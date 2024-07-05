@@ -157,7 +157,21 @@ void Game::update()
 				case ActionButtonType::DECK_SHUFFLE:
 					if (gameTable_->preparationTurn())
 					{
-						gameTable_->playerDeckShuffle();
+						std::vector<int> cardIDs = gameTable_->playerDeckShuffle();
+
+						// get the card IDs stream from the shuffled deck
+
+						Message msg;
+						msg.header.id = MessageType::ShuffleDeck;
+						for (int id : cardIDs)
+						{
+							msg << id;
+						}
+						msg << (int)cardIDs.size();
+
+						if (netClient_) netClient_->Send(msg);
+						else netServer_->MessageClient(msg);
+						std::cout << "sended shuffled deck to opponent" << std::endl;
 					}
 				break;
 
@@ -173,7 +187,7 @@ void Game::update()
 					Message m;
 					m.header.id = MessageType::DrawCard;
 					m << cardsToDraw;
-					// TODO: estandarizar la manera de saber si soy el cliente o el servidor a través de todo el programa
+
 					if (netClient_) netClient_->Send(m);
 					else netServer_->MessageClient(m);
 
@@ -427,10 +441,11 @@ void Game::updateNetworking()
 					break;
 				}
 				case MessageType::DrawCard: //opponent has drawed cards
-					int cardsDrawed;
-					msg >> cardsDrawed;
-					gameTable_->opponentPlayerDraw(cardsDrawed);
-					std::cout << "opponent drawed " << cardsDrawed << " cards" << std::endl;
+					onDrawCardMessage(msg);
+					break;
+
+				case MessageType::ShuffleDeck:
+					onShuffleDeckMessage(msg);
 					break;
 			}
 		}
@@ -482,14 +497,15 @@ void Game::updateNetworking()
 				}
 
 				case MessageType::GameTableLoaded: // Server has loaded the game table
-					std::cout << "Server table ready" << std::endl;
 					waiting_ = false;
 					break;
 
 				case MessageType::DrawCard:
-					char cardsDrawed;
-					msg >> cardsDrawed;
-					std::cout << "opponent drawed " << cardsDrawed << "cards" << std::endl;
+					onDrawCardMessage(msg);
+					break;
+
+				case MessageType::ShuffleDeck:
+					onShuffleDeckMessage(msg);
 					break;
 			}
 		}
@@ -585,3 +601,33 @@ void Game::release()
 	SDL_Quit();
 }
 
+void Game::onShuffleDeckMessage(Message &msg) {
+	int numberOfCards = 0;
+	std::vector<int> cardIDs;
+
+	msg >> numberOfCards;
+
+	int cardId = 0;
+	for (int i = 0; i < numberOfCards; i++)
+	{
+		msg >> cardId;
+		cardIDs.push_back(cardId);
+	}
+
+	std::reverse(cardIDs.begin(), cardIDs.end());
+
+	std::cout << "opponent cards ids stream" << std::endl;
+	for (int n : cardIDs) std::cout << n << ",";
+
+	// TODO: gameTable_->createOpponentDeck(); // desde un vector de cardIDs cargar el deck del rival en el mismo orden que el vector
+
+	std::cout << std::endl;
+}
+
+void Game::onDrawCardMessage(Message& msg)
+{
+	int cardsDrawed = 0;
+	msg >> cardsDrawed;
+	gameTable_->opponentPlayerDraw(cardsDrawed);
+	std::cout << "opponent drawed " << cardsDrawed << "cards" << std::endl;
+}

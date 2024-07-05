@@ -49,6 +49,10 @@ private:
 
 	Player* constructPlayerFromData(std::string data);
 
+	void onShuffleDeckMessage(Message& msg);
+
+	void onDrawCardMessage(Message& msg);
+
 private:
 	bool _isRunning;
 
