@@ -36,7 +36,7 @@ LoadingScreen::~LoadingScreen()
 	SDL_DestroyTexture(_background);
 	SDL_DestroyTexture(_textTexture);
 	SDL_FreeSurface(_surfaceText);
-	delete _textFont;
+	TTF_CloseFont(_textFont);
 }
 
 void LoadingScreen::render()

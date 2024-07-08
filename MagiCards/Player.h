@@ -20,6 +20,8 @@ public:
 
 	void loadDeck();
 
+	void loadDeck(std::vector<int>& cardIDs);
+
 	// shufles the deck and returns the shuffled card IDs
 	std::vector<int> shuffleDeck(); 
 
@@ -33,7 +35,7 @@ public:
 
 	int deckMaxSize() const;
 
-	std::vector<Card> hand(); //returns a copy of the hand
+	std::vector<Card>& hand();
 
 private:
 	std::string _name;
@@ -44,7 +46,7 @@ private:
 	std::vector<Card> hand_;
 	SDL_Renderer* renderer_;
 	bool loaded_ = false; //testing, remove
-	int deckMaxSize_ = -1;
+	int deckMaxSize_ = 0;
 	int actualDeckSize;
 };
 

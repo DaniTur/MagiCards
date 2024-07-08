@@ -64,7 +64,7 @@ void GameTable::render()
 	// player_->renderDeck(SDL_Rect dstRect);
 	//		
 	// player_->renderHand(SDL_Rect dstRect); first card destination rectangle
-	SDL_Texture* background = IMG_LoadTexture(renderer_, IMG_DECK);
+	SDL_Texture* deckTexture = IMG_LoadTexture(renderer_, IMG_DECK);
 	SDL_Rect src, dst;
 	src.x = 0;
 	src.y = 0;
@@ -75,7 +75,7 @@ void GameTable::render()
 	dst.y = (int)(720 - 310 * 0.5 - 25);
 	dst.w = (int)(225 * 0.5);
 	dst.h = (int)(310 * 0.5);
-	SDL_RenderCopy(renderer_, background, &src, &dst);
+	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
 
 	// Player deck data(cards left)
 	std::string text = std::to_string(player_->deckSize()) + "/" + std::to_string(player_->deckMaxSize());
@@ -90,24 +90,37 @@ void GameTable::render()
 	SDL_DestroyTexture(textTexture);
 
 	// Player hand cards
-	std::vector<Card> hand = player_->hand();
-	for (int i = 0; i < hand.size(); i++)
+	src.w = 215;
+	src.h = 300;
+	if (!player_->hand().empty())
 	{
-		SDL_Rect dst;
-		dst.x = (1280 / 4) + (i * 215) + 2; // 215 card default width +2 margin between cards
-		dst.y = (720 * 3 / 4) + 10; // 3/4 of the screen heigth + 10 of margin
-		// render a card
-		hand[i].render(&dst, 0.15f);
+		std::vector<Card> hand = player_->hand();
+
+		dst.x = (1280 / 4) + (0 * 215) + 2;
+		dst.y = (720 * 3 / 4) + 10;
+
+		hand[0].render(src, 0.15f);
 	}
+	//for (int i = 0; i < hand.size(); i++)
+	//{
+	//	SDL_Rect dst;
+	//	dst.x = (1280 / 4) + (i * 215) + 2; // 215 card default width +2 margin between cards
+	//	dst.y = (720 * 3 / 4) + 10; // 3/4 of the screen heigth + 10 of margin
+	//	// render a card
+	//	hand[i].render(&dst, 0.15f);
+	//}
 
 	// OPPONENT
 	// Opponent deck
 	//SDL_Rect dstOpponent;
+	src.w = 225;
+	src.h = 310;
+
 	dst.x =  25;
 	dst.y =  25;
 	dst.w = (int)(225 * 0.5);
 	dst.h = (int)(310 * 0.5);
-	SDL_RenderCopy(renderer_, background, &src, &dst);
+	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
 
 	// Opponent deck data(cards left)
 	text = std::to_string(playerOpponent_->deckSize()) + "/" + std::to_string(playerOpponent_->deckMaxSize());
@@ -175,4 +188,9 @@ void GameTable::nextTurn()
 void GameTable::clearButtonPressed()
 {
 	actionButtonPressed_ = false;
+}
+
+void GameTable::createOpponentDeck(std::vector<int>& cardIDs)
+{
+	playerOpponent_->loadDeck(cardIDs);
 }

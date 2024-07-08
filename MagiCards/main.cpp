@@ -12,12 +12,14 @@ using namespace std;
 
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
-	//_CrtSetBreakAlloc(468);
+	_CrtMemState sOld;
+	_CrtMemState sNew;
+	_CrtMemState sDiff;
+	_CrtMemCheckpoint(&sOld); //take a snapshot
 
 	const int FPS = 60;
 	const int frameDelay = 1000 / 60;
-	Uint32 frameStart;
+	Uint64 frameStart;
 	int frameTime;
 
 	Game game;
@@ -29,7 +31,7 @@ int main() {
 		SDL_ShowCursor(SDL_DISABLE);
 
 		while (game.isRunning()) {
-			frameStart = SDL_GetTicks();
+			frameStart = SDL_GetTicks64();
 
 			game.handleEvents();
 
@@ -37,7 +39,7 @@ int main() {
 
 			game.render();
 
-			frameTime = SDL_GetTicks() - frameStart;
+			frameTime = SDL_GetTicks64() - frameStart;
 			//std::cout << frameTime << std::endl;
 			if (frameDelay > frameTime)
 			{
@@ -54,6 +56,16 @@ int main() {
 		return -1;
 	}
 
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
+	_CrtMemCheckpoint(&sNew); //take a snapshot 
+	if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
+	{
+		OutputDebugString(L"-----------_CrtMemDumpStatistics ---------");
+		_CrtMemDumpStatistics(&sDiff);
+		OutputDebugString(L"-----------_CrtMemDumpAllObjectsSince ---------");
+		_CrtMemDumpAllObjectsSince(&sOld);
+		OutputDebugString(L"-----------_CrtDumpMemoryLeaks ---------");
+		_CrtDumpMemoryLeaks();
+	}
 	return 0;
 }

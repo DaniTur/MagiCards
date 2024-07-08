@@ -83,4 +83,13 @@ public:
 			std::cout << "Error: deck with id: " << deckId << " not found in the decks.json" << std::endl;
 		}
 	}
+
+	static void load(std::vector<int>& cardIDs, std::vector<Card>& deck, SDL_Renderer* renderer)
+	{
+		for (int cardId : cardIDs)
+		{
+			Card card = CardFactory::create(cardId, renderer);
+			deck.push_back(card);
+		}
+	}
 };

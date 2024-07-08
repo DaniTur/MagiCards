@@ -16,7 +16,7 @@ public:
 
 	int getId() const; // testing, remove
 
-	void render(SDL_Rect* destination, float proportion) const;
+	void render(SDL_Rect& destination, float proportion);
 
 private:
 	SDL_Renderer* renderer_ = nullptr;

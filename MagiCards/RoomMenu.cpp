@@ -44,7 +44,7 @@ RoomMenu::~RoomMenu()
 	SDL_DestroyTexture(_background);
 	delete _startButton;
 	delete _backButton;
-	delete _textFont;
+	TTF_CloseFont(_textFont);
 	SDL_FreeSurface(_surfaceText);
 	SDL_DestroyTexture(_textTexture);
 }

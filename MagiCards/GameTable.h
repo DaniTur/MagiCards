@@ -47,6 +47,8 @@ public:
 
 	void clearButtonPressed();
 
+	void createOpponentDeck(std::vector<int>& cardIDs);
+
 private:
 	
 	SDL_Renderer* renderer_;

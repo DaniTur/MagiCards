@@ -8,6 +8,7 @@
 #include "RoomMenu.h"
 #include "Player.h"
 #include <SDL_image.h>
+#include <stdexcept>
 
 
 Game::Game() {
@@ -31,36 +32,61 @@ Game::~Game()
 void Game::init()
 {
 	initSDL();
-	createWindowAndRenderer();
-	SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
+
+	window_ = std::unique_ptr<SDL_Window, WindowDestructor>
+		(SDL_CreateWindow("MagiCards",
+			SDL_WINDOWPOS_CENTERED,
+			SDL_WINDOWPOS_CENTERED,
+			1280, 720,
+			SDL_WINDOW_SHOWN),
+		SDL_DestroyWindow);
+
+	if (window_.get() == NULL)
+	{
+		throw std::runtime_error(
+			std::string("Runtime Error. Unable to initialize SDL_Window: ") + SDL_GetError());
+	}
+
+	renderer_ = SDL_CreateRenderer(window_.get(), -1, SDL_RENDERER_ACCELERATED);
+	if (renderer_ == NULL)
+	{
+		throw std::runtime_error(
+			std::string("Runtime Error. Unable to initialize SDL_Renderer: ") + SDL_GetError());
+	}
+
+	SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255); // render clear color
 
 	if (TTF_Init() == -1) std::cerr << "failed to initialize ttf" << std::endl;
 
 	_isRunning = true;
 	_activeMenu = true;
 
-	_mainMenu = new MainMenu(_renderer);
+	_mainMenu = new MainMenu(renderer_);
 	_gameState = MAIN_MENU;
 
-	static Mouse* m = new Mouse(_renderer);
+	static Mouse* m = new Mouse(renderer_);
 	_mouse = m;
 }
 
 void Game::initSDL()
 {
-	bool isInitialized = SDL_Init(SDL_INIT_VIDEO) == 0;
-	if (!isInitialized) throw SDLException(SDL_GetError());
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER |SDL_INIT_EVENTS) != 0)
+	{
+		throw std::runtime_error(
+			std::string("Runtime Error. Unable to initialize SDL: ") + SDL_GetError());
+	}
+
+	if (IMG_Init(IMG_INIT_PNG) == 0)
+	{
+		throw std::runtime_error(
+			std::string("Runtime Error. Unable to initialize SDL_Image: ") + SDL_GetError());
+	}
+	
 }
 
-bool Game::isRunning() {
-	return _isRunning;
-}
-
-void Game::createWindowAndRenderer()
+bool Game::isRunning()
 {
-	SDL_CreateWindowAndRenderer(1280, 720, SDL_WINDOW_SHOWN, &_window, &_renderer);
-	SDL_SetWindowTitle(_window, "MagiCards");
-	if (_window == NULL || _renderer == NULL) throw SDLException(SDL_GetError());
+	return _isRunning;
 }
 
 void Game::handleEvents()
@@ -135,7 +161,6 @@ void Game::handleEvents()
 		}
 	}
 }
-
 
 void Game::update()
 {
@@ -221,19 +246,19 @@ void Game::updateMenu()
 			{
 				case 0:
 					if (!_createRoomMenu) delete _createRoomMenu;
-					_createRoomMenu = new CreateRoomMenu(_renderer);
+					_createRoomMenu = new CreateRoomMenu(renderer_);
 					_gameState = CREATE_ROOM;
 					break;
 
 				case 1:
 					if (!_joinRoomMenu) delete _joinRoomMenu;
-					_joinRoomMenu = new JoinRoomMenu(_renderer);
+					_joinRoomMenu = new JoinRoomMenu(renderer_);
 					_gameState = JOIN_ROOM;
 					break;
 
 				case 2:
 					if (!_decksMenu) delete _decksMenu;
-					_decksMenu = new DecksMenu(_renderer);
+					_decksMenu = new DecksMenu(renderer_);
 					_gameState = DECKS_MENU;
 					break;
 
@@ -250,8 +275,8 @@ void Game::updateMenu()
 			{
 				case 0: //Create button
 				{
-					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck(), _renderer);
-					_gameRoomMenu = new RoomMenu(_renderer, _playerHost, true);
+					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck(), renderer_);
+					_gameRoomMenu = new RoomMenu(renderer_, _playerHost, true);
 					netServer_ = new NetServer(30000);
 					_gameState = GAME_ROOM;
 					break;
@@ -269,8 +294,8 @@ void Game::updateMenu()
 			{
 				case 0: //Join button
 				{
-					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck(), _renderer);
-					_gameRoomMenu = new RoomMenu(_renderer, _playerClient, false);
+					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck(), renderer_);
+					_gameRoomMenu = new RoomMenu(renderer_, _playerClient, false);
 					netClient_ = new NetClient();
 
 					bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
@@ -297,28 +322,20 @@ void Game::updateMenu()
 			if (!_gameRoomMenu->serverSide())	// Client side
 			{
 				if (!_playerClient->deckLoaded())
-				{
 					_playerClient->loadDeck();
-					std::cout << "My deck loaded." << std::endl;
-				}
-
-				if (!_playerHost->deckLoaded()) // Server is the opponent of client
-				{
-					_playerHost->loadDeck();
-					std::cout << "Opponent deck loaded." << std::endl;
-				}
 				
 				// Create / load game table
 				if (!gameTable_)
 				{
-					gameTable_ = new GameTable(_renderer, _playerClient, _playerHost, GameTable::Owner::client);
-					std::cout << "game table ready" << std::endl;
+					gameTable_ = new GameTable(renderer_, _playerClient, _playerHost, GameTable::Owner::client);
+
 					Message m;
 					m.header.id = MessageType::GameTableLoaded;
 					netClient_->Send(m);
+
 					waiting_ = true;
 				}
-				//wait for server to load the game table
+				//wait for opponent(server) to load the game table
 				if (!waiting_)
 				{
 					_gameState = GAME_TABLE;
@@ -328,21 +345,11 @@ void Game::updateMenu()
 			else // Server side
 			{
 				if (!_playerHost->deckLoaded())
-				{
 					_playerHost->loadDeck();
-					std::cout << "My deck loaded." << std::endl;
-				}
-
-				if (!_playerClient->deckLoaded()) // Client is the opponent of server
-				{
-					_playerClient->loadDeck();
-					std::cout << "Opponent deck loaded." << std::endl;
-				}
 
 				// Create / load game table
 				if (!gameTable_) {
-					gameTable_ = new GameTable(_renderer, _playerHost, _playerClient, GameTable::Owner::server);
-					std::cout << "game table ready" << std::endl;
+					gameTable_ = new GameTable(renderer_, _playerHost, _playerClient, GameTable::Owner::server);
 
 					Message m;
 					m.header.id = MessageType::GameTableLoaded;
@@ -350,14 +357,13 @@ void Game::updateMenu()
 
 					waiting_ = true;
 				}
-				//wait client to load the game table
+				//wait opponent(client) to load the game table
 				if (!waiting_)
 				{
 					_gameState = GAME_TABLE;
 					_activeMenu = false;
 				}
-			}
-
+			}	
 			break;
 		}
 
@@ -374,7 +380,7 @@ void Game::updateMenu()
 				case 0: // Start button, only server side can press it
 				{
 					std::cout << "Play button pressed" << std::endl;
-					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
+					_loadingScreen = new LoadingScreen(renderer_, "Preparing game table...");
 
 					Message msg;
 					msg.header.id = MessageType::StartGame;
@@ -491,7 +497,7 @@ void Game::updateNetworking()
 				case MessageType::StartGame:
 				{
 					if (!_loadingScreen) delete _loadingScreen;
-					_loadingScreen = new LoadingScreen(_renderer, "Preparing game table...");
+					_loadingScreen = new LoadingScreen(renderer_, "Preparing game table...");
 					_gameState = LOADING_SCREEN;
 					break;
 				}
@@ -536,13 +542,13 @@ Player* Game::constructPlayerFromData(std::string data)
 		// Extract the deck from the posición "deck:" hasta el final de la cadena
 		std::istringstream(data.substr(deckPos + 5)) >> deck; // 5 es la longitud de "deck:"
 	}
-	Player* player = new Player(name, deck, _renderer);
+	Player* player = new Player(name, deck, renderer_);
 	return player;
 }
 
 void Game::render()
 {
-	SDL_RenderClear(_renderer);
+	SDL_RenderClear(renderer_);
 
 	if (_activeMenu)
 	{
@@ -574,21 +580,12 @@ void Game::render()
 	}
 	else
 	{
-		// render game table
-		//std::cout << "game table render()" << std::endl;
 		gameTable_->render();
-		//SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
 	}
 
 	_mouse->render();
 
-	SDL_RenderPresent(_renderer);
-	//if (gameTable_)
-	//{
-	//	SDL_Texture* tmp = gameTable_->getBackground();
-	//}
-	//SDL_SetRenderDrawColor(_renderer, 20, 20, 20, 255);
-	//SDL_RenderClear(_renderer);
+	SDL_RenderPresent(renderer_);
 }
 
 void Game::release()
@@ -596,8 +593,8 @@ void Game::release()
 	if (netClient_ != nullptr) delete netClient_;
 	if (netServer_ != nullptr) delete netServer_;
 
-	SDL_DestroyRenderer(_renderer);
-	SDL_DestroyWindow(_window);
+	SDL_DestroyRenderer(renderer_);
+	IMG_Quit();
 	SDL_Quit();
 }
 
@@ -616,12 +613,7 @@ void Game::onShuffleDeckMessage(Message &msg) {
 
 	std::reverse(cardIDs.begin(), cardIDs.end());
 
-	std::cout << "opponent cards ids stream" << std::endl;
-	for (int n : cardIDs) std::cout << n << ",";
-
-	// TODO: gameTable_->createOpponentDeck(); // desde un vector de cardIDs cargar el deck del rival en el mismo orden que el vector
-
-	std::cout << std::endl;
+	gameTable_->createOpponentDeck(cardIDs); // desde un vector de cardIDs cargar el deck del rival en el mismo orden que el vector
 }
 
 void Game::onDrawCardMessage(Message& msg)

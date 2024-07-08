@@ -38,6 +38,18 @@ void Player::loadDeck()
     deckMaxSize_ = deck_.size();
 }
 
+void Player::loadDeck(std::vector<int>& cardIDs)
+{
+    DeckLoader::load(cardIDs, deck_, renderer_);
+    ////loaded_ = true;//testing, remove
+    ////if (!deck_.cards.empty())
+    if (!deck_.empty())
+    {
+        loaded_ = true;
+    }
+    deckMaxSize_ = deck_.size();
+}
+
 std::vector<int> Player::shuffleDeck()
 {
     std::random_device rd;
@@ -102,7 +114,7 @@ int Player::deckMaxSize() const
     return deckMaxSize_;
 }
 
-std::vector<Card> Player::hand()
+std::vector<Card>& Player::hand()
 {
     return hand_;
 }

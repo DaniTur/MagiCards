@@ -17,6 +17,13 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 
 	textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
 	texture_ = IMG_LoadTexture(renderer_, texture);
+
+	//card texture source size
+	sRect_.w = 215;
+	sRect_.h = 300;
+	sRect_.x = 2;
+
+	dRect_ = { 0, 0, 0, 0 };
 }
 
 Card::~Card()
@@ -29,9 +36,11 @@ int Card::getId() const
 	return static_cast<int>(id_);
 }
 
-void Card::render(SDL_Rect* destination, float proportion) const
+void Card::render(SDL_Rect& destination, float proportion)
 {
-	destination->w = sRect_.w * proportion;
-	destination->h = sRect_.h * proportion;
-	SDL_RenderCopy(renderer_, texture_, NULL, destination);
+	//TODO: revisar el paso de objeto por referencia
+	destination.w = sRect_.w * proportion;
+	destination.h = sRect_.h * proportion;
+
+	SDL_RenderCopy(renderer_, texture_, NULL, &destination);
 }

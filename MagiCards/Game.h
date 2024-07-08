@@ -39,7 +39,6 @@ public:
 	bool isRunning();
 
 private:
-	void createWindowAndRenderer();
 
 	void initSDL();
 
@@ -56,8 +55,11 @@ private:
 private:
 	bool _isRunning;
 
-	SDL_Window* _window = nullptr;
-	SDL_Renderer* _renderer = nullptr;
+	//SDL_Window* window_ = nullptr;
+	using WindowDestructor = std::function<void(SDL_Window*)>;
+	std::unique_ptr<SDL_Window, WindowDestructor> window_;
+
+	SDL_Renderer* renderer_ = nullptr;
 
 	bool _activeMenu = false;
 
