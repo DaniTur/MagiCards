@@ -27,6 +27,8 @@ public:
 
 	void draw(int number); // draw cards
 
+	void drawFaceUp(int number);
+
 	void update(Mouse* mouse);
 
 	void render();

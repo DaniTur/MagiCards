@@ -621,5 +621,4 @@ void Game::onDrawCardMessage(Message& msg)
 	int cardsDrawed = 0;
 	msg >> cardsDrawed;
 	gameTable_->opponentPlayerDraw(cardsDrawed);
-	std::cout << "opponent drawed " << cardsDrawed << "cards" << std::endl;
 }

@@ -18,6 +18,14 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 	textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
 	texture_ = IMG_LoadTexture(renderer_, texture);
 
+	//texture_ = std::unique_ptr<SDL_Texture, TextureDestructor>
+	//	(IMG_LoadTexture(renderer_, texture)
+	//	, SDL_DestroyTexture);
+
+	//textureBack_ = std::unique_ptr<SDL_Texture, TextureDestructor>
+	//	(IMG_LoadTexture(renderer_, IMG_REVERSE_CARD)
+		//, SDL_DestroyTexture);
+
 	//card texture source size
 	sRect_.w = 215;
 	sRect_.h = 300;
@@ -28,7 +36,7 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 
 Card::~Card()
 {
-	SDL_DestroyTexture(texture_);
+	//SDL_DestroyTexture(texture_);
 }
 
 int Card::getId() const
@@ -36,11 +44,26 @@ int Card::getId() const
 	return static_cast<int>(id_);
 }
 
-void Card::render(SDL_Rect& destination, float proportion)
+void Card::render(SDL_Rect* destination, float proportion)
 {
-	//TODO: revisar el paso de objeto por referencia
-	destination.w = sRect_.w * proportion;
-	destination.h = sRect_.h * proportion;
+	destination->w = sRect_.w * proportion;
+	destination->h = sRect_.h * proportion;
 
-	SDL_RenderCopy(renderer_, texture_, NULL, &destination);
+	if (facedown_) {
+		//SDL_RenderCopy(renderer_, textureBack_.get(), NULL, &destination);
+		SDL_RenderCopy(renderer_, textureBack_, NULL, destination);
+	}else{
+		//SDL_RenderCopy(renderer_, texture_.get(), NULL, &destination);
+		SDL_RenderCopy(renderer_, texture_, NULL, destination);
+	}
+}
+
+void Card::turnUp()
+{
+	facedown_ = false;
+}
+
+void Card::turnDown()
+{
+	facedown_ = true;
 }

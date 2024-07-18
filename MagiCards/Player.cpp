@@ -80,6 +80,24 @@ void Player::draw(int number = 1)
     }
 }
 
+void Player::drawFaceUp(int number)
+{
+    if (deck_.size() >= number)
+    {
+        for (int i = 0; i < number; i++)
+        {
+            Card& card = deck_.back();
+            card.turnUp();
+            hand_.push_back(card);
+            deck_.pop_back();
+        }
+    }
+    else
+    {
+        std::cout << "Error: trying to draw more cards than the deck has." << std::endl;
+    }
+}
+
 void Player::update(Mouse* mouse)
 {
 

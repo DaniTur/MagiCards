@@ -6,20 +6,18 @@
 GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, Owner owner)
 	: renderer_(renderer), player_(player), playerOpponent_(opponent)
 {
-	const int windowW = 1280;
-	const int windowH = 720;
-
-	background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
+	//background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
+	background_ = std::unique_ptr<SDL_Texture, TextureDestructor>(IMG_LoadTexture(renderer_, IMG_GAME_TABLE), SDL_DestroyTexture);
 
 	sRect_.x = 0;
 	sRect_.y = 0;
-	sRect_.w = 1280;
-	sRect_.h = 720;
+	sRect_.w = RESOLUTION_WIDTH;
+	sRect_.h = RESOLUTION_HEIGHT;
 
 	dRect_.x = 0;
 	dRect_.y = 0;
-	dRect_.w = windowW;
-	dRect_.h = windowH;
+	dRect_.w = RESOLUTION_WIDTH;
+	dRect_.h = RESOLUTION_HEIGHT;
 
 	textFont_ = TTF_OpenFont(TEXT_FONT, 14);
 
@@ -27,15 +25,14 @@ GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, O
 	// 25 right marging deck to screen, 115 deck aprox, 20 maring to deck
 	dst.w = 70;
 	dst.h = 35;
-	dst.x = windowW - 25 - 115 - 20 - dst.w; 
-	dst.y = windowH - 25 - dst.h;
+	dst.x = RESOLUTION_WIDTH - 25 - 115 - 20 - dst.w;
+	dst.y = RESOLUTION_HEIGHT - 25 - dst.h;
 
 	actionButton_ = new ActionButton(ActionButtonType::DECK_SHUFFLE, renderer_, dst);
 }
 
 GameTable::~GameTable()
 {
-	SDL_DestroyTexture(background_);
 	TTF_CloseFont(textFont_);
 }
 
@@ -57,7 +54,7 @@ void GameTable::update(Mouse* mouse)
 void GameTable::render()
 {
 	// Render background
-	SDL_RenderCopy(renderer_, background_, &sRect_, &dRect_);
+	SDL_RenderCopy(renderer_, background_.get(), &sRect_, &dRect_);
 
 	// PLAYER
 	// Player deck
@@ -71,8 +68,8 @@ void GameTable::render()
 	src.w = 225;
 	src.h = 310;
 
-	dst.x = (int)(1280 - 225 * 0.5 - 25);
-	dst.y = (int)(720 - 310 * 0.5 - 25);
+	dst.x = (int)(RESOLUTION_WIDTH - 225 * 0.5 - 25);
+	dst.y = (int)(RESOLUTION_HEIGHT - 310 * 0.5 - 25);
 	dst.w = (int)(225 * 0.5);
 	dst.h = (int)(310 * 0.5);
 	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
@@ -92,23 +89,32 @@ void GameTable::render()
 	// Player hand cards
 	src.w = 215;
 	src.h = 300;
-	if (!player_->hand().empty())
+
+	std::vector<Card> hand = player_->hand();
+
+	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
+	int startPointY = (RESOLUTION_HEIGHT * 3 / 4); // vertical
+	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
+	int proportionalCardWidth = src.w * textureProportion; //107
+	int cardMargin = 70;
+
+	//dst.x = startPointX + (0 * proportionalCardWidth) + cardMargin;
+	//dst.y = startPointY;
+
+	//hand.at(0).render(&dst, textureProportion);
+
+	//dst.x = startPointX + (1 * proportionalCardWidth) + cardMargin;
+	//dst.y = startPointY;
+
+	//hand.at(1).render(&dst, textureProportion);
+
+	for (int i = 0; i < hand.size(); i++)
 	{
-		std::vector<Card> hand = player_->hand();
-
-		dst.x = (1280 / 4) + (0 * 215) + 2;
-		dst.y = (720 * 3 / 4) + 10;
-
-		hand[0].render(src, 0.15f);
+		dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
+		dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
+		// render a card
+		hand[i].render(&dst, textureProportion);
 	}
-	//for (int i = 0; i < hand.size(); i++)
-	//{
-	//	SDL_Rect dst;
-	//	dst.x = (1280 / 4) + (i * 215) + 2; // 215 card default width +2 margin between cards
-	//	dst.y = (720 * 3 / 4) + 10; // 3/4 of the screen heigth + 10 of margin
-	//	// render a card
-	//	hand[i].render(&dst, 0.15f);
-	//}
 
 	// OPPONENT
 	// Opponent deck
@@ -134,6 +140,19 @@ void GameTable::render()
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(textTexture);
 
+	// Opponent hand cards
+	hand = playerOpponent_->hand();
+
+	startPointY = 10; // vertical margin from top scren
+
+	for (int i = 0; i < hand.size(); i++)
+	{
+		dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
+		dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
+		// render a card
+		hand[i].render(&dst, textureProportion);
+	}
+
 	// Acction Button
 	actionButton_->render();
 }
@@ -141,11 +160,6 @@ void GameTable::render()
 bool GameTable::isMyTurn() const
 {
 	return turn_;
-}
-
-SDL_Texture* GameTable::getBackground() const
-{
-	return background_;
 }
 
 bool GameTable::actionButtonPressed() const
@@ -165,7 +179,7 @@ bool GameTable::preparationTurn() const
 
 void GameTable::playerDraw(int cards)
 {
-	player_->draw(cards);
+	player_->drawFaceUp(cards);
 }
 
 std::vector<int> GameTable::playerDeckShuffle()

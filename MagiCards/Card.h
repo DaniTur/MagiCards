@@ -2,6 +2,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
+#include <memory>
+#include <functional>
 
 enum class Color{ RED, GREEN, COLORLESS};
 
@@ -16,19 +18,30 @@ public:
 
 	int getId() const; // testing, remove
 
-	void render(SDL_Rect& destination, float proportion);
+	void render(SDL_Rect* destination, float proportion);
+
+	void turnUp();
+
+	void turnDown();
 
 private:
 	SDL_Renderer* renderer_ = nullptr;
+
+	//using TextureDestructor = std::function<void(SDL_Texture*)>;
+	//std::unique_ptr<SDL_Texture, TextureDestructor> texture_;
+	//
+	//using TextureDestructor = std::function<void(SDL_Texture*)>;
+	//std::unique_ptr<SDL_Texture, TextureDestructor> textureBack_;
+
 	SDL_Texture* texture_ = nullptr, *textureBack_ = nullptr;
 	SDL_Rect sRect_, dRect_;
 
 	bool facedown_ = true;
-	uint8_t id_;
+	Uint8 id_;
 	std::string name_;
 	Color color_;
-	uint8_t cost_;
-	uint8_t damage_;
-	uint8_t defense_;
+	Uint8 cost_;
+	Uint8 damage_;
+	Uint8 defense_;
 };
 

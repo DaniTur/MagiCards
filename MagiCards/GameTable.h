@@ -6,6 +6,9 @@
 #include "ActionButton.h"
 #include "Mouse.h"
 
+constexpr auto RESOLUTION_WIDTH = 1280;
+constexpr auto RESOLUTION_HEIGHT = 720;
+
 class GameTable
 {
 public:
@@ -29,8 +32,6 @@ public:
 	//return true if the turn belongs to the player side calling the function
 	bool isMyTurn() const; 
 
-	SDL_Texture* getBackground() const; // testing, remove.
-
 	bool actionButtonPressed() const;
 
 	ActionButtonType actionButtonType() const;
@@ -53,12 +54,15 @@ private:
 	
 	SDL_Renderer* renderer_;
 
-	SDL_Texture* background_ = nullptr;
+	using TextureDestructor = std::function<void(SDL_Texture*)>;
+	std::unique_ptr<SDL_Texture, TextureDestructor> background_;
+
 	SDL_Rect sRect_, dRect_; //background rectangle
 
 	TTF_Font* textFont_ = nullptr;
 
-	Player  *player_, *playerOpponent_;
+	//Player  *player_, *playerOpponent_;
+	std::unique_ptr<Player> player_, playerOpponent_;
 	//	_playerTableCards
 	//	_playerManaResource
 
