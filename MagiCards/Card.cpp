@@ -1,5 +1,6 @@
 #include "Card.h"
 #include "ResourcesList.h"
+#include <iostream>
 
 Card::Card()
 {
@@ -17,7 +18,7 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 
 	textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
 	texture_ = IMG_LoadTexture(renderer_, texture);
-
+	textureSelectedFrame_ = IMG_LoadTexture(renderer_, IMG_SELECTED_CARD_FRAME);
 	//texture_ = std::unique_ptr<SDL_Texture, TextureDestructor>
 	//	(IMG_LoadTexture(renderer_, texture)
 	//	, SDL_DestroyTexture);
@@ -44,17 +45,39 @@ int Card::getId() const
 	return static_cast<int>(id_);
 }
 
+void Card::update(Mouse* mouse)
+{
+	if (SDL_HasIntersection(mouse->getTip(), &dRect_))
+	{
+		std::cout << "mouse hover card: " << unsigned(id_) << std::endl;
+		mouseHover_ = true;
+	}
+	else {
+		mouseHover_ = false;
+	}
+}
+
 void Card::render(SDL_Rect* destination, float proportion)
 {
 	destination->w = sRect_.w * proportion;
 	destination->h = sRect_.h * proportion;
 
+	dRect_.x = destination->x;
+	dRect_.y = destination->y;
+	dRect_.w = destination->w;
+	dRect_.h = destination->h;
+
 	if (facedown_) {
 		//SDL_RenderCopy(renderer_, textureBack_.get(), NULL, &destination);
-		SDL_RenderCopy(renderer_, textureBack_, NULL, destination);
+		SDL_RenderCopy(renderer_, textureBack_, NULL, &dRect_);
 	}else{
 		//SDL_RenderCopy(renderer_, texture_.get(), NULL, &destination);
-		SDL_RenderCopy(renderer_, texture_, NULL, destination);
+		SDL_RenderCopy(renderer_, texture_, NULL, &dRect_);
+	}
+
+	if (mouseHover_)
+	{
+		SDL_RenderCopy(renderer_, textureSelectedFrame_, NULL, &dRect_);
 	}
 }
 

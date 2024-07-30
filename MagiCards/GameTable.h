@@ -51,6 +51,16 @@ public:
 	void createOpponentDeck(std::vector<int>& cardIDs);
 
 private:
+
+	void playerRenderDeck();
+
+	void playerRenderHand();
+
+	void playerOpponentRenderDeck();
+
+	void playerOpponentRenderHand();
+
+private:
 	
 	SDL_Renderer* renderer_;
 

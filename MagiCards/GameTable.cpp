@@ -57,101 +57,18 @@ void GameTable::render()
 	SDL_RenderCopy(renderer_, background_.get(), &sRect_, &dRect_);
 
 	// PLAYER
-	// Player deck
-	// player_->renderDeck(SDL_Rect dstRect);
-	//		
-	// player_->renderHand(SDL_Rect dstRect); first card destination rectangle
-	SDL_Texture* deckTexture = IMG_LoadTexture(renderer_, IMG_DECK);
-	SDL_Rect src, dst;
-	src.x = 0;
-	src.y = 0;
-	src.w = 225;
-	src.h = 310;
 
-	dst.x = (int)(RESOLUTION_WIDTH - 225 * 0.5 - 25);
-	dst.y = (int)(RESOLUTION_HEIGHT - 310 * 0.5 - 25);
-	dst.w = (int)(225 * 0.5);
-	dst.h = (int)(310 * 0.5);
-	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
+	playerRenderDeck();
 
-	// Player deck data(cards left)
-	std::string text = std::to_string(player_->deckSize()) + "/" + std::to_string(player_->deckMaxSize());
-	SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text.c_str(), { 0, 0, 0, 255 });
-	SDL_Texture * textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
-	dst.x = dst.x + (dst.w / 2) - (surface->w / 2);
-	dst.y = dst.y + dst.h + 5;
-	dst.w = surface->w;
-	dst.h = surface->h;
-	SDL_RenderCopy(renderer_, textTexture, NULL, &dst);
-	SDL_FreeSurface(surface);
-	SDL_DestroyTexture(textTexture);
+	playerRenderHand();
 
-	// Player hand cards
-	src.w = 215;
-	src.h = 300;
-
-	std::vector<Card> hand = player_->hand();
-
-	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
-	int startPointY = (RESOLUTION_HEIGHT * 3 / 4); // vertical
-	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
-	int proportionalCardWidth = src.w * textureProportion; //107
-	int cardMargin = 70;
-
-	//dst.x = startPointX + (0 * proportionalCardWidth) + cardMargin;
-	//dst.y = startPointY;
-
-	//hand.at(0).render(&dst, textureProportion);
-
-	//dst.x = startPointX + (1 * proportionalCardWidth) + cardMargin;
-	//dst.y = startPointY;
-
-	//hand.at(1).render(&dst, textureProportion);
-
-	for (int i = 0; i < hand.size(); i++)
-	{
-		dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
-		dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
-		// render a card
-		hand[i].render(&dst, textureProportion);
-	}
 
 	// OPPONENT
-	// Opponent deck
-	//SDL_Rect dstOpponent;
-	src.w = 225;
-	src.h = 310;
 
-	dst.x =  25;
-	dst.y =  25;
-	dst.w = (int)(225 * 0.5);
-	dst.h = (int)(310 * 0.5);
-	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
+	playerOpponentRenderDeck();
 
-	// Opponent deck data(cards left)
-	text = std::to_string(playerOpponent_->deckSize()) + "/" + std::to_string(playerOpponent_->deckMaxSize());
-	surface = TTF_RenderText_Solid(textFont_, text.c_str(), { 0, 0, 0, 255 });
-	textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
-	dst.x = dst.x + (dst.w / 2) - (surface->w / 2);
-	dst.y = dst.y + dst.h + 5;
-	dst.w = surface->w;
-	dst.h = surface->h;
-	SDL_RenderCopy(renderer_, textTexture, NULL, &dst);
-	SDL_FreeSurface(surface);
-	SDL_DestroyTexture(textTexture);
+	playerOpponentRenderHand();
 
-	// Opponent hand cards
-	hand = playerOpponent_->hand();
-
-	startPointY = 10; // vertical margin from top scren
-
-	for (int i = 0; i < hand.size(); i++)
-	{
-		dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
-		dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
-		// render a card
-		hand[i].render(&dst, textureProportion);
-	}
 
 	// Acction Button
 	actionButton_->render();
@@ -207,4 +124,109 @@ void GameTable::clearButtonPressed()
 void GameTable::createOpponentDeck(std::vector<int>& cardIDs)
 {
 	playerOpponent_->loadDeck(cardIDs);
+}
+
+void GameTable::playerRenderDeck()
+{
+	SDL_Texture* deckTexture = IMG_LoadTexture(renderer_, IMG_DECK);
+	SDL_Rect src, dst;
+	src.x = 0;
+	src.y = 0;
+	src.w = 225;
+	src.h = 310;
+
+	dst.x = (int)(RESOLUTION_WIDTH - 225 * 0.5 - 25);
+	dst.y = (int)(RESOLUTION_HEIGHT - 310 * 0.5 - 25);
+	dst.w = (int)(225 * 0.5);
+	dst.h = (int)(310 * 0.5);
+	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
+
+	// Player deck data(cards left)
+	std::string text = std::to_string(player_->deckSize()) + "/" + std::to_string(player_->deckMaxSize());
+	SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text.c_str(), { 0, 0, 0, 255 });
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
+	dst.x = dst.x + (dst.w / 2) - (surface->w / 2);
+	dst.y = dst.y + dst.h + 5;
+	dst.w = surface->w;
+	dst.h = surface->h;
+	SDL_RenderCopy(renderer_, textTexture, NULL, &dst);
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(textTexture);
+}
+
+void GameTable::playerRenderHand()
+{
+	SDL_Rect src, dst;
+
+	src.w = 215;
+	src.h = 300;
+
+	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
+	int startPointY = (RESOLUTION_HEIGHT * 3 / 4); // vertical
+	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
+	int proportionalCardWidth = src.w * textureProportion; //107
+	int cardMargin = 70;
+
+	std::vector<Card>& hand = player_->hand();
+
+	if (!hand.empty())
+	{
+		for (int i = 0; i < hand.size(); i++)
+		{
+			dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
+			dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
+			// render a card
+			hand.at(i).render(&dst, textureProportion);
+		}
+	}
+}
+
+void GameTable::playerOpponentRenderDeck()
+{
+	SDL_Texture* deckTexture = IMG_LoadTexture(renderer_, IMG_DECK);
+	SDL_Rect src, dst;
+	src.w = 225;
+	src.h = 310;
+
+	dst.x = 25;
+	dst.y = 25;
+	dst.w = (int)(225 * 0.5);
+	dst.h = (int)(310 * 0.5);
+	SDL_RenderCopy(renderer_, deckTexture, &src, &dst);
+
+	// Opponent deck data(cards left)
+	std::string text = std::to_string(playerOpponent_->deckSize()) + "/" + std::to_string(playerOpponent_->deckMaxSize());
+	SDL_Surface*  surface = TTF_RenderText_Solid(textFont_, text.c_str(), { 0, 0, 0, 255 });
+	SDL_Texture*  textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
+	dst.x = dst.x + (dst.w / 2) - (surface->w / 2);
+	dst.y = dst.y + dst.h + 5;
+	dst.w = surface->w;
+	dst.h = surface->h;
+	SDL_RenderCopy(renderer_, textTexture, NULL, &dst);
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(textTexture);
+}
+
+void GameTable::playerOpponentRenderHand()
+{
+	SDL_Rect src, dst;
+
+	src.w = 215;
+	src.h = 300;
+
+	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
+	int startPointY = 10; // vertical margin from top scren
+	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
+	int proportionalCardWidth = src.w * textureProportion; //107
+	int cardMargin = 70;
+
+	std::vector<Card>& hand = playerOpponent_->hand();
+
+	for (int i = 0; i < hand.size(); i++)
+	{
+		dst.x = startPointX + (i * proportionalCardWidth) + cardMargin; // 215 card default width +2 margin between cards
+		dst.y = startPointY; // 3/4 of the screen heigth + 10 of margin
+		// render a card
+		hand.at(i).render(&dst, textureProportion);
+	}
 }

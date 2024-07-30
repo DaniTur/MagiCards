@@ -100,7 +100,14 @@ void Player::drawFaceUp(int number)
 
 void Player::update(Mouse* mouse)
 {
-
+    // Update hand cards
+    if (!hand_.empty())
+    {
+        for(int i = 0; i < hand_.size(); i++)
+        {
+            hand_.at(i).update(mouse);
+        }
+    }
 }
 
 void Player::render()

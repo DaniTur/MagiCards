@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include "Mouse.h"
 
 enum class Color{ RED, GREEN, COLORLESS};
 
@@ -16,7 +17,9 @@ public:
 
 	~Card();
 
-	int getId() const; // testing, remove
+	int getId() const;
+
+	void update(Mouse* mouse);
 
 	void render(SDL_Rect* destination, float proportion);
 
@@ -33,8 +36,10 @@ private:
 	//using TextureDestructor = std::function<void(SDL_Texture*)>;
 	//std::unique_ptr<SDL_Texture, TextureDestructor> textureBack_;
 
-	SDL_Texture* texture_ = nullptr, *textureBack_ = nullptr;
+	SDL_Texture *texture_ = nullptr, *textureBack_ = nullptr, *textureSelectedFrame_ = nullptr;
 	SDL_Rect sRect_, dRect_;
+
+	bool mouseHover_ = false;
 
 	bool facedown_ = true;
 	Uint8 id_;
