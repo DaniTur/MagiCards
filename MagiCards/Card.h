@@ -4,7 +4,9 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <SDL_ttf.h>
 #include "Mouse.h"
+#include "ResourcesList.h"
 
 enum class Color{ RED, GREEN, COLORLESS};
 
@@ -13,7 +15,10 @@ class Card
 public:
 	Card();
 
-	Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, uint8_t cost, uint8_t damage, uint8_t defense, const char* texture);
+	Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, uint8_t cost, uint8_t damage, uint8_t defense, std::string texture);
+
+	// Copy constructor (performs a Deep copy)
+	Card(const Card& card);
 
 	~Card();
 
@@ -27,6 +32,18 @@ public:
 
 	void turnDown();
 
+	bool isMouseHovered() const;
+
+	bool isSelected() const;
+
+	void select();
+
+	void deselect();
+
+private:
+
+	void renderCardTextData();
+
 private:
 	SDL_Renderer* renderer_ = nullptr;
 
@@ -38,8 +55,12 @@ private:
 
 	SDL_Texture *texture_ = nullptr, *textureBack_ = nullptr, *textureSelectedFrame_ = nullptr;
 	SDL_Rect sRect_, dRect_;
+	std::string texturePath_;
+	
+	TTF_Font* textFont_ = nullptr;
 
 	bool mouseHover_ = false;
+	bool selected_ = false;
 
 	bool facedown_ = true;
 	Uint8 id_;

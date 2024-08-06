@@ -1,6 +1,7 @@
 #include "LoadingScreen.h"
 #include <SDL_image.h>
 #include "ResourcesList.h"
+#include <iostream>
 
 LoadingScreen::LoadingScreen(SDL_Renderer* renderer, std::string message) : _renderer(renderer), _message(message)
 {
@@ -36,7 +37,12 @@ LoadingScreen::~LoadingScreen()
 	SDL_DestroyTexture(_background);
 	SDL_DestroyTexture(_textTexture);
 	SDL_FreeSurface(_surfaceText);
-	TTF_CloseFont(_textFont);
+	try {
+		//TTF_CloseFont(_textFont);
+	}
+	catch (std::exception& e) {
+		std::cout << "Error while trying to close font of loading screen" << e.what() << std::endl;
+	}
 }
 
 void LoadingScreen::render()

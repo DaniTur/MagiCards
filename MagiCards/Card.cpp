@@ -1,13 +1,12 @@
 #include "Card.h"
-#include "ResourcesList.h"
 #include <iostream>
 
 Card::Card()
 {
 }
 
-Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, uint8_t cost, uint8_t damage, uint8_t defense, const char* texture)
-	: renderer_(renderer)
+Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, uint8_t cost, uint8_t damage, uint8_t defense, std::string texture)
+	: renderer_(renderer), texturePath_(texture)
 {
 	id_ = id;
 	name_ = name;
@@ -17,8 +16,10 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 	defense_ = defense;
 
 	textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
-	texture_ = IMG_LoadTexture(renderer_, texture);
+	texture_ = IMG_LoadTexture(renderer_, texturePath_.c_str());
 	textureSelectedFrame_ = IMG_LoadTexture(renderer_, IMG_SELECTED_CARD_FRAME);
+
+	textFont_ = TTF_OpenFont(TEXT_FONT, 14);
 	//texture_ = std::unique_ptr<SDL_Texture, TextureDestructor>
 	//	(IMG_LoadTexture(renderer_, texture)
 	//	, SDL_DestroyTexture);
@@ -35,9 +36,32 @@ Card::Card(SDL_Renderer* renderer, uint8_t id, std::string name, Color color, ui
 	dRect_ = { 0, 0, 0, 0 };
 }
 
+// Copy constructor (performs a Deep copy)
+Card::Card(const Card& card)
+	: sRect_(card.sRect_), dRect_(card.dRect_), texturePath_(card.texturePath_),
+	mouseHover_(card.mouseHover_), selected_(card.selected_),
+	facedown_(card.facedown_), id_(card.id_), name_(card.name_),
+	color_(card.color_), cost_(card.cost_), damage_(card.damage_),
+	defense_(card.defense_), renderer_(card.renderer_) {
+
+	texture_ = IMG_LoadTexture(renderer_, texturePath_.c_str());
+	textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
+	textureSelectedFrame_ = IMG_LoadTexture(renderer_, IMG_SELECTED_CARD_FRAME);
+	textFont_ = TTF_OpenFont(TEXT_FONT, 12);
+}
+
 Card::~Card()
 {
-	//SDL_DestroyTexture(texture_);
+	SDL_DestroyTexture(texture_);
+	SDL_DestroyTexture(textureBack_);
+	SDL_DestroyTexture(textureSelectedFrame_);
+
+	try {
+		//TTF_CloseFont(textFont_);
+	}
+	catch (std::exception& e) {
+		std::cout << "Error while trying to close font of a card" << e.what() << std::endl;
+	}
 }
 
 int Card::getId() const
@@ -49,7 +73,6 @@ void Card::update(Mouse* mouse)
 {
 	if (SDL_HasIntersection(mouse->getTip(), &dRect_))
 	{
-		std::cout << "mouse hover card: " << unsigned(id_) << std::endl;
 		mouseHover_ = true;
 	}
 	else {
@@ -73,9 +96,12 @@ void Card::render(SDL_Rect* destination, float proportion)
 	}else{
 		//SDL_RenderCopy(renderer_, texture_.get(), NULL, &destination);
 		SDL_RenderCopy(renderer_, texture_, NULL, &dRect_);
+
+		// Render Card data on top
+		renderCardTextData();
 	}
 
-	if (mouseHover_)
+	if (mouseHover_ || selected_)
 	{
 		SDL_RenderCopy(renderer_, textureSelectedFrame_, NULL, &dRect_);
 	}
@@ -89,4 +115,56 @@ void Card::turnUp()
 void Card::turnDown()
 {
 	facedown_ = true;
+}
+
+bool Card::isMouseHovered() const
+{
+	return mouseHover_;
+}
+
+bool Card::isSelected() const
+{
+	return selected_;
+}
+
+void Card::select()
+{
+	std::cout << "card" << static_cast<int>(id_) << "selected" << std::endl;
+	selected_ = true;
+}
+
+void Card::deselect()
+{
+	std::cout << "card" << static_cast<int>(id_) << "deselected" << std::endl;
+	selected_ = false;
+}
+
+void Card::renderCardTextData()
+{
+	// Render Card Name
+	SDL_Surface* textSurface = TTF_RenderText_Solid(textFont_, name_.c_str(), { 0, 0, 0, 255 });
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer_, textSurface);
+	
+	SDL_Rect textDRect;
+	textDRect.x = dRect_.x + 5; //top left margin
+	textDRect.y = dRect_.y + 5;
+	textDRect.w = dRect_.w - 8;
+	textDRect.h = textSurface->h -5;
+
+	SDL_RenderCopy(renderer_, textTexture, NULL, &textDRect);
+	
+	// Render Card damage/defense
+	std::string text = std::to_string(damage_) + "/" + std::to_string(defense_);
+	textSurface = TTF_RenderText_Solid(textFont_, text.c_str(), { 0, 0, 0, 255 });
+	textTexture = SDL_CreateTextureFromSurface(renderer_, textSurface);
+
+	textDRect.x = dRect_.x + dRect_.w - textSurface->w - 10; // x card start + card width - text size - margin
+	textDRect.y = dRect_.y + dRect_.h - textSurface->h - 10;
+	textDRect.w = textSurface->w;
+	textDRect.h = textSurface->h;
+
+	SDL_RenderCopy(renderer_, textTexture, NULL, &textDRect);
+
+	SDL_FreeSurface(textSurface);
+	SDL_DestroyTexture(textTexture);
 }

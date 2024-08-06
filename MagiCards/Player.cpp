@@ -28,6 +28,7 @@ bool Player::deckLoaded() const
 
 void Player::loadDeck() 
 {
+    std::cout << "loading deck" << std::endl;
     DeckLoader::load(deckId_, deck_, renderer_);
     //loaded_ = true;//testing, remove
     //if (!deck_.cards.empty())
@@ -80,7 +81,7 @@ void Player::draw(int number = 1)
     }
 }
 
-void Player::drawFaceUp(int number)
+void Player::drawFaceUp(int number = 1)
 {
     if (deck_.size() >= number)
     {
@@ -95,6 +96,49 @@ void Player::drawFaceUp(int number)
     else
     {
         std::cout << "Error: trying to draw more cards than the deck has." << std::endl;
+    }
+}
+
+void Player::handleEvents()
+{
+    // the player has made a left click (left mouse up event)
+    
+    // check if a card is mouse hovered and set that card to selected
+    if (!hand_.empty())
+    {
+        bool hoveredCardFound = false;
+        int i = 0;
+
+        while (i < hand_.size() && !hoveredCardFound)
+        {
+            if (hand_.at(i).isMouseHovered()) {
+                hoveredCardFound = true;
+            }else {
+                i++;
+            }  
+
+        }
+
+        if (hoveredCardFound)  //mouse clicked on top of a card
+        { 
+            // TODO: arreglar la seleccion y deseleccion de cartas de la mano
+            if (selectedCardIndex_ != i) // if the new selected card (i) is not the previous selected card, select it
+            {
+                hand_.at(i).select();
+            }
+
+            // if there was already a selected card, deselect it
+            if (selectedCardIndex_ >= 0 && hand_.at(selectedCardIndex_).isSelected())
+            {
+                hand_.at(selectedCardIndex_).deselect();
+            }
+
+            selectedCardIndex_ = i;
+        }
+        else // if there is no mouse hovered card, check for selected card and deselect it
+        { 
+            hand_.at(selectedCardIndex_).deselect();
+        }
     }
 }
 

@@ -63,7 +63,7 @@ public:
 		}
 		if (found)
 		{
-			auto texture = getTexture(id);
+			std::string texture = std::string(getTexture(id));
 			return Card(renderer, id, name, color, cost, damage, defense, texture);
 		}
 		else

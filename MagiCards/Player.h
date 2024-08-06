@@ -29,6 +29,8 @@ public:
 
 	void drawFaceUp(int number);
 
+	void handleEvents();
+
 	void update(Mouse* mouse);
 
 	void render();
@@ -50,5 +52,7 @@ private:
 	bool loaded_ = false; //testing, remove
 	int deckMaxSize_ = 0;
 	int actualDeckSize;
+
+	int selectedCardIndex_ = -1; // index of the hand
 };
 

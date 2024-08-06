@@ -87,5 +87,7 @@ private:
 	//_inGameMenu
 
 	int turn_ = -1; // preparation turn
+	bool playerReady = false;
+	bool opponentPlayerReady = false;
 };
 

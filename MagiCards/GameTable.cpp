@@ -38,6 +38,8 @@ GameTable::~GameTable()
 
 void GameTable::handleEvents()
 {
+	player_->handleEvents();
+
 	if (actionButton_->isSelected()) actionButtonPressed_ = true;
 	else actionButtonPressed_ = false;
 }
@@ -185,6 +187,8 @@ void GameTable::playerOpponentRenderDeck()
 {
 	SDL_Texture* deckTexture = IMG_LoadTexture(renderer_, IMG_DECK);
 	SDL_Rect src, dst;
+	src.x = 0;
+	src.y = 0;
 	src.w = 225;
 	src.h = 310;
 

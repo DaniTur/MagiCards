@@ -128,6 +128,7 @@ void Game::handleEvents()
 					case DECKS_MENU:
 						_decksMenu->handleEvents();
 						break;
+
 					case GAME_TABLE:
 						gameTable_->handleEvents();
 						break;
