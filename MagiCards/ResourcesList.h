@@ -30,3 +30,4 @@ constexpr auto IMG_SELECTED_CARD_FRAME = "D:\\MagiCardsProject\\MagiCards\\resou
 // Table
 constexpr auto IMG_GAME_TABLE = "D:\\MagiCardsProject\\MagiCards\\resources\\gameTable.png";
 constexpr auto IMG_DECK = "D:\\MagiCardsProject\\MagiCards\\resources\\deck.png";
+constexpr auto IMG_TURN_INDICATOR = "D:\\MagiCardsProject\\MagiCards\\resources\\turnIndicator.png";

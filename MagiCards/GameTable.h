@@ -5,21 +5,18 @@
 #include "Player.h"
 #include "ActionButton.h"
 #include "Mouse.h"
+#include "TurnManager.h"
+#include "Common.h"
 
 constexpr auto RESOLUTION_WIDTH = 1280;
 constexpr auto RESOLUTION_HEIGHT = 720;
+
 
 class GameTable
 {
 public:
 
-	// Testing, remove
-	enum class Owner {
-		server,
-		client
-	};
-
-	GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, Owner owner);
+	GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, OWNER owner);
 
 	~GameTable();
 
@@ -50,6 +47,12 @@ public:
 
 	void createOpponentDeck(std::vector<int>& cardIDs);
 
+	void clientPlayerPreparationTurnReady();
+
+	void hostPlayerPreparationTurnReady();
+
+	bool playerCanDraw() const;
+
 private:
 
 	void playerRenderDeck();
@@ -59,6 +62,10 @@ private:
 	void playerOpponentRenderDeck();
 
 	void playerOpponentRenderHand();
+
+	void updatePreparationTurnReady();
+
+	void renderPlayerNames();
 
 private:
 	
@@ -73,21 +80,16 @@ private:
 
 	//Player  *player_, *playerOpponent_;
 	std::unique_ptr<Player> player_, playerOpponent_;
-	//	_playerTableCards
-	//	_playerManaResource
 
 	ActionButton* actionButton_;
 	bool actionButtonPressed_ = false;
 
 	int selectedCardIndex_ = -1; // seleccted card index of the hand vector
 
-	//_oponentTableCards
-	//_oponentManaResource
-
 	//_inGameMenu
 
-	int turn_ = -1; // preparation turn
-	bool playerReady = false;
-	bool opponentPlayerReady = false;
+	OWNER owner_;
+
+	TurnManager turnManager_;
 };
 

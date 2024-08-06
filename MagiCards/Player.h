@@ -39,6 +39,8 @@ public:
 
 	int deckMaxSize() const;
 
+	int handSize() const;
+
 	std::vector<Card>& hand();
 
 private:

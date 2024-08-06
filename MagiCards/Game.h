@@ -16,8 +16,7 @@
 #include "GameTable.h"
 #include "NetServer.h"
 #include "NetClient.h"
-
-enum gameStates { MAIN_MENU, CREATE_ROOM, GAME_ROOM, JOIN_ROOM, DECKS_MENU, LOADING_SCREEN, GAME_TABLE };
+#include "Common.h"
 
 class Game
 {
@@ -52,6 +51,8 @@ private:
 
 	void onDrawCardMessage(Message& msg);
 
+	void sendMessageToOpponent(Message& msg);
+
 private:
 	bool _isRunning;
 
@@ -65,13 +66,16 @@ private:
 
 	Mouse* _mouse = nullptr;
 
-	int _gameState = -1;
+	GAME_STATE _gameState;
+
 	MainMenu* _mainMenu = nullptr;
 	CreateRoomMenu* _createRoomMenu = nullptr;
 	RoomMenu* _gameRoomMenu = nullptr;
 	JoinRoomMenu* _joinRoomMenu = nullptr;
 	DecksMenu* _decksMenu = nullptr;
-	LoadingScreen* _loadingScreen = nullptr;
+
+	std::unique_ptr<LoadingScreen> loadingScreen_;
+
 	GameTable* gameTable_ = nullptr;
 
 	Player *_playerHost = nullptr, *_playerClient = nullptr;

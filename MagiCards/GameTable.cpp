@@ -3,8 +3,8 @@
 #include "ResourcesList.h"
 
 
-GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, Owner owner)
-	: renderer_(renderer), player_(player), playerOpponent_(opponent)
+GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, OWNER owner)
+	: renderer_(renderer), player_(player), playerOpponent_(opponent), owner_(owner), turnManager_(owner)
 {
 	//background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
 	background_ = std::unique_ptr<SDL_Texture, TextureDestructor>(IMG_LoadTexture(renderer_, IMG_GAME_TABLE), SDL_DestroyTexture);
@@ -51,6 +51,19 @@ void GameTable::update(Mouse* mouse)
 	//selectedCardIndex_ = player_->selectedCard();
 
 	actionButton_->update(mouse);
+
+	if (turnManager_.isPreparationTurn())
+	{
+		updatePreparationTurnReady();
+	}
+}
+
+void GameTable::updatePreparationTurnReady()
+{
+	if (turnManager_.isClientPrepared() and turnManager_.isHostPrepared())
+	{
+		turnManager_.next();
+	}
 }
 
 void GameTable::render()
@@ -72,13 +85,73 @@ void GameTable::render()
 	playerOpponentRenderHand();
 
 
+	renderPlayerNames();
+
 	// Acction Button
 	actionButton_->render();
 }
 
+void GameTable::renderPlayerNames()
+{
+	// Render player name
+	SDL_Surface* surface = TTF_RenderText_Solid(textFont_, player_->getName().c_str(), { 0, 0, 0, 255 });
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
+	SDL_Rect playerDRect;
+	playerDRect.x = 15;
+	playerDRect.y = (RESOLUTION_HEIGHT / 2) + 10;
+	playerDRect.w = surface->w;
+	playerDRect.h = surface->h;
+
+	SDL_RenderCopy(renderer_, textTexture, NULL, &playerDRect);
+
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(textTexture);
+
+	// Render opponent name
+	surface = TTF_RenderText_Solid(textFont_, playerOpponent_->getName().c_str(), { 0, 0, 0, 255 });
+	textTexture = SDL_CreateTextureFromSurface(renderer_, surface);
+	SDL_Rect opponentDRect;
+	opponentDRect.x = 15;
+	opponentDRect.y = (RESOLUTION_HEIGHT / 2) - surface->h - 10;
+	opponentDRect.w = surface->w;
+	opponentDRect.h = surface->h;
+
+	SDL_RenderCopy(renderer_, textTexture, NULL, &opponentDRect);
+
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(textTexture);
+
+	// Render turn indicator 
+	if (!turnManager_.isPreparationTurn())
+	{
+		if (turnManager_.isMyTurn())
+		{
+			SDL_Texture* turnIndicatorTexture = IMG_LoadTexture(renderer_, IMG_TURN_INDICATOR);
+			playerDRect.y = playerDRect.y + playerDRect.h + 5;
+			playerDRect.h = 5;
+
+			SDL_RenderCopy(renderer_, turnIndicatorTexture, NULL, &playerDRect);
+
+			SDL_DestroyTexture(turnIndicatorTexture);
+		}
+		//else {
+		//	SDL_Texture* turnIndicatorTexture = IMG_LoadTexture(renderer_, IMG_TURN_INDICATOR);
+		//	opponentDRect.y = playerDRect.y + playerDRect.h + 5;
+		//	opponentDRect.h = 5;
+
+		//	SDL_RenderCopy(renderer_, turnIndicatorTexture, NULL, &opponentDRect);
+
+		//	SDL_DestroyTexture(turnIndicatorTexture);
+		//}
+
+		
+	}
+
+}
+
 bool GameTable::isMyTurn() const
 {
-	return turn_;
+	return turnManager_.isMyTurn();
 }
 
 bool GameTable::actionButtonPressed() const
@@ -93,7 +166,7 @@ ActionButtonType GameTable::actionButtonType() const
 
 bool GameTable::preparationTurn() const
 {
-	return turn_ == -1;
+	return turnManager_.isPreparationTurn();
 }
 
 void GameTable::playerDraw(int cards)
@@ -115,7 +188,7 @@ void GameTable::opponentPlayerDraw(int cardsDrawed)
 
 void GameTable::nextTurn()
 {
-	turn_++;
+	turnManager_.next();
 }
 
 void GameTable::clearButtonPressed()
@@ -126,6 +199,24 @@ void GameTable::clearButtonPressed()
 void GameTable::createOpponentDeck(std::vector<int>& cardIDs)
 {
 	playerOpponent_->loadDeck(cardIDs);
+}
+
+void GameTable::clientPlayerPreparationTurnReady()
+{
+	turnManager_.clientPreparationReady();
+}
+
+void GameTable::hostPlayerPreparationTurnReady()
+{
+	turnManager_.hostPreparationReady();
+}
+
+bool GameTable::playerCanDraw() const
+{
+	if (player_->deckSize() > 0 and player_->handSize() < 5)
+		return true;
+	else
+		return false;
 }
 
 void GameTable::playerRenderDeck()
@@ -166,7 +257,7 @@ void GameTable::playerRenderHand()
 	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
 	int startPointY = (RESOLUTION_HEIGHT * 3 / 4); // vertical
 	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
-	int proportionalCardWidth = src.w * textureProportion; //107
+	int proportionalCardWidth = (int)(src.w * textureProportion); //107
 	int cardMargin = 70;
 
 	std::vector<Card>& hand = player_->hand();
@@ -221,7 +312,7 @@ void GameTable::playerOpponentRenderHand()
 	int startPointX = (RESOLUTION_WIDTH / 4); //horizontal
 	int startPointY = 10; // vertical margin from top scren
 	float textureProportion = 0.5f; // proporcion respecto al tamaño original de la imagen de textura
-	int proportionalCardWidth = src.w * textureProportion; //107
+	int proportionalCardWidth = (int)(src.w * textureProportion); //107
 	int cardMargin = 70;
 
 	std::vector<Card>& hand = playerOpponent_->hand();

@@ -187,3 +187,12 @@ std::vector<Card>& Player::hand()
 {
     return hand_;
 }
+
+int Player::handSize() const
+{
+    if (hand_.empty())
+    {
+        return 0;
+    }
+    return hand_.size();
+}

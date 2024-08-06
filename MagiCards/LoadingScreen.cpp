@@ -36,7 +36,6 @@ LoadingScreen::~LoadingScreen()
 {
 	SDL_DestroyTexture(_background);
 	SDL_DestroyTexture(_textTexture);
-	SDL_FreeSurface(_surfaceText);
 	try {
 		//TTF_CloseFont(_textFont);
 	}
