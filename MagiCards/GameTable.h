@@ -84,8 +84,7 @@ private:
 
 	TTF_Font* textFont_ = nullptr;
 
-	//Player  *player_, *playerOpponent_;
-	std::unique_ptr<Player> player_, playerOpponent_;
+	Player  *player_, *playerOpponent_;
 
 	ActionButton* actionButton_;
 	bool actionButtonPressed_ = false;

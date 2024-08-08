@@ -25,6 +25,6 @@ private:
 
 	ActionButtonType type_;
 
-	const char* buttonTextByType(ActionButtonType type);
+	const char* buttonTextByType(ActionButtonType type) const;
 };
 

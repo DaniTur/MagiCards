@@ -56,7 +56,6 @@ private:
 private:
 	bool _isRunning;
 
-	//SDL_Window* window_ = nullptr;
 	using WindowDestructor = std::function<void(SDL_Window*)>;
 	std::unique_ptr<SDL_Window, WindowDestructor> window_;
 
@@ -68,17 +67,17 @@ private:
 
 	GAME_STATE _gameState;
 
-	MainMenu* _mainMenu = nullptr;
-	CreateRoomMenu* _createRoomMenu = nullptr;
+	std::unique_ptr<MainMenu> mainMenu_;
+	std::unique_ptr<CreateRoomMenu> createRoomMenu_;
 	RoomMenu* _gameRoomMenu = nullptr;
-	JoinRoomMenu* _joinRoomMenu = nullptr;
-	DecksMenu* _decksMenu = nullptr;
-
+	std::unique_ptr<JoinRoomMenu> joinRoomMenu_;
+	std::unique_ptr<DecksMenu> decksMenu_;
 	std::unique_ptr<LoadingScreen> loadingScreen_;
 
-	GameTable* gameTable_ = nullptr;
+	std::unique_ptr<GameTable> gameTable_;
 
-	Player *_playerHost = nullptr, *_playerClient = nullptr;
+	Player* _playerHost = nullptr;
+	Player* _playerClient = nullptr;
 
 	NetClient* netClient_ = nullptr;
 	NetServer* netServer_ = nullptr;

@@ -18,13 +18,8 @@ Game::Game() {
 Game::~Game()
 {
 	delete _mouse;
-	delete _mainMenu;
-	delete _createRoomMenu;
+
 	delete _gameRoomMenu;
-	delete _joinRoomMenu;
-	delete _decksMenu;
-	delete _playerHost;
-	delete _playerClient;
 	release();
 }
 
@@ -60,7 +55,7 @@ void Game::init()
 	_isRunning = true;
 	_activeMenu = true;
 
-	_mainMenu = new MainMenu(renderer_);
+	mainMenu_ = std::make_unique<MainMenu>(renderer_);
 	_gameState = GAME_STATE::MAIN_MENU;
 
 	static Mouse* m = new Mouse(renderer_);
@@ -109,11 +104,11 @@ void Game::handleEvents()
 				switch (_gameState)
 				{
 					case GAME_STATE::MAIN_MENU:
-						_mainMenu->handleEvents();
+						mainMenu_->handleEvents();
 						break;
 
 					case GAME_STATE::CREATE_ROOM:
-						_createRoomMenu->handleEvents();
+						createRoomMenu_->handleEvents();
 						break;
 
 					case GAME_STATE::GAME_ROOM:
@@ -121,11 +116,11 @@ void Game::handleEvents()
 						break;
 
 					case GAME_STATE::JOIN_ROOM:
-						_joinRoomMenu->handleEvents();
+						joinRoomMenu_->handleEvents();
 						break;
 
 					case GAME_STATE::DECKS_MENU:
-						_decksMenu->handleEvents();
+						decksMenu_->handleEvents();
 						break;
 
 					case GAME_STATE::GAME_TABLE:
@@ -140,10 +135,10 @@ void Game::handleEvents()
 			switch (_gameState)
 			{
 				case GAME_STATE::CREATE_ROOM:
-					_createRoomMenu->handleTextInputEvent(event.text);
+					createRoomMenu_->handleTextInputEvent(event.text);
 					break;
 				case GAME_STATE::JOIN_ROOM:
-					_joinRoomMenu->handleTextInputEvent(event.text);
+					joinRoomMenu_->handleTextInputEvent(event.text);
 					break;
 			}
 			break;
@@ -152,10 +147,10 @@ void Game::handleEvents()
 			switch (_gameState)
 			{
 			case GAME_STATE::CREATE_ROOM:
-				_createRoomMenu->handleKeyDownEvent(event.key.keysym);
+				createRoomMenu_->handleKeyDownEvent(event.key.keysym);
 				break;
 			case GAME_STATE::JOIN_ROOM:
-				_joinRoomMenu->handleKeyDownEvent(event.key.keysym);
+				joinRoomMenu_->handleKeyDownEvent(event.key.keysym);
 				break;
 			}
 		}
@@ -266,24 +261,21 @@ void Game::updateMenu()
 	switch (_gameState)
 	{
 		case GAME_STATE::MAIN_MENU:
-			_mainMenu->update(_mouse);
-			switch (_mainMenu->getButtonPressed())
+			mainMenu_->update(_mouse);
+			switch (mainMenu_->getButtonPressed())
 			{
 				case 0:
-					if (!_createRoomMenu) delete _createRoomMenu;
-					_createRoomMenu = new CreateRoomMenu(renderer_);
+					createRoomMenu_ = std::make_unique<CreateRoomMenu>(renderer_);
 					_gameState = GAME_STATE::CREATE_ROOM;
 					break;
 
 				case 1:
-					if (!_joinRoomMenu) delete _joinRoomMenu;
-					_joinRoomMenu = new JoinRoomMenu(renderer_);
+					joinRoomMenu_ = std::make_unique<JoinRoomMenu>(renderer_);
 					_gameState = GAME_STATE::JOIN_ROOM;
 					break;
 
 				case 2:
-					if (!_decksMenu) delete _decksMenu;
-					_decksMenu = new DecksMenu(renderer_);
+					decksMenu_ = std::make_unique<DecksMenu>(renderer_);
 					_gameState = GAME_STATE::DECKS_MENU;
 					break;
 
@@ -291,16 +283,16 @@ void Game::updateMenu()
 					_isRunning = false;
 					break;
 			}
-			_mainMenu->clearPressedButton();
+			mainMenu_->clearPressedButton();
 			break;
 
 		case GAME_STATE::CREATE_ROOM:
-			_createRoomMenu->update(_mouse);
-			switch (_createRoomMenu->getButtonPressed())
+			createRoomMenu_->update(_mouse);
+			switch (createRoomMenu_->getButtonPressed())
 			{
 				case 0: //Create button
 				{
-					_playerHost = new Player(_createRoomMenu->getPlayerName(), _createRoomMenu->getSelectedDeck(), renderer_);
+					_playerHost = new Player(createRoomMenu_->getPlayerName(), createRoomMenu_->getSelectedDeck(), renderer_);
 					_gameRoomMenu = new RoomMenu(renderer_, _playerHost, true);
 					netServer_ = new NetServer(30000);
 					_gameState = GAME_STATE::GAME_ROOM;
@@ -310,20 +302,20 @@ void Game::updateMenu()
 					_gameState = GAME_STATE::MAIN_MENU;
 					break;
 			}
-			_createRoomMenu->clearPressedButton();
+			createRoomMenu_->clearPressedButton();
 			break;
 
 		case GAME_STATE::JOIN_ROOM:
-			_joinRoomMenu->update(_mouse);
-			switch (_joinRoomMenu->getButtonPressed())
+			joinRoomMenu_->update(_mouse);
+			switch (joinRoomMenu_->getButtonPressed())
 			{
 				case 0: //Join button
 				{
-					_playerClient = new Player(_joinRoomMenu->getPlayerName(), _joinRoomMenu->getSelectedDeck(), renderer_);
+					_playerClient = new Player(joinRoomMenu_->getPlayerName(), joinRoomMenu_->getSelectedDeck(), renderer_);
 					_gameRoomMenu = new RoomMenu(renderer_, _playerClient, false);
 					netClient_ = new NetClient();
 
-					bool connectionStatus = netClient_->Connect(_joinRoomMenu->getServerAddress(), _joinRoomMenu->getServerPort());
+					bool connectionStatus = netClient_->Connect(joinRoomMenu_->getServerAddress(), joinRoomMenu_->getServerPort());
 					if (!connectionStatus)
 					{
 						std::cout << "Connection to the server failed." << std::endl;
@@ -339,7 +331,7 @@ void Game::updateMenu()
 					_gameState = GAME_STATE::MAIN_MENU;
 					break;
 			}
-			_joinRoomMenu->clearPressedButton();
+			joinRoomMenu_->clearPressedButton();
 			break;
 
 		case GAME_STATE::LOADING_SCREEN:
@@ -352,7 +344,7 @@ void Game::updateMenu()
 				// Create / load game table
 				if (!gameTable_)
 				{
-					gameTable_ = new GameTable(renderer_, _playerClient, _playerHost, OWNER::CLIENT);
+					gameTable_ = std::make_unique<GameTable>(renderer_, _playerClient, _playerHost, OWNER::CLIENT);
 
 					Message m;
 					m.header.id = MessageType::GameTableLoaded;
@@ -374,7 +366,7 @@ void Game::updateMenu()
 
 				// Create / load game table
 				if (!gameTable_) {
-					gameTable_ = new GameTable(renderer_, _playerHost, _playerClient, OWNER::SERVER);
+					gameTable_ = std::make_unique<GameTable>(renderer_, _playerHost, _playerClient, OWNER::SERVER);
 
 					Message m;
 					m.header.id = MessageType::GameTableLoaded;
@@ -594,11 +586,11 @@ void Game::render()
 		switch (_gameState)
 		{
 			case GAME_STATE::MAIN_MENU:
-				_mainMenu->render();
+				mainMenu_->render();
 				break;
 
 			case GAME_STATE::CREATE_ROOM:
-				_createRoomMenu->render();
+				createRoomMenu_->render();
 				break;
 
 			case GAME_STATE::GAME_ROOM:
@@ -606,11 +598,11 @@ void Game::render()
 				break;
 
 			case GAME_STATE::JOIN_ROOM:
-				_joinRoomMenu->render();
+				joinRoomMenu_->render();
 				break;
 
 			case GAME_STATE::DECKS_MENU:
-				_decksMenu->render();
+				decksMenu_->render();
 				break;
 
 			case GAME_STATE::LOADING_SCREEN:

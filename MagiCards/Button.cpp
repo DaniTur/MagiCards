@@ -2,12 +2,9 @@
 #include <SDL_image.h>
 #include "ResourcesList.h"
 
-Button::Button()
-{
-}
 
 Button::Button(const char* text, SDL_Renderer* renderer, SDL_Rect src, SDL_Rect dstRect)
-	: text_(text), _renderer(renderer)
+	: _renderer(renderer), text_(text)
 {
 	static SDL_Texture* texture = IMG_LoadTexture(_renderer, IMG_BUTTON_TEXTURE);
 	_texture = texture;
@@ -39,7 +36,7 @@ void Button::update(Mouse* mouse)
 	}
 }
 
-bool Button::isSelected()
+bool Button::isSelected() const
 {
 	return _mouseHover;
 }
@@ -63,12 +60,12 @@ void Button::render()
 			SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text_.c_str(), { 0, 0, 0, 255 });
 			SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
 			SDL_Rect dst;
-			dst.w = _dRect.w * 0.85;
-			dst.h = _dRect.h * 0.85;
+			dst.w = (int)(_dRect.w * 0.85);
+			dst.h = (int)(_dRect.h * 0.85);
 			dst.x = _dRect.x + (_dRect.w / 2) - (dst.w / 2);
 			dst.y = _dRect.y + (_dRect.h / 2) - (dst.h / 2);
 
-			SDL_RenderCopy(_renderer, texture, NULL, &dst);
+			SDL_RenderCopy(_renderer, texture, nullptr, &dst);
 
 			SDL_FreeSurface(surface);
 			SDL_DestroyTexture(texture);
@@ -76,7 +73,7 @@ void Button::render()
 	}
 }
 
-void Button::changeText(std::string newText)
+void Button::changeText(std::string_view newText)
 {
 	text_ = newText;
 }

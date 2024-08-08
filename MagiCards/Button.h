@@ -7,7 +7,6 @@
 class Button
 {
 public:
-	Button();
 
 	Button(const char* text, SDL_Renderer* renderer, SDL_Rect src, SDL_Rect dstRect);
 	
@@ -15,16 +14,17 @@ public:
 
 	void update(Mouse* mouse);
 
-	bool isSelected();
+	bool isSelected() const;
 
 	void render();
 
 protected:
-	void changeText(std::string newText);
+	void changeText(std::string_view newText);
 
 private:
 	SDL_Texture* _texture;
-	SDL_Rect _sRect, _dRect;
+	SDL_Rect _sRect;
+	SDL_Rect _dRect;
 
 	SDL_Renderer* _renderer;
 

@@ -5,9 +5,7 @@ ActionButton::ActionButton(ActionButtonType type, SDL_Renderer* renderer, SDL_Re
 {
 }
 
-ActionButton::~ActionButton()
-{
-}
+ActionButton::~ActionButton() = default;
 
 void ActionButton::changeButtonType(ActionButtonType newType)
 {
@@ -23,7 +21,7 @@ ActionButtonType ActionButton::getType() const
 	return type_;
 }
 
-const char* ActionButton::buttonTextByType(ActionButtonType type)
+const char* ActionButton::buttonTextByType(ActionButtonType type) const
 {
 	switch (type)
 	{
