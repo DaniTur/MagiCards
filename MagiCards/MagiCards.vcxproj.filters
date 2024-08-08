@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de encabezado\Network">
+      <UniqueIdentifier>{75fa78d8-cf24-4c0f-93bf-e8bc95c3e90e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Network">
+      <UniqueIdentifier>{6ff93206-69ab-449e-947f-49c6a140037a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Deck">
+      <UniqueIdentifier>{7967f12a-b097-452f-8e57-8d7db10c9717}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -51,7 +60,28 @@
     <ClCompile Include="Player.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="MenuINH.cpp">
+    <ClCompile Include="NetClient.cpp">
+      <Filter>Archivos de origen\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="NetConnection.cpp">
+      <Filter>Archivos de origen\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServer.cpp">
+      <Filter>Archivos de origen\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingScreen.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Card.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTable.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="ActionButton.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="TurnManager.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,8 +125,105 @@
     <ClInclude Include="Player.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="MenuINH.h">
+    <ClInclude Include="NetClient.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="NetConnection.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServer.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingScreen.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageType.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="TSQueue.h">
+      <Filter>Archivos de encabezado\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcesList.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Card.h">
+      <Filter>Archivos de encabezado\Deck</Filter>
+    </ClInclude>
+    <ClInclude Include="Deck.h">
+      <Filter>Archivos de encabezado\Deck</Filter>
+    </ClInclude>
+    <ClInclude Include="DeckLoader.h">
+      <Filter>Archivos de encabezado\Deck</Filter>
+    </ClInclude>
+    <ClInclude Include="CardFactory.h">
+      <Filter>Archivos de encabezado\Deck</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTable.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="ActionButton.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="TurnManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MagiCards.rc">
+      <Filter>Archivos de recursos</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="redDragon.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="bitmap1.bmp">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="buttonTexture1.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="CreateRoomMenu.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="DecksMenu.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="greenDragon.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="JoinRoomMenu.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="LoadingScreen.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="MainMenu.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="Mouse.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="preparingGameTable.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="RoomMenu.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="TextInput.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
   </ItemGroup>
 </Project>

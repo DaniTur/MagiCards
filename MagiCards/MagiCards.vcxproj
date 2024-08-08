@@ -45,6 +45,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -53,6 +54,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -86,6 +88,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\vclib\jsoncpp-1.9.5\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,6 +104,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\vclib\jsoncpp-1.9.5\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,7 +120,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\vclib\jsoncpp-1.9.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,7 +138,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\MagiCardsProject\MagiCards\vclib\jsoncpp-1.9.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,37 +151,77 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ActionButton.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="Card.cpp" />
     <ClCompile Include="CreateRoomMenu.cpp" />
     <ClCompile Include="DecksMenu.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameTable.cpp" />
     <ClCompile Include="JoinRoomMenu.cpp" />
+    <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="MainMenu.cpp" />
-    <ClCompile Include="MainMenuINH.cpp" />
-    <ClCompile Include="MenuINH.cpp" />
     <ClCompile Include="Mouse.cpp" />
+    <ClCompile Include="NetClient.cpp" />
+    <ClCompile Include="NetConnection.cpp" />
+    <ClCompile Include="NetServer.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RoomMenu.cpp" />
     <ClCompile Include="TextInput.cpp" />
+    <ClCompile Include="TurnManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ActionButton.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="Card.h" />
+    <ClInclude Include="CardFactory.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="CreateRoomMenu.h" />
+    <ClInclude Include="Deck.h" />
+    <ClInclude Include="DeckLoader.h" />
     <ClInclude Include="DecksMenu.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Connection.h" />
+    <ClInclude Include="GameTable.h" />
     <ClInclude Include="JoinRoomMenu.h" />
+    <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="MainMenu.h" />
-    <ClInclude Include="MainMenuINH.h" />
     <ClInclude Include="Menu.h" />
-    <ClInclude Include="MenuINH.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="MessageType.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="NetClient.h" />
+    <ClInclude Include="NetConnection.h" />
+    <ClInclude Include="NetServer.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="ResourcesList.h" />
     <ClInclude Include="RoomMenu.h" />
     <ClInclude Include="SDLException.h" />
     <ClInclude Include="TextInput.h" />
+    <ClInclude Include="TSQueue.h" />
+    <ClInclude Include="TurnManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MagiCards.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp" />
+    <Image Include="buttonTexture1.png" />
+    <Image Include="CreateRoomMenu.png" />
+    <Image Include="DecksMenu.png" />
+    <Image Include="greenDragon.png" />
+    <Image Include="JoinRoomMenu.png" />
+    <Image Include="LoadingScreen.png" />
+    <Image Include="MainMenu.png" />
+    <Image Include="Mouse.png" />
+    <Image Include="preparingGameTable.png" />
+    <Image Include="redDragon.png" />
+    <Image Include="RoomMenu.png" />
+    <Image Include="TextInput.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

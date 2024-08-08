@@ -53,6 +53,10 @@ public:
 
 	bool playerCanDraw() const;
 
+	bool playerCanPlayCard() const;
+
+	void clearTurnActions();
+
 private:
 
 	void playerRenderDeck();
@@ -66,6 +70,8 @@ private:
 	void updatePreparationTurnReady();
 
 	void renderPlayerNames();
+
+	void checkNextActionAllowed();
 
 private:
 	
@@ -91,5 +97,8 @@ private:
 	OWNER owner_;
 
 	TurnManager turnManager_;
+
+	bool playerDrawedThisTurn_ = false;
+	bool playerPlayedCardThisTurn_ = false;
 };
 

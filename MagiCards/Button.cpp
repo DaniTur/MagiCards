@@ -46,30 +46,33 @@ bool Button::isSelected()
 
 void Button::render()
 {
-	if (_mouseHover)
+	if (text_ != "INACTIVE")
 	{
-		_sRect.x = 500;
-	}
-	else
-	{
-		_sRect.x = 0;
-	}
-	SDL_RenderCopy(_renderer, _texture, &_sRect, &_dRect);
+		if (_mouseHover)
+		{
+			_sRect.x = 500;
+		}
+		else
+		{
+			_sRect.x = 0;
+		}
+		SDL_RenderCopy(_renderer, _texture, &_sRect, &_dRect);
 
-	if (!text_.empty())
-	{
-		SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text_.c_str(), { 0, 0, 0, 255 });
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
-		SDL_Rect dst;
-		dst.w = _dRect.w * 0.85;
-		dst.h = _dRect.h * 0.85;
-		dst.x = _dRect.x + (_dRect.w / 2) - (dst.w / 2);
-		dst.y = _dRect.y + (_dRect.h / 2) - (dst.h / 2);
+		if (!text_.empty())
+		{
+			SDL_Surface* surface = TTF_RenderText_Solid(textFont_, text_.c_str(), { 0, 0, 0, 255 });
+			SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
+			SDL_Rect dst;
+			dst.w = _dRect.w * 0.85;
+			dst.h = _dRect.h * 0.85;
+			dst.x = _dRect.x + (_dRect.w / 2) - (dst.w / 2);
+			dst.y = _dRect.y + (_dRect.h / 2) - (dst.h / 2);
 
-		SDL_RenderCopy(_renderer, texture, NULL, &dst);
+			SDL_RenderCopy(_renderer, texture, NULL, &dst);
 
-		SDL_FreeSurface(surface);
-		SDL_DestroyTexture(texture);
+			SDL_FreeSurface(surface);
+			SDL_DestroyTexture(texture);
+		}
 	}
 }
 

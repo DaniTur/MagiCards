@@ -5,7 +5,9 @@ enum class ActionButtonType {
 	OTHER,
 	DECK_SHUFFLE,
 	DRAW,
-	PLAY_CARD
+	PLAY_CARD,
+	END_TURN,
+	INACTIVE
 };
 
 class ActionButton : public Button

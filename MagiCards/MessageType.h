@@ -10,5 +10,6 @@ enum class MessageType : uint32_t
 	GameTableLoaded,
 	DrawCard,
 	ShuffleDeck,
-	PreparationTurnReady
+	PreparationTurnReady,
+	NextTurn
 };

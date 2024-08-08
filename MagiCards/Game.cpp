@@ -228,10 +228,23 @@ void Game::update()
 				}
 
 				case ActionButtonType::PLAY_CARD:
-					// aplicar restricciones para poder ejecutar la funcionalidad del botón aquí?
-					// las restricciones para 
+					// obtener la carta seleccionada, quitarla de la mano y ponerla en la posición de playingCard
 
 					break;
+
+				case ActionButtonType::END_TURN:
+				{
+					gameTable_->clearTurnActions();
+
+					gameTable_->nextTurn();
+					
+					Message m;
+					m.header.id = MessageType::NextTurn;
+
+					sendMessageToOpponent(m);
+
+					break;
+				}
 
 				default:
 					break;
@@ -468,6 +481,10 @@ void Game::updateNetworking()
 				case MessageType::PreparationTurnReady:
 					gameTable_->clientPlayerPreparationTurnReady();
 					break;
+
+				case MessageType::NextTurn:
+					gameTable_->nextTurn();
+					break;
 			}
 		}
 	}
@@ -530,6 +547,10 @@ void Game::updateNetworking()
 
 				case MessageType::PreparationTurnReady:
 					gameTable_->hostPlayerPreparationTurnReady();
+					break;
+
+				case MessageType::NextTurn:
+					gameTable_->nextTurn();
 					break;
 			}
 		}

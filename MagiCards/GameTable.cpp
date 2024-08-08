@@ -48,14 +48,34 @@ void GameTable::update(Mouse* mouse)
 {
 	player_->update(mouse);
 
-	//selectedCardIndex_ = player_->selectedCard();
-
-	actionButton_->update(mouse);
-
 	if (turnManager_.isPreparationTurn())
 	{
 		updatePreparationTurnReady();
 	}
+
+	checkNextActionAllowed();
+
+	actionButton_->update(mouse);
+}
+
+void GameTable::checkNextActionAllowed() 
+{
+	if (turnManager_.isMyTurn())
+	{
+		if (playerCanDraw()) actionButton_->changeButtonType(ActionButtonType::DRAW);
+		else if (playerCanPlayCard()) actionButton_->changeButtonType(ActionButtonType::PLAY_CARD);
+		else actionButton_->changeButtonType(ActionButtonType::END_TURN);
+	}
+	else if (!turnManager_.isPreparationTurn())
+	{
+		actionButton_->changeButtonType(ActionButtonType::INACTIVE);
+	}
+}
+
+void GameTable::clearTurnActions()
+{
+	playerDrawedThisTurn_ = false;
+	playerPlayedCardThisTurn_ = false;
 }
 
 void GameTable::updatePreparationTurnReady()
@@ -172,7 +192,10 @@ bool GameTable::preparationTurn() const
 void GameTable::playerDraw(int cards)
 {
 	player_->drawFaceUp(cards);
+
+	playerDrawedThisTurn_ = true;
 }
+
 
 std::vector<int> GameTable::playerDeckShuffle()
 {
@@ -213,10 +236,16 @@ void GameTable::hostPlayerPreparationTurnReady()
 
 bool GameTable::playerCanDraw() const
 {
-	if (player_->deckSize() > 0 and player_->handSize() < 5)
+	if (!playerDrawedThisTurn_ and player_->handSize() < 5 and player_->deckSize() > 0)
 		return true;
 	else
 		return false;
+}
+
+bool GameTable::playerCanPlayCard() const
+{
+	if (playerPlayedCardThisTurn_) return false;
+	else return true;
 }
 
 void GameTable::playerRenderDeck()
