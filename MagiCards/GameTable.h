@@ -57,6 +57,10 @@ public:
 
 	void clearTurnActions();
 
+	int playSelecctedCard();
+
+	void playOpponentSelectedCard(int cardIndex);
+
 private:
 
 	void playerRenderDeck();
@@ -73,6 +77,10 @@ private:
 
 	void checkNextActionAllowed();
 
+	void playerRenderPlayedCard();
+
+	void playerRenderOpponentPlayedCard();
+
 private:
 	
 	SDL_Renderer* renderer_;
@@ -80,11 +88,13 @@ private:
 	using TextureDestructor = std::function<void(SDL_Texture*)>;
 	std::unique_ptr<SDL_Texture, TextureDestructor> background_;
 
-	SDL_Rect sRect_, dRect_; //background rectangle
+	SDL_Rect sRect_; //background rectangle
+	SDL_Rect dRect_; 
 
 	TTF_Font* textFont_ = nullptr;
 
-	Player  *player_, *playerOpponent_;
+	Player* player_;
+	Player* playerOpponent_;
 
 	ActionButton* actionButton_;
 	bool actionButtonPressed_ = false;

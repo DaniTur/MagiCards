@@ -223,9 +223,17 @@ void Game::update()
 				}
 
 				case ActionButtonType::PLAY_CARD:
-					// obtener la carta seleccionada, quitarla de la mano y ponerla en la posición de playingCard
+				{
+					int playedHandCardIndex = gameTable_->playSelecctedCard();
+
+					Message m;
+					m.header.id = MessageType::PlayCard;
+					m << playedHandCardIndex;
+
+					sendMessageToOpponent(m);
 
 					break;
+				}
 
 				case ActionButtonType::END_TURN:
 				{
@@ -476,6 +484,15 @@ void Game::updateNetworking()
 
 				case MessageType::NextTurn:
 					gameTable_->nextTurn();
+					break;
+
+				case MessageType::PlayCard:
+					int playedCardIndex;
+
+					msg >> playedCardIndex;
+
+					gameTable_->playOpponentSelectedCard(playedCardIndex);
+
 					break;
 			}
 		}

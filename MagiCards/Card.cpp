@@ -47,11 +47,80 @@ Card::Card(const Card& card)
 	textFont_ = TTF_OpenFont(TEXT_FONT, 12);
 }
 
+// Constructor de Movimiento
+Card::Card(Card&& card) noexcept
+	: renderer_(card.renderer_), texture_(card.texture_), textureBack_(card.textureBack_),
+	textureSelectedFrame_(card.textureSelectedFrame_), sRect_(card.sRect_), dRect_(card.dRect_),
+	texturePath_(std::move(card.texturePath_)), textFont_(card.textFont_), 
+	mouseHover_(card.mouseHover_),  selected_(card.selected_), facedown_(card.facedown_), 
+	id_(card.id_), name_(std::move(card.name_)), color_(card.color_), cost_(card.cost_),
+	damage_(card.damage_), defense_(card.defense_)  {
+
+	// Transferir la propiedad de los recursos del objeto `card`
+	card.texture_ = nullptr;
+	card.textureBack_ = nullptr;
+	card.textureSelectedFrame_ = nullptr;
+	card.textFont_ = nullptr;
+
+	// Opcional: Si los recursos deben ser inicializados o reiniciados, hazlo aquí
+	//texture_ = IMG_LoadTexture(renderer_, texturePath_.c_str());
+	//textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
+	//textureSelectedFrame_ = IMG_LoadTexture(renderer_, IMG_SELECTED_CARD_FRAME);
+	//textFont_ = TTF_OpenFont(TEXT_FONT, 12);
+}
+
+// Operador de Asignación de Copia
+Card& Card::operator=(const Card& other) {
+	if (this != &other) {
+		// Primero libera los recursos actuales
+		if (texture_) {
+			SDL_DestroyTexture(texture_);
+			texture_ = nullptr;  // Opcional: asegurar que el puntero esté en un estado válido
+		}
+		if (textureBack_) {
+			SDL_DestroyTexture(textureBack_);
+			textureBack_ = nullptr;  // Opcional
+		}
+		if (textureSelectedFrame_) {
+			SDL_DestroyTexture(textureSelectedFrame_);
+			textureSelectedFrame_ = nullptr;  // Opcional
+		}
+		if (textFont_) {
+			TTF_CloseFont(textFont_);
+			textFont_ = nullptr;  // Opcional
+		}
+
+		// Luego copia los recursos del objeto 'other'
+		renderer_ = other.renderer_;
+		sRect_ = other.sRect_;
+		dRect_ = other.dRect_;
+		texturePath_ = other.texturePath_;
+		mouseHover_ = other.mouseHover_;
+		selected_ = other.selected_;
+		facedown_ = other.facedown_;
+		id_ = other.id_;
+		name_ = other.name_;
+		color_ = other.color_;
+		cost_ = other.cost_;
+		damage_ = other.damage_;
+		defense_ = other.defense_;
+
+		// Asignar nuevas instancias de recursos
+		texture_ = IMG_LoadTexture(renderer_, texturePath_.c_str());
+		textureBack_ = IMG_LoadTexture(renderer_, IMG_REVERSE_CARD);
+		textureSelectedFrame_ = IMG_LoadTexture(renderer_, IMG_SELECTED_CARD_FRAME);
+		textFont_ = TTF_OpenFont(TEXT_FONT, 12);
+	}
+	return *this;
+}
+
 Card::~Card()
 {
-	SDL_DestroyTexture(texture_);
-	SDL_DestroyTexture(textureBack_);
-	SDL_DestroyTexture(textureSelectedFrame_);
+	// Solo liberar recursos si no son nullptr
+	if (texture_) SDL_DestroyTexture(texture_);
+	if (textureBack_) SDL_DestroyTexture(textureBack_);
+	if (textureSelectedFrame_) SDL_DestroyTexture(textureSelectedFrame_);
+	if (textFont_) TTF_CloseFont(textFont_);
 }
 
 int Card::getId() const

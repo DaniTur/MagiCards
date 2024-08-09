@@ -196,3 +196,36 @@ int Player::handSize() const
     }
     return hand_.size();
 }
+
+int Player::playSelectedCard()
+{
+    // Tener cuidado si se copia un player porque al tener un unique_ptr puede dar problemas
+    playedCard_ = std::make_unique<Card>(hand_[selectedCardIndex_]);
+
+    hand_.erase(hand_.begin() + selectedCardIndex_);
+
+    return selectedCardIndex_;
+}
+
+void Player::playSelectedCard(int cardIndex)
+{
+    // Tener cuidado si se copia un player porque al tener un unique_ptr puede dar problemas
+    playedCard_ = std::make_unique<Card>(hand_[cardIndex]);
+    playedCard_->turnUp();
+
+    hand_.erase(hand_.begin() + cardIndex);
+}
+
+bool Player::playedCardActive() const
+{
+    if (playedCard_.get()) return true;
+    else return false;
+}
+
+void Player::renderPlayedCard(SDL_Rect destination, float proportion)
+{
+    if (playedCard_.get())
+    {
+        playedCard_->render(&destination, proportion);
+    }
+}

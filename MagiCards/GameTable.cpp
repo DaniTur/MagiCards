@@ -6,7 +6,6 @@
 GameTable::GameTable(SDL_Renderer* renderer, Player* player, Player* opponent, OWNER owner)
 	: renderer_(renderer), player_(player), playerOpponent_(opponent), owner_(owner), turnManager_(owner)
 {
-	//background_ = IMG_LoadTexture(renderer_, IMG_GAME_TABLE);
 	background_ = std::unique_ptr<SDL_Texture, TextureDestructor>(IMG_LoadTexture(renderer_, IMG_GAME_TABLE), SDL_DestroyTexture);
 
 	sRect_.x = 0;
@@ -72,6 +71,19 @@ void GameTable::checkNextActionAllowed()
 	}
 }
 
+
+int GameTable::playSelecctedCard()
+{
+	playerPlayedCardThisTurn_ = true;
+
+	return player_->playSelectedCard();
+}
+
+void GameTable::playOpponentSelectedCard(int cardIndex)
+{
+	playerOpponent_->playSelectedCard(cardIndex);
+}
+
 void GameTable::clearTurnActions()
 {
 	playerDrawedThisTurn_ = false;
@@ -97,6 +109,7 @@ void GameTable::render()
 
 	playerRenderHand();
 
+	playerRenderPlayedCard();
 
 	// OPPONENT
 
@@ -104,6 +117,7 @@ void GameTable::render()
 
 	playerOpponentRenderHand();
 
+	playerRenderOpponentPlayedCard();
 
 	renderPlayerNames();
 
@@ -167,6 +181,35 @@ void GameTable::renderPlayerNames()
 		
 	}
 
+}
+
+
+void GameTable::playerRenderPlayedCard()
+{
+	float cardWidth = 225.0;
+	float cardHeight = 310.0;
+	float textureProportion = 0.65f; // proporcion respecto al tamaño original de la imagen de textura
+
+	SDL_Rect dst = {0,0,0,0};
+
+	dst.x = static_cast<int>( (RESOLUTION_WIDTH / 2) - (cardWidth * textureProportion / 2));
+	dst.y = (RESOLUTION_HEIGHT / 2) + 10 ;
+
+	player_->renderPlayedCard(dst, textureProportion);
+}
+
+void GameTable::playerRenderOpponentPlayedCard()
+{
+	float cardWidth = 225.0;
+	float cardHeight = 310.0;
+	float textureProportion = 0.7f; // proporcion respecto al tamaño original de la imagen de textura
+
+	SDL_Rect dst = { 0,0,0,0 };
+
+	dst.x = static_cast<int>((RESOLUTION_WIDTH / 2) - (cardWidth * textureProportion / 2));
+	dst.y = static_cast<int>((RESOLUTION_HEIGHT / 2) - (cardHeight * textureProportion - 10));
+
+	playerOpponent_->renderPlayedCard(dst, textureProportion);
 }
 
 bool GameTable::isMyTurn() const
@@ -244,7 +287,7 @@ bool GameTable::playerCanDraw() const
 
 bool GameTable::playerCanPlayCard() const
 {
-	if (playerPlayedCardThisTurn_) return false;
+	if (playerPlayedCardThisTurn_ || player_->playedCardActive()) return false;
 	else return true;
 }
 

@@ -19,6 +19,12 @@ public:
 
 	// Copy constructor (performs a Deep copy)
 	Card(const Card& card);
+	
+	// Constructor de movimiento
+	Card(Card&& card) noexcept;
+
+	// Operador de asignacion de copia
+	Card& operator=(const Card& other);
 
 	~Card();
 

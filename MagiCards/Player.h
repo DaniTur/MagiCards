@@ -43,11 +43,18 @@ public:
 
 	std::vector<Card>& hand();
 
+	int playSelectedCard();
+
+	void playSelectedCard(int cardIndex);
+
+	void renderPlayedCard(SDL_Rect destination, float textureProportion);
+
+	bool playedCardActive() const;
+
 private:
 	std::string _name;
 	int deckId_ = -1;
 
-	//Deck deck_;
 	std::vector<Card> deck_;
 	std::vector<Card> hand_;
 	SDL_Renderer* renderer_;
@@ -56,5 +63,6 @@ private:
 	int actualDeckSize;
 
 	int selectedCardIndex_ = -1; // index of the hand
+	std::unique_ptr<Card> playedCard_;
 };
 
