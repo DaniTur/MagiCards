@@ -1,4 +1,5 @@
 #include "ActionButton.h"
+#include <iostream>
 
 ActionButton::ActionButton(ActionButtonType type, SDL_Renderer* renderer, SDL_Rect dstRect) 
 	: Button(buttonTextByType(type), renderer, {0, 800}, dstRect), type_(type) // {0, 800} SDL_Rect source from texture

@@ -30,6 +30,12 @@ public:
 
 	int getId() const;
 
+	int getDamage() const;
+
+	int getDefense() const;
+
+	int dealDamage(int damage);
+
 	void update(Mouse* mouse);
 
 	void render(SDL_Rect* destination, float proportion);
@@ -76,7 +82,7 @@ private:
 	std::string name_;
 	Color color_;
 	Uint8 cost_;
-	Uint8 damage_;
-	Uint8 defense_;
+	int damage_;
+	int defense_;
 };
 

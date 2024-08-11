@@ -102,7 +102,7 @@ void Player::drawFaceUp(int number = 1)
 void Player::handleEvents()
 {
     // the player has made a left click (left mouse up event)
-    
+    std::cout << "player handle events" << std::endl;
     // check if a card is mouse hovered and set that card to selected
     if (!hand_.empty())
     {
@@ -137,7 +137,11 @@ void Player::handleEvents()
         }
         else // if there is no mouse hovered card, check for selected card and deselect it
         { 
-            hand_.at(selectedCardIndex_).deselect();
+            // En el caso de jugar una carta, la carta seleccionada ya no estará en la mano y no se puede acceder a ella
+            if (selectedCardIndex_ < hand_.size())
+            {
+                hand_.at(selectedCardIndex_).deselect();
+            }
         }
     }
 }
@@ -205,6 +209,30 @@ int Player::playSelectedCard()
     hand_.erase(hand_.begin() + selectedCardIndex_);
 
     return selectedCardIndex_;
+}
+
+Card* Player::getPlayedCard() const
+{
+    // If player has played a card
+    return playedCard_.get();
+}
+
+void Player::dealDamage(int damage)
+{
+    int d = healthPoints_ - damage;
+
+    if (d < 0) healthPoints_ = 0;
+    else healthPoints_ = d;
+}
+
+void Player::destroyActiveCard()
+{
+    playedCard_.reset();
+}
+
+int Player::getHealthPoints() const
+{
+    return healthPoints_;
 }
 
 void Player::playSelectedCard(int cardIndex)

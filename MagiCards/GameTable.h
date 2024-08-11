@@ -60,6 +60,8 @@ public:
 	int playSelecctedCard();
 
 	void playOpponentSelectedCard(int cardIndex);
+	
+	void resolveTurnActions();
 
 private:
 
@@ -80,6 +82,8 @@ private:
 	void playerRenderPlayedCard();
 
 	void playerRenderOpponentPlayedCard();
+
+	void renderPlayerHealthPoints();
 
 private:
 	
@@ -107,6 +111,8 @@ private:
 
 	TurnManager turnManager_;
 
+	bool playerShuffledInPrepTurn_ = false;
+	bool playerDrawedInPrepTurn_ = false;
 	bool playerDrawedThisTurn_ = false;
 	bool playerPlayedCardThisTurn_ = false;
 };

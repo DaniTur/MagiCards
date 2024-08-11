@@ -51,6 +51,14 @@ public:
 
 	bool playedCardActive() const;
 
+	Card* getPlayedCard() const;
+
+	void dealDamage(int damage);
+
+	int getHealthPoints() const;
+
+	void destroyActiveCard();
+
 private:
 	std::string _name;
 	int deckId_ = -1;
@@ -64,5 +72,7 @@ private:
 
 	int selectedCardIndex_ = -1; // index of the hand
 	std::unique_ptr<Card> playedCard_;
+
+	int healthPoints_ = 10;
 };
 

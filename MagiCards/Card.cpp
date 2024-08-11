@@ -128,6 +128,32 @@ int Card::getId() const
 	return static_cast<int>(id_);
 }
 
+int Card::getDamage() const
+{
+	return damage_;
+}
+
+int Card::getDefense() const
+{
+	return defense_;
+}
+
+int Card::dealDamage(int damage)
+{
+	int overfloatDamage = defense_ - damage;
+	defense_ -= damage;
+
+	// Si hay daño excedente que no cubre la defensa de la carta, devuelve daño excedente
+	if (overfloatDamage < 0)
+	{
+		return (overfloatDamage * -1); // devovler el daño excedente como valor positivo
+	}
+	else {	// Si no hay daño excedente porque la defensa de la carta cubre el ataque, devolver cero de daño excedente
+		return 0;
+	}
+
+}
+
 void Card::update(Mouse* mouse)
 {
 	if (SDL_HasIntersection(mouse->getTip(), &dRect_))

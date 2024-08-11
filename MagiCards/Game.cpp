@@ -237,6 +237,8 @@ void Game::update()
 
 				case ActionButtonType::END_TURN:
 				{
+					gameTable_->resolveTurnActions();
+
 					gameTable_->clearTurnActions();
 
 					gameTable_->nextTurn();
@@ -483,6 +485,11 @@ void Game::updateNetworking()
 					break;
 
 				case MessageType::NextTurn:
+
+					gameTable_->clearTurnActions();
+
+					gameTable_->resolveTurnActions();
+					
 					gameTable_->nextTurn();
 					break;
 
@@ -559,7 +566,18 @@ void Game::updateNetworking()
 					break;
 
 				case MessageType::NextTurn:
+					gameTable_->clearTurnActions();
+					gameTable_->resolveTurnActions();
 					gameTable_->nextTurn();
+					break;
+
+				case MessageType::PlayCard:
+					int playedCardIndex;
+
+					msg >> playedCardIndex;
+
+					gameTable_->playOpponentSelectedCard(playedCardIndex);
+
 					break;
 			}
 		}

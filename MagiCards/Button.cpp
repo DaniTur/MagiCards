@@ -1,6 +1,7 @@
 #include "Button.h"
 #include <SDL_image.h>
 #include "ResourcesList.h"
+#include <iostream>
 
 
 Button::Button(const char* text, SDL_Renderer* renderer, SDL_Rect src, SDL_Rect dstRect)
@@ -76,4 +77,5 @@ void Button::render()
 void Button::changeText(std::string_view newText)
 {
 	text_ = newText;
+	std::cout << "button changed to: " << newText << std::endl;
 }

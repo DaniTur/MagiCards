@@ -59,14 +59,40 @@ void GameTable::update(Mouse* mouse)
 
 void GameTable::checkNextActionAllowed() 
 {
-	if (turnManager_.isMyTurn())
+	if (turnManager_.isPreparationTurn())
 	{
-		if (playerCanDraw()) actionButton_->changeButtonType(ActionButtonType::DRAW);
-		else if (playerCanPlayCard()) actionButton_->changeButtonType(ActionButtonType::PLAY_CARD);
-		else actionButton_->changeButtonType(ActionButtonType::END_TURN);
+		if (!playerShuffledInPrepTurn_) {
+			std::cout << "prep turn and i can shuffle" << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::DECK_SHUFFLE);
+		}
+		else if (!playerDrawedInPrepTurn_) {
+			std::cout << "prep turn, i cant shuffle, can draw " << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::DRAW);
+		} 
+		else {
+			std::cout << "prep turn, i cant shuffle, cant draw, inactive " << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::INACTIVE);
+		}
 	}
-	else if (!turnManager_.isPreparationTurn())
+	else if (turnManager_.isMyTurn())
 	{
+		if (playerCanDraw()) {
+			std::cout << "my turn and player can draw" << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::DRAW);
+		}
+		else if (playerCanPlayCard()) {
+
+			std::cout << "my turn, cant draw, can play card" << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::PLAY_CARD);
+		}
+		else {
+			std::cout << "my turn, cant draw, cant play card, end turn" << std::endl;
+			actionButton_->changeButtonType(ActionButtonType::END_TURN);
+		}
+	}
+	else // opponent turn
+	{
+		std::cout << "opponent turn, cant do action" << std::endl;
 		actionButton_->changeButtonType(ActionButtonType::INACTIVE);
 	}
 }
@@ -84,17 +110,56 @@ void GameTable::playOpponentSelectedCard(int cardIndex)
 	playerOpponent_->playSelectedCard(cardIndex);
 }
 
+void GameTable::resolveTurnActions()
+{
+	Card* playerCard = nullptr;
+	Card* opponentCard = nullptr;
+
+	// Both players must have an active played card to resolve turn actions
+	if (player_->playedCardActive() && playerOpponent_->playedCardActive())
+	{
+		std::cout << "resolving turn actions..." << std::endl;
+		// Get playedCards from both players
+		playerCard = player_->getPlayedCard();
+		opponentCard = playerOpponent_->getPlayedCard();
+
+		// Calculo de los daños de las cartas y daño a jugador
+		int playerCardDamage = playerCard->getDamage();
+		int opponentCardDamage = opponentCard->getDamage();
+
+		int storedPlayerTrumbleDamage = opponentCard->dealDamage(playerCardDamage);
+		int storedOpponentTrumbleDamage = playerCard->dealDamage(opponentCardDamage);
+
+		player_->dealDamage(storedPlayerTrumbleDamage);
+		playerOpponent_->dealDamage(storedOpponentTrumbleDamage);
+
+	}
+	
+	// Check if cards are destroyed
+	if (playerCard != nullptr && playerCard->getDefense() <= 0)
+	{
+		player_->destroyActiveCard();	
+	}
+
+	if (opponentCard != nullptr && opponentCard->getDefense() <= 0)
+	{
+		playerOpponent_->destroyActiveCard();
+	}
+}
+
 void GameTable::clearTurnActions()
 {
 	playerDrawedThisTurn_ = false;
 	playerPlayedCardThisTurn_ = false;
+	std::cout << "turn actions cleared" << std::endl;
 }
 
 void GameTable::updatePreparationTurnReady()
 {
-	if (turnManager_.isClientPrepared() and turnManager_.isHostPrepared())
+	if (turnManager_.isClientPrepared() && turnManager_.isHostPrepared())
 	{
 		turnManager_.next();
+		std::cout << "turnManager next" << std::endl;
 	}
 }
 
@@ -120,6 +185,8 @@ void GameTable::render()
 	playerRenderOpponentPlayedCard();
 
 	renderPlayerNames();
+
+	renderPlayerHealthPoints();
 
 	// Acction Button
 	actionButton_->render();
@@ -212,6 +279,38 @@ void GameTable::playerRenderOpponentPlayedCard()
 	playerOpponent_->renderPlayedCard(dst, textureProportion);
 }
 
+void GameTable::renderPlayerHealthPoints()
+{
+	// Render player health points
+	std::string hpText = "HP: " + std::to_string(player_->getHealthPoints());
+	SDL_Surface* textSurface = TTF_RenderText_Solid(textFont_, hpText.c_str(), { 0, 0, 0, 255 });
+	SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer_, textSurface);
+
+	SDL_Rect dst;
+	dst.x = 15;
+	dst.y = (RESOLUTION_HEIGHT / 2) + 30;
+	dst.w = textSurface->w;
+	dst.h = textSurface->h;
+
+	SDL_RenderCopy(renderer_, textTexture, nullptr, &dst);
+	SDL_FreeSurface(textSurface);
+	SDL_DestroyTexture(textTexture);
+
+	// Render opponent player health points
+	hpText = "HP: " + std::to_string(playerOpponent_->getHealthPoints());
+	textSurface  = TTF_RenderText_Solid(textFont_, hpText.c_str(), { 0, 0, 0, 255 });
+	textTexture = SDL_CreateTextureFromSurface(renderer_, textSurface);
+	
+	dst.x = 15;
+	dst.y = (RESOLUTION_HEIGHT / 2) - 50;
+	dst.w = textSurface->w;
+	dst.h = textSurface->h;
+
+	SDL_RenderCopy(renderer_, textTexture, nullptr, &dst);
+	SDL_FreeSurface(textSurface);
+	SDL_DestroyTexture(textTexture);
+}
+
 bool GameTable::isMyTurn() const
 {
 	return turnManager_.isMyTurn();
@@ -236,13 +335,23 @@ void GameTable::playerDraw(int cards)
 {
 	player_->drawFaceUp(cards);
 
-	playerDrawedThisTurn_ = true;
+	if (turnManager_.isPreparationTurn())
+	{
+		playerDrawedInPrepTurn_ = true;
+		std::cout << "player drawed in prep turn" << std::endl;
+	}
+	else
+	{
+		playerDrawedThisTurn_ = true;
+		std::cout << "player drawed in regular turn" << std::endl;
+	}
 }
 
 
 std::vector<int> GameTable::playerDeckShuffle()
 {
-	actionButton_->changeButtonType(ActionButtonType::DRAW);
+	//actionButton_->changeButtonType(ActionButtonType::DRAW);
+	playerShuffledInPrepTurn_ = true;
 
 	return player_->shuffleDeck();
 }
@@ -279,10 +388,13 @@ void GameTable::hostPlayerPreparationTurnReady()
 
 bool GameTable::playerCanDraw() const
 {
-	if (!playerDrawedThisTurn_ and player_->handSize() < 5 and player_->deckSize() > 0)
+	// y si no tiene una carta jugada
+	if (!playerDrawedThisTurn_ && player_->handSize() < 5 && player_->deckSize() > 0 && !player_->playedCardActive()) {
 		return true;
-	else
+	}
+	else {
 		return false;
+	}
 }
 
 bool GameTable::playerCanPlayCard() const
